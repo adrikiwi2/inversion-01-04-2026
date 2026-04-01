@@ -4,526 +4,803 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Activos Explorer — Infraestructura IA 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --surface2: #232733;
-    --border: #2e3345;
-    --text: #e4e6ed;
-    --text2: #9ca0b0;
-    --accent: #6c8aff;
-    --accent2: #4a6aff;
-    --green: #34d399;
-    --yellow: #fbbf24;
-    --red: #f87171;
-    --orange: #fb923c;
-    --purple: #a78bfa;
-    --pink: #f472b6;
-    --cyan: #22d3ee;
-    --teal: #2dd4bf;
+    --bg: #101114;
+    --surface: #18191f;
+    --surface2: #1f2028;
+    --border: #272937;
+    --border-subtle: #1f2130;
+    --text: #e8eaf0;
+    --text2: #7b7f95;
+    --text3: #4a4e62;
+    --accent: #3b82f6;
+    --accent-dim: rgba(59,130,246,.08);
+    --accent-mid: rgba(59,130,246,.15);
+    --green: #10b981;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --orange: #f97316;
+    --purple: #8b5cf6;
+    --pink: #ec4899;
+    --cyan: #06b6d4;
+    --teal: #14b8a6;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Outfit', system-ui, sans-serif;
     background: var(--bg);
     color: var(--text);
     line-height: 1.5;
+    overflow-x: hidden;
   }
-  .header {
-    background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 24px 32px;
+
+  /* === TOPBAR === */
+  .topbar {
     position: sticky;
     top: 0;
-    z-index: 100;
-    backdrop-filter: blur(12px);
+    z-index: 80;
+    background: rgba(16,17,20,.85);
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 16px 28px;
   }
-  .header h1 {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-  .header h1 span { color: var(--accent); }
-  .header p { color: var(--text2); font-size: 13px; }
-  .controls {
+  .topbar-inner {
+    max-width: 1400px;
+    margin: 0 auto;
     display: flex;
-    gap: 12px;
-    margin-top: 16px;
-    flex-wrap: wrap;
     align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
   }
-  .search-box {
-    flex: 1;
-    min-width: 240px;
-    padding: 10px 16px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
+  .logo {
+    font-weight: 800;
+    font-size: 17px;
+    letter-spacing: -.3px;
+    white-space: nowrap;
     color: var(--text);
-    font-size: 14px;
+  }
+  .logo span { color: var(--accent); }
+  .search-wrap {
+    flex: 1;
+    min-width: 200px;
+    max-width: 400px;
+    position: relative;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text3);
+    width: 16px;
+    height: 16px;
+  }
+  .search-input {
+    width: 100%;
+    padding: 9px 14px 9px 36px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
     outline: none;
     transition: border-color .2s;
   }
-  .search-box:focus { border-color: var(--accent); }
-  .search-box::placeholder { color: var(--text2); }
-  .filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
-  .filter-btn {
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--text3); }
+  .pill-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .pill {
     padding: 6px 14px;
     font-size: 12px;
     font-weight: 600;
     border: 1px solid var(--border);
-    border-radius: 20px;
-    background: var(--surface2);
+    border-radius: 100px;
+    background: transparent;
     color: var(--text2);
     cursor: pointer;
     transition: all .2s;
     white-space: nowrap;
+    font-family: inherit;
   }
-  .filter-btn:hover { border-color: var(--accent); color: var(--text); }
-  .filter-btn.active { background: var(--accent2); border-color: var(--accent); color: #fff; }
-  .stats-bar {
+  .pill:hover { border-color: var(--accent); color: var(--text); }
+  .pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .pill .count {
+    display: inline-block;
+    margin-left: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    opacity: .6;
+  }
+
+  /* === VERTICAL CHIPS (below topbar) === */
+  .chip-bar {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 12px 28px 0;
     display: flex;
-    gap: 24px;
-    padding: 12px 32px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-    color: var(--text2);
+    gap: 6px;
     flex-wrap: wrap;
   }
-  .stats-bar .stat b { color: var(--text); font-size: 16px; margin-right: 4px; }
-  .type-tabs {
-    display: flex;
-    gap: 4px;
-    padding: 12px 32px;
-    background: var(--bg);
-    border-bottom: 1px solid var(--border);
-  }
-  .type-tab {
-    padding: 8px 20px;
-    font-size: 13px;
+  .chip {
+    padding: 4px 12px;
+    font-size: 11px;
     font-weight: 600;
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 6px;
     background: var(--surface);
     color: var(--text2);
     cursor: pointer;
     transition: all .2s;
+    border: 1px solid transparent;
+    font-family: inherit;
   }
-  .type-tab:hover { border-color: var(--accent); color: var(--text); }
-  .type-tab.active { background: var(--accent2); border-color: var(--accent); color: #fff; }
+  .chip:hover { color: var(--text); border-color: var(--border); }
+  .chip.active { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-mid); }
+  .chip .dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 2px;
+    margin-right: 5px;
+    vertical-align: middle;
+  }
+
+  /* === GRID === */
+  .main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px 28px 80px;
+  }
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 16px;
-    padding: 24px 32px;
-  }
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    transition: all .25s;
-    cursor: default;
-    position: relative;
-    overflow: hidden;
-  }
-  .card:hover {
-    border-color: var(--accent);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(108,138,255,.12);
-  }
-  .card .top-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10px;
-  }
-  .card .ticker {
-    font-size: 20px;
-    font-weight: 800;
-    font-family: 'JetBrains Mono', 'Fira Code', monospace;
-    color: var(--accent);
-    letter-spacing: .5px;
-  }
-  .card .ticker.delisted { color: var(--red); text-decoration: line-through; }
-  .card .ticker.not-traded { color: var(--text2); }
-  .card .badges { display: flex; gap: 6px; flex-wrap: wrap; }
-  .badge {
-    display: inline-block;
-    padding: 2px 8px;
-    font-size: 10px;
-    font-weight: 700;
-    border-radius: 4px;
-    text-transform: uppercase;
-    letter-spacing: .5px;
-  }
-  .badge-stock { background: rgba(108,138,255,.15); color: var(--accent); }
-  .badge-etf { background: rgba(52,211,153,.15); color: var(--green); }
-  .badge-trust { background: rgba(251,191,36,.15); color: var(--yellow); }
-  .badge-ucits { background: rgba(45,212,191,.12); color: var(--teal); }
-  .badge-delisted { background: rgba(248,113,113,.15); color: var(--red); }
-  .badge-private { background: rgba(156,160,176,.15); color: var(--text2); }
-  .badge-sa-portfolio { background: rgba(251,146,60,.18); color: var(--orange); }
-  .badge-adr { background: rgba(164,139,250,.15); color: var(--purple); }
-  .card .name {
-    font-size: 15px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--text);
-  }
-  .card .role {
-    font-size: 13px;
-    color: var(--text2);
-    margin-bottom: 14px;
-    line-height: 1.4;
-  }
-  .card .meta {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    font-size: 12px;
-  }
-  .card .meta-item { display: flex; flex-direction: column; }
-  .card .meta-item .label { color: var(--text2); font-size: 10px; text-transform: uppercase; letter-spacing: .6px; font-weight: 600; }
-  .card .meta-item .value { color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 12px; word-break: break-all; }
-  .card .vertical-tag {
-    position: absolute;
-    top: 0; left: 0;
-    width: 4px;
-    height: 100%;
-    border-radius: 12px 0 0 12px;
-  }
-  .vt-mag7 { background: var(--yellow); }
-  .vt-semi { background: var(--accent); }
-  .vt-servers { background: var(--cyan); }
-  .vt-optics { background: var(--purple); }
-  .vt-cloud { background: #818cf8; }
-  .vt-energy { background: var(--orange); }
-  .vt-nuclear { background: var(--green); }
-  .vt-thermal { background: var(--pink); }
-  .vt-mining { background: #a78bfa; }
-  .vt-reits { background: var(--teal); }
-  .vt-btc { background: var(--red); }
-  .vt-software { background: #64748b; }
-  .vt-etf-semi { background: var(--accent); }
-  .vt-etf-soft { background: #818cf8; }
-  .vt-etf-dc { background: var(--teal); }
-  .vt-etf-energy { background: var(--orange); }
-  .vt-etf-asia { background: var(--pink); }
-  .vt-etf-eu { background: #60a5fa; }
-  .vt-etf-mat { background: #a78bfa; }
-  .vt-etf-macro { background: var(--yellow); }
-  .vt-trust { background: var(--green); }
-  .no-results {
-    text-align: center;
-    padding: 80px 32px;
-    color: var(--text2);
-    font-size: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
   }
   .section-label {
     grid-column: 1 / -1;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text3);
+    padding: 20px 0 6px;
+  }
+  .section-label:first-child { padding-top: 0; }
+
+  /* === CARD (minimal) === */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    cursor: pointer;
+    position: relative;
+    transition: border-color .2s, background .2s;
+    overflow: hidden;
+    animation: cardIn .4s cubic-bezier(.16,1,.3,1) both;
+  }
+  .card:active { transform: scale(.985); }
+  .card:hover {
+    border-color: #3a3d50;
+    background: var(--surface2);
+  }
+  .card .stripe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    border-radius: 10px 0 0 10px;
+    opacity: .6;
+    transition: opacity .2s;
+  }
+  .card:hover .stripe { opacity: 1; }
+  .card .c-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .card .c-ticker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: .3px;
+  }
+  .card .c-badge {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .b-stock { background: var(--accent-dim); color: var(--accent); }
+  .b-etf { background: rgba(16,185,129,.1); color: var(--green); }
+  .b-trust { background: rgba(245,158,11,.1); color: var(--yellow); }
+  .b-ucits { background: rgba(20,184,166,.08); color: var(--teal); font-size: 8px; margin-left: 4px; }
+  .b-sa { background: rgba(249,115,22,.1); color: var(--orange); font-size: 8px; margin-left: 4px; }
+  .card .c-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card .c-country {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card { animation: none; }
+  }
+
+  /* === DETAIL PANEL (slide-in overlay) === */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    justify-content: flex-end;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .25s;
+  }
+  .overlay.open {
+    pointer-events: auto;
+    opacity: 1;
+  }
+  .overlay-bg {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    cursor: pointer;
+  }
+  .panel {
+    position: relative;
+    width: 520px;
+    max-width: 100vw;
+    height: 100vh;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform .35s cubic-bezier(.16,1,.3,1);
+    display: flex;
+    flex-direction: column;
+  }
+  .overlay.open .panel { transform: translateX(0); }
+  @media (prefers-reduced-motion: reduce) {
+    .panel { transition: none; }
+    .overlay { transition: none; }
+  }
+  .panel-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text2);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s;
+    z-index: 5;
+  }
+  .panel-close:hover { border-color: var(--accent); color: var(--text); }
+
+  /* Panel header */
+  .p-header {
+    padding: 32px 28px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .p-header .p-vertical {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+  }
+  .p-header .p-ticker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    color: var(--text);
+  }
+  .p-header .p-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+  .p-header .p-badges {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .p-header .p-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    padding: 3px 10px;
+    border-radius: 5px;
+  }
+
+  /* Panel body */
+  .p-body { padding: 24px 28px; flex: 1; }
+  .p-section {
+    margin-bottom: 24px;
+  }
+  .p-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text3);
+    margin-bottom: 10px;
+  }
+  .p-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .p-field { display: flex; flex-direction: column; gap: 2px; }
+  .p-field .fl { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .6px; }
+  .p-field .fv { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text); word-break: break-all; }
+  .p-role {
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  /* Hypothesis section */
+  .hyp-divider {
+    height: 1px;
+    background: linear-gradient(90deg, var(--accent-mid), transparent);
+    margin: 0 0 24px;
+  }
+  .hyp-title {
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    color: var(--text2);
-    padding: 8px 0 0;
-    border-top: 1px solid var(--border);
-    margin-top: 8px;
+    color: var(--accent);
+    margin-bottom: 16px;
   }
-  @media (max-width: 600px) {
-    .grid { grid-template-columns: 1fr; padding: 16px; }
-    .header { padding: 16px; }
-    .controls { flex-direction: column; }
+  .hyp-field {
+    margin-bottom: 16px;
+  }
+  .hyp-field .hl {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--text3);
+    margin-bottom: 6px;
+  }
+  .hyp-field .hv {
+    font-size: 13px;
+    color: var(--text3);
+    font-style: italic;
+    line-height: 1.5;
+  }
+  .conviction-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .conviction-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    transition: all .2s;
+  }
+  .conviction-dot.filled {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(59,130,246,.3);
+  }
+  .catalyst-list, .risk-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .cat-item, .risk-item {
+    font-size: 12px;
+    color: var(--text3);
+    font-style: italic;
+    padding-left: 16px;
+    position: relative;
+    line-height: 1.4;
+  }
+  .cat-item::before, .risk-item::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 6px;
+    width: 6px; height: 6px;
+    border-radius: 2px;
+  }
+  .cat-item::before { background: var(--green); opacity: .3; }
+  .risk-item::before { background: var(--red); opacity: .3; }
+
+  /* Meta row in hypothesis */
+  .hyp-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* Empty / no results */
+  .no-results {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text3);
+    font-size: 14px;
+  }
+
+  /* Stats */
+  .stats-line {
+    display: flex;
+    gap: 20px;
+    padding: 12px 0 8px;
+    font-size: 12px;
+    color: var(--text3);
+    flex-wrap: wrap;
+  }
+  .stats-line b {
+    color: var(--text2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .topbar-inner { gap: 12px; }
+    .search-wrap { max-width: 100%; min-width: 0; }
+    .panel { width: 100vw; }
+    .main { padding: 16px 16px 60px; }
+    .chip-bar { padding: 10px 16px 0; }
+    .topbar { padding: 12px 16px; }
+  }
+  @media (max-width: 400px) {
+    .grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1><span>Activos Explorer</span> — Infraestructura IA 2026</h1>
-  <p>106 activos | Investigaci&oacute;n Situational Awareness LP | Consolidado 1 abril 2026</p>
-  <div class="controls">
-    <input type="text" class="search-box" id="search" placeholder="Buscar por ticker, nombre, ISIN, pa&iacute;s, sector...">
-    <div class="filter-group" id="verticalFilters"></div>
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="logo"><span>Activos</span> Explorer</div>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" class="search-input" id="search" placeholder="Buscar ticker, nombre, ISIN, sector...">
+    </div>
+    <div class="pill-group" id="typePills"></div>
   </div>
 </div>
 
-<div class="type-tabs" id="typeTabs">
-  <div class="type-tab active" data-type="all">Todos (106)</div>
-  <div class="type-tab" data-type="stock">Acciones (78)</div>
-  <div class="type-tab" data-type="etf">ETFs (27)</div>
-  <div class="type-tab" data-type="trust">Trusts (1)</div>
+<div class="chip-bar" id="chipBar"></div>
+
+<div class="main">
+  <div class="stats-line" id="statsLine"></div>
+  <div class="grid" id="grid"></div>
+  <div class="no-results" id="noResults" style="display:none">Sin resultados para ese filtro.</div>
 </div>
 
-<div class="stats-bar" id="statsBar"></div>
-<div class="grid" id="grid"></div>
-<div class="no-results" id="noResults" style="display:none">No se encontraron activos con ese filtro.</div>
+<!-- Detail panel overlay -->
+<div class="overlay" id="overlay">
+  <div class="overlay-bg" id="overlayBg"></div>
+  <div class="panel" id="panel">
+    <button class="panel-close" id="panelClose" aria-label="Cerrar">&times;</button>
+    <div id="panelContent"></div>
+  </div>
+</div>
 
 <script>
-const ASSETS = [
-  // === MAGNIFICENT SEVEN ===
-  {id:1,ticker:"GOOGL",name:"Alphabet (Google)",isin:"US02079K3059",exchange:"NASDAQ",country:"US",role:"B\u00fasquedas, cloud (GCP)",type:"stock",vertical:"Magnificent Seven",vtClass:"vt-mag7",sa:false},
-  {id:2,ticker:"AMZN",name:"Amazon",isin:"US0231351067",exchange:"NASDAQ",country:"US",role:"E-commerce, cloud (AWS)",type:"stock",vertical:"Magnificent Seven",vtClass:"vt-mag7",sa:false},
-  {id:3,ticker:"AAPL",name:"Apple",isin:"US0378331005",exchange:"NASDAQ",country:"US",role:"Hardware consumo, servicios",type:"stock",vertical:"Magnificent Seven",vtClass:"vt-mag7",sa:false},
-  {id:4,ticker:"META",name:"Meta Platforms",isin:"US30303M1027",exchange:"NASDAQ",country:"US",role:"Redes sociales, metaverso",type:"stock",vertical:"Magnificent Seven",vtClass:"vt-mag7",sa:false},
-  {id:5,ticker:"MSFT",name:"Microsoft",isin:"US5949181045",exchange:"NASDAQ",country:"US",role:"Software, cloud (Azure), IA",type:"stock",vertical:"Magnificent Seven",vtClass:"vt-mag7",sa:false},
-  {id:6,ticker:"NVDA",name:"NVIDIA",isin:"US67066G1040",exchange:"NASDAQ",country:"US",role:"GPUs, aceleradores IA",type:"stock",vertical:"Magnificent Seven",vtClass:"vt-mag7",sa:true},
-  {id:7,ticker:"TSLA",name:"Tesla",isin:"US88160R1014",exchange:"NASDAQ",country:"US",role:"Veh\u00edculos el\u00e9ctricos, energ\u00eda",type:"stock",vertical:"Magnificent Seven",vtClass:"vt-mag7",sa:false},
-  // === SEMICONDUCTORES ===
-  {id:8,ticker:"AMD",name:"Advanced Micro Devices",isin:"US0079031078",exchange:"NASDAQ",country:"US",role:"GPUs competidor (MI300)",type:"stock",vertical:"Semiconductores",vtClass:"vt-semi",sa:false},
-  {id:9,ticker:"AVGO",name:"Broadcom",isin:"US11135F1012",exchange:"NASDAQ",country:"US",role:"Networking, ASICs para IA",type:"stock",vertical:"Semiconductores",vtClass:"vt-semi",sa:false},
-  {id:10,ticker:"INTC",name:"Intel",isin:"US4581401001",exchange:"NASDAQ",country:"US",role:"CPUs Xeon, Gaudi, fabricaci\u00f3n US. CALL en 13F de SA LP",type:"stock",vertical:"Semiconductores",vtClass:"vt-semi",sa:true},
-  {id:11,ticker:"MU",name:"Micron Technology",isin:"US5951121038",exchange:"NASDAQ",country:"US",role:"Memoria HBM3E",type:"stock",vertical:"Semiconductores",vtClass:"vt-semi",sa:false},
-  {id:12,ticker:"TSM",name:"TSMC (ADR)",isin:"US8740391003",exchange:"NYSE",country:"Taiw\u00e1n (ADR)",role:"Fundici\u00f3n de chips avanzados",type:"stock",vertical:"Semiconductores",vtClass:"vt-semi",sa:false,adr:true},
-  {id:13,ticker:"000660.KS",name:"SK Hynix",isin:"KR7000660001",exchange:"KRX (KOSPI)",country:"Corea del Sur",role:"Memoria HBM (proveedor #1 NVIDIA)",type:"stock",vertical:"Semiconductores",vtClass:"vt-semi",sa:false},
-  {id:14,ticker:"005930.KS",name:"Samsung Electronics",isin:"KR7005930003",exchange:"KRX (KOSPI)",country:"Corea del Sur",role:"Memorias HBM",type:"stock",vertical:"Semiconductores",vtClass:"vt-semi",sa:false},
-  {id:15,ticker:"ASML",name:"ASML (Euronext)",isin:"NL0010273215",exchange:"Euronext Amsterdam",country:"Pa\u00edses Bajos",role:"M\u00e1quinas de litograf\u00eda",type:"stock",vertical:"Semiconductores",vtClass:"vt-semi",sa:false},
-  {id:16,ticker:"TSEM",name:"Tower Semiconductor",isin:"IL0010823792",exchange:"NASDAQ",country:"Israel",role:"Fundici\u00f3n especializada",type:"stock",vertical:"Semiconductores",vtClass:"vt-semi",sa:true},
-  {id:17,ticker:"WDC",name:"Western Digital (ex-SanDisk)",isin:"US9581021055",exchange:"NASDAQ",country:"US",role:"Almacenamiento/Memoria NAND. SanDisk adquirida 2016",type:"stock",vertical:"Semiconductores",vtClass:"vt-semi",sa:false},
-  {id:18,ticker:"0981.HK",name:"SMIC (HK)",isin:"KYG8020E1017",exchange:"HKEX",country:"China",role:"Principal fundici\u00f3n china",type:"stock",vertical:"Semiconductores",vtClass:"vt-semi",sa:false},
-  {id:19,ticker:"TXN",name:"Texas Instruments",isin:"US8825081040",exchange:"NASDAQ",country:"US",role:"Chips anal\u00f3gicos para control de energ\u00eda",type:"stock",vertical:"Semiconductores",vtClass:"vt-semi",sa:false},
-  {id:20,ticker:"AMAT",name:"Applied Materials",isin:"US0382221051",exchange:"NASDAQ",country:"US",role:"Equipos de fabricaci\u00f3n de semis",type:"stock",vertical:"Semiconductores",vtClass:"vt-semi",sa:false},
-  // === SERVIDORES Y RED ===
-  {id:21,ticker:"ANET",name:"Arista Networks",isin:"US0404131064",exchange:"NASDAQ",country:"US",role:"Switches Ethernet alta velocidad",type:"stock",vertical:"Servidores y Red",vtClass:"vt-servers",sa:false},
-  {id:22,ticker:"SMCI",name:"Super Micro Computer",isin:"US86800U1043",exchange:"NASDAQ",country:"US",role:"Servidores optimizados IA",type:"stock",vertical:"Servidores y Red",vtClass:"vt-servers",sa:false},
-  {id:23,ticker:"DELL",name:"Dell Technologies",isin:"US24703L2025",exchange:"NYSE",country:"US",role:"Servidores empresariales",type:"stock",vertical:"Servidores y Red",vtClass:"vt-servers",sa:false},
-  {id:24,ticker:"HPE",name:"Hewlett Packard Enterprise",isin:"US42824C1099",exchange:"NYSE",country:"US",role:"Servidores e infra de almacenamiento",type:"stock",vertical:"Servidores y Red",vtClass:"vt-servers",sa:false},
-  {id:25,ticker:"CSCO",name:"Cisco Systems",isin:"US17275R1023",exchange:"NASDAQ",country:"US",role:"Networking",type:"stock",vertical:"Servidores y Red",vtClass:"vt-servers",sa:false},
-  {id:26,ticker:"2317.TW",name:"Foxconn (Hon Hai Precision)",isin:"TW0002317005",exchange:"TWSE",country:"Taiw\u00e1n",role:"Fabrica servidores Blackwell de NVIDIA",type:"stock",vertical:"Servidores y Red",vtClass:"vt-servers",sa:false},
-  {id:27,ticker:"2382.TW",name:"Quanta Computer",isin:"TW0002382009",exchange:"TWSE",country:"Taiw\u00e1n",role:"Servidores de dise\u00f1o abierto",type:"stock",vertical:"Servidores y Red",vtClass:"vt-servers",sa:false},
-  {id:28,ticker:"000977.SZ",name:"Inspur Electronic Info",isin:"CNE0000011V0",exchange:"SZSE",country:"China",role:"L\u00edder chino en servidores IA",type:"stock",vertical:"Servidores y Red",vtClass:"vt-servers",sa:false},
-  {id:29,ticker:"2395.TW",name:"Advantech",isin:"TW0002395001",exchange:"TWSE",country:"Taiw\u00e1n",role:"Hardware industrial/edge",type:"stock",vertical:"Servidores y Red",vtClass:"vt-servers",sa:false},
-  // === OPTICA ===
-  {id:30,ticker:"LITE",name:"Lumentum Holdings",isin:"US55024U1097",exchange:"NASDAQ",country:"US",role:"\u00d3ptica, comunicaciones",type:"stock",vertical:"\u00d3ptica y Conectividad",vtClass:"vt-optics",sa:true},
-  {id:31,ticker:"COHR",name:"Coherent Corp",isin:"US19247G1076",exchange:"NYSE",country:"US",role:"\u00d3ptica",type:"stock",vertical:"\u00d3ptica y Conectividad",vtClass:"vt-optics",sa:true},
-  {id:32,ticker:"NOKIA.HE",name:"Nokia",isin:"FI0009000681",exchange:"Helsinki",country:"Finlandia",role:"Networking/Infraestructura",type:"stock",vertical:"\u00d3ptica y Conectividad",vtClass:"vt-optics",sa:false},
-  {id:33,ticker:"ERIC-B.ST",name:"Ericsson",isin:"SE0000108656",exchange:"Stockholm",country:"Suecia",role:"Networking/Infraestructura",type:"stock",vertical:"\u00d3ptica y Conectividad",vtClass:"vt-optics",sa:false},
-  // === CLOUD GPU ===
-  {id:34,ticker:"CRWV",name:"CoreWeave",isin:"US21872Q1013",exchange:"NASDAQ",country:"US",role:"Cloud GPU / hosting IA. CALL en 13F. IPO mar-2025",type:"stock",vertical:"Cloud GPU",vtClass:"vt-cloud",sa:true,note:"Verificar ISIN (IPO reciente)"},
-  {id:35,ticker:"APLD",name:"Applied Digital",isin:"US03827U1051",exchange:"NASDAQ",country:"US",role:"Minera BTC \u2192 Data centers IA",type:"stock",vertical:"Cloud GPU",vtClass:"vt-cloud",sa:true},
-  // === ENERGIA ===
-  {id:36,ticker:"BE",name:"Bloom Energy",isin:"US0937121079",exchange:"NYSE",country:"US",role:"Celdas de combustible, energ\u00eda in-situ",type:"stock",vertical:"Energ\u00eda",vtClass:"vt-energy",sa:true},
-  {id:37,ticker:"CEG",name:"Constellation Energy",isin:"US21037T1097",exchange:"NASDAQ",country:"US",role:"Mayor operador nuclear US",type:"stock",vertical:"Energ\u00eda",vtClass:"vt-energy",sa:false},
-  {id:38,ticker:"NEE",name:"NextEra Energy",isin:"US65339F1012",exchange:"NYSE",country:"US",role:"Renovables",type:"stock",vertical:"Energ\u00eda",vtClass:"vt-energy",sa:false},
-  {id:39,ticker:"VST",name:"Vistra Energy",isin:"US92840M1027",exchange:"NYSE",country:"US",role:"Energ\u00eda el\u00e9ctrica",type:"stock",vertical:"Energ\u00eda",vtClass:"vt-energy",sa:true},
-  {id:40,ticker:"EQT",name:"EQT Corporation",isin:"US26884L1098",exchange:"NYSE",country:"US",role:"Gas natural",type:"stock",vertical:"Energ\u00eda",vtClass:"vt-energy",sa:true},
-  {id:41,ticker:"LBRT",name:"Liberty Energy",isin:"US53115L1044",exchange:"NYSE",country:"US",role:"Servicios energ\u00e9ticos",type:"stock",vertical:"Energ\u00eda",vtClass:"vt-energy",sa:true},
-  {id:42,ticker:"ETN",name:"Eaton Corporation",isin:"IE00B8KQN827",exchange:"NYSE",country:"Irlanda",role:"Distribuci\u00f3n el\u00e9ctrica, protecci\u00f3n, UPS",type:"stock",vertical:"Energ\u00eda",vtClass:"vt-energy",sa:false},
-  {id:43,ticker:"SU.PA",name:"Schneider Electric",isin:"FR0000121972",exchange:"Euronext Paris",country:"Francia",role:"Gesti\u00f3n de energ\u00eda, UPS, distribuci\u00f3n",type:"stock",vertical:"Energ\u00eda",vtClass:"vt-energy",sa:false},
-  {id:44,ticker:"ABB",name:"ABB",isin:"CH0012221716",exchange:"SIX",country:"Suiza",role:"Equipos el\u00e9ctricos industriales",type:"stock",vertical:"Energ\u00eda",vtClass:"vt-energy",sa:false},
-  {id:45,ticker:"PRY.MI",name:"Prysmian",isin:"IT0004176001",exchange:"Borsa Italiana",country:"Italia",role:"Cables de alta tensi\u00f3n y submarinos",type:"stock",vertical:"Energ\u00eda",vtClass:"vt-energy",sa:false},
-  {id:46,ticker:"NEX.PA",name:"Nexans",isin:"FR0000044448",exchange:"Euronext Paris",country:"Francia",role:"Cables de alta tensi\u00f3n",type:"stock",vertical:"Energ\u00eda",vtClass:"vt-energy",sa:false},
-  {id:47,ticker:"IBE.MC",name:"Iberdrola",isin:"ES0144580Y14",exchange:"BME",country:"Espa\u00f1a",role:"PPAs con tecnol\u00f3gicas",type:"stock",vertical:"Energ\u00eda",vtClass:"vt-energy",sa:false},
-  {id:48,ticker:"ELE.MC",name:"Endesa",isin:"ES0130670112",exchange:"BME",country:"Espa\u00f1a",role:"PPAs con tecnol\u00f3gicas",type:"stock",vertical:"Energ\u00eda",vtClass:"vt-energy",sa:false},
-  {id:49,ticker:"ACS.MC",name:"ACS",isin:"ES0167050915",exchange:"BME",country:"Espa\u00f1a",role:"Infraestructura energ\u00e9tica",type:"stock",vertical:"Energ\u00eda",vtClass:"vt-energy",sa:false},
-  {id:50,ticker:"RR.L",name:"Rolls-Royce Holdings",isin:"GB00B63H8491",exchange:"LSE",country:"UK",role:"Reactores modulares peque\u00f1os (SMR)",type:"stock",vertical:"Energ\u00eda",vtClass:"vt-energy",sa:false},
-  // === NUCLEAR ===
-  {id:51,ticker:"CCJ",name:"Cameco",isin:"CA13321L1085",exchange:"NYSE / TSX",country:"Canad\u00e1",role:"Mayor productor de uranio",type:"stock",vertical:"Nuclear / Uranio",vtClass:"vt-nuclear",sa:false},
-  {id:52,ticker:"OKLO",name:"Oklo",isin:"US6788921005",exchange:"NYSE",country:"US",role:"Microreactores (backed by Sam Altman)",type:"stock",vertical:"Nuclear / Uranio",vtClass:"vt-nuclear",sa:false},
-  {id:53,ticker:"SMR",name:"NuScale Power",isin:"US67079K1007",exchange:"NYSE",country:"US",role:"Reactores modulares peque\u00f1os",type:"stock",vertical:"Nuclear / Uranio",vtClass:"vt-nuclear",sa:false},
-  {id:54,ticker:"KAP.L",name:"Kazatomprom (GDR)",isin:"US63253R2013",exchange:"LSE",country:"Kazajist\u00e1n",role:"Productor de uranio",type:"stock",vertical:"Nuclear / Uranio",vtClass:"vt-nuclear",sa:false},
-  {id:55,ticker:"NXE",name:"NexGen Energy",isin:"CA65340P1062",exchange:"NYSE / TSX",country:"Canad\u00e1",role:"Miner\u00eda de uranio",type:"stock",vertical:"Nuclear / Uranio",vtClass:"vt-nuclear",sa:false},
-  // === THERMAL ===
-  {id:56,ticker:"VRT",name:"Vertiv",isin:"IE00BFMHRM44",exchange:"NYSE",country:"Irlanda",role:"Refrigeraci\u00f3n l\u00edquida, racks IA",type:"stock",vertical:"Refrigeraci\u00f3n",vtClass:"vt-thermal",sa:false},
-  {id:57,ticker:"MOD",name:"Modine Manufacturing",isin:"US6076071053",exchange:"NYSE",country:"US",role:"Transferencia de calor",type:"stock",vertical:"Refrigeraci\u00f3n",vtClass:"vt-thermal",sa:false},
-  {id:58,ticker:"MTRS.ST",name:"Munters",isin:"SE0009806607",exchange:"Nasdaq Stockholm",country:"Suecia",role:"Control de clima industrial",type:"stock",vertical:"Refrigeraci\u00f3n",vtClass:"vt-thermal",sa:false},
-  // === MATERIAS PRIMAS ===
-  {id:59,ticker:"FCX",name:"Freeport-McMoRan",isin:"US35671D8570",exchange:"NYSE",country:"US",role:"Minas de cobre",type:"stock",vertical:"Materias Primas",vtClass:"vt-mining",sa:false},
-  {id:60,ticker:"ANTO.L",name:"Antofagasta",isin:"GB0000456144",exchange:"LSE",country:"UK (Chile ops)",role:"Minas de cobre",type:"stock",vertical:"Materias Primas",vtClass:"vt-mining",sa:false},
-  {id:61,ticker:"ALB",name:"Albemarle",isin:"US0126531013",exchange:"NYSE",country:"US",role:"Litio",type:"stock",vertical:"Materias Primas",vtClass:"vt-mining",sa:false},
-  {id:62,ticker:"MP",name:"MP Materials",isin:"US5533681012",exchange:"NYSE",country:"US",role:"Tierras raras",type:"stock",vertical:"Materias Primas",vtClass:"vt-mining",sa:false},
-  // === REITS ===
-  {id:63,ticker:"EQIX",name:"Equinix",isin:"US29444U7000",exchange:"NASDAQ",country:"US",role:"Mayor propietario global de data centers",type:"stock",vertical:"Data Centers (REITs)",vtClass:"vt-reits",sa:false},
-  {id:64,ticker:"DLR",name:"Digital Realty",isin:"US2538681030",exchange:"NYSE",country:"US",role:"Segundo mayor operador",type:"stock",vertical:"Data Centers (REITs)",vtClass:"vt-reits",sa:false},
-  {id:65,ticker:"AMT",name:"American Tower",isin:"US03027X1000",exchange:"NYSE",country:"US",role:"Torres de celdas",type:"stock",vertical:"Data Centers (REITs)",vtClass:"vt-reits",sa:false},
-  // === BTC MINERS ===
-  {id:66,ticker:"CORZ",name:"Core Scientific",isin:"US21874P1084",exchange:"NASDAQ",country:"US",role:"Miner\u00eda BTC \u2192 Data centers IA. 13D activista de SA LP",type:"stock",vertical:"Miner\u00eda BTC \u2192 IA",vtClass:"vt-btc",sa:true},
-  {id:67,ticker:"RIOT",name:"Riot Platforms",isin:"US7672921050",exchange:"NASDAQ",country:"US",role:"Miner\u00eda BTC",type:"stock",vertical:"Miner\u00eda BTC \u2192 IA",vtClass:"vt-btc",sa:true},
-  {id:68,ticker:"HUT",name:"Hut 8 Corp",isin:"US44812J1025",exchange:"NASDAQ / TSX",country:"Canad\u00e1/US",role:"Miner\u00eda BTC \u2192 Data centers",type:"stock",vertical:"Miner\u00eda BTC \u2192 IA",vtClass:"vt-btc",sa:true},
-  {id:69,ticker:"BTDR",name:"Bitdeer Technologies",isin:"KY09320M1069",exchange:"NASDAQ",country:"Cayman Islands",role:"Miner\u00eda BTC \u2192 Infraestructura",type:"stock",vertical:"Miner\u00eda BTC \u2192 IA",vtClass:"vt-btc",sa:true},
-  {id:70,ticker:"BITF",name:"Bitfarms",isin:"CA09173B1076",exchange:"NASDAQ / TSX",country:"Canad\u00e1",role:"Miner\u00eda BTC",type:"stock",vertical:"Miner\u00eda BTC \u2192 IA",vtClass:"vt-btc",sa:true},
-  {id:71,ticker:"CLSK",name:"CleanSpark",isin:"US18452B2088",exchange:"NASDAQ",country:"US",role:"Miner\u00eda BTC",type:"stock",vertical:"Miner\u00eda BTC \u2192 IA",vtClass:"vt-btc",sa:true},
-  {id:72,ticker:"IREN",name:"IREN (fka Iris Energy)",isin:"AU0000210046",exchange:"NASDAQ",country:"Australia",role:"Miner\u00eda BTC \u2192 Data centers",type:"stock",vertical:"Miner\u00eda BTC \u2192 IA",vtClass:"vt-btc",sa:true},
-  {id:73,ticker:"CIFR",name:"Cipher Mining",isin:"US17180Q1058",exchange:"NASDAQ",country:"US",role:"Miner\u00eda BTC",type:"stock",vertical:"Miner\u00eda BTC \u2192 IA",vtClass:"vt-btc",sa:false},
-  {id:74,ticker:"WULF",name:"TeraWulf",isin:"US88080T1043",exchange:"NASDAQ",country:"US",role:"Miner\u00eda BTC \u2192 Data centers",type:"stock",vertical:"Miner\u00eda BTC \u2192 IA",vtClass:"vt-btc",sa:false},
-  {id:75,ticker:"GLXY",name:"Galaxy Digital",isin:"KYG3740V1041",exchange:"TSX",country:"Cayman/Canad\u00e1",role:"Cripto/Infraestructura",type:"stock",vertical:"Miner\u00eda BTC \u2192 IA",vtClass:"vt-btc",sa:true},
-  // === SOFTWARE ===
-  {id:76,ticker:"\u2014",name:"Huawei (Ascend)",isin:"NO COTIZA",exchange:"\u2014",country:"China",role:"Empresa privada. No invertible.",type:"stock",vertical:"Software / IA",vtClass:"vt-software",sa:false,private:true},
-  {id:77,ticker:"BIDU",name:"Baidu (ADR)",isin:"US0567521085",exchange:"NASDAQ",country:"China (ADR)",role:"Chips propios (Kunlun) para servicios IA",type:"stock",vertical:"Software / IA",vtClass:"vt-software",sa:false,adr:true},
-  {id:78,ticker:"SAP",name:"SAP SE",isin:"DE0007164600",exchange:"XETRA / NYSE",country:"Alemania",role:"Software empresarial",type:"stock",vertical:"Software / IA",vtClass:"vt-software",sa:false},
-  // === ETFs ===
-  {id:79,ticker:"SMH",name:"VanEck Semiconductor ETF",isin:"US92189F6065",exchange:"NASDAQ",country:"US",role:"Cadena completa de semiconductores",type:"etf",vertical:"ETF Semiconductores",vtClass:"vt-etf-semi",sa:false,ucits:false,provider:"VanEck"},
-  {id:80,ticker:"SMH.L",name:"VanEck Semiconductor UCITS ETF",isin:"IE00BMC38736",exchange:"LSE",country:"Irlanda",role:"Cadena completa de semis (versi\u00f3n UCITS)",type:"etf",vertical:"ETF Semiconductores",vtClass:"vt-etf-semi",sa:false,ucits:true,provider:"VanEck"},
-  {id:81,ticker:"SOXX",name:"iShares Semiconductor ETF",isin:"US4642875235",exchange:"NASDAQ",country:"US",role:"Semiconductores amplio",type:"etf",vertical:"ETF Semiconductores",vtClass:"vt-etf-semi",sa:false,ucits:false,provider:"BlackRock"},
-  {id:82,ticker:"CNDX.L",name:"iShares NASDAQ 100 UCITS ETF",isin:"IE00B53SZB19",exchange:"LSE",country:"Irlanda",role:"Proxy hiperscalers + software. Beta IA diversificado",type:"etf",vertical:"ETF Software / IA",vtClass:"vt-etf-soft",sa:false,ucits:true,provider:"BlackRock"},
-  {id:83,ticker:"INTL.L",name:"WisdomTree AI UCITS ETF",isin:"IE00BDVPNG13",exchange:"LSE",country:"Irlanda",role:"Exposici\u00f3n tem\u00e1tica IA mixta",type:"etf",vertical:"ETF Software / IA",vtClass:"vt-etf-soft",sa:false,ucits:true,provider:"WisdomTree"},
-  {id:84,ticker:"KLWD.L",name:"WisdomTree Cloud Computing UCITS ETF",isin:"IE00BJGWQN72",exchange:"LSE",country:"Irlanda",role:"Software cloud. Baja liquidez (MCap ~232M$)",type:"etf",vertical:"ETF Software / IA",vtClass:"vt-etf-soft",sa:false,ucits:true,provider:"WisdomTree"},
-  {id:85,ticker:"MAGS",name:"Roundhill Magnificent Seven ETF",isin:"US53656F5028",exchange:"NASDAQ",country:"US",role:"Replica las 7 megacaps tech",type:"etf",vertical:"ETF Software / IA",vtClass:"vt-etf-soft",sa:false,ucits:false,provider:"Roundhill"},
-  {id:86,ticker:"CHAT",name:"Roundhill Generative AI & Technology ETF",isin:"US53656F8808",exchange:"NYSE Arca",country:"US",role:"Hardware y software de IA generativa",type:"etf",vertical:"ETF Software / IA",vtClass:"vt-etf-soft",sa:false,ucits:false,provider:"Roundhill"},
-  {id:87,ticker:"SRVR",name:"Pacer Data & Infrastructure Real Estate ETF",isin:"US69374H8815",exchange:"CBOE BZX",country:"US",role:"REITs de data centers y torres (Equinix, DLR, AMT)",type:"etf",vertical:"ETF Data Centers",vtClass:"vt-etf-dc",sa:false,ucits:false,provider:"Pacer"},
-  {id:88,ticker:"VPN",name:"Global X Data Center REITs & Digital Infra",isin:"US37960A7972",exchange:"NASDAQ",country:"US",role:"REITs + hardware de conectividad",type:"etf",vertical:"ETF Data Centers",vtClass:"vt-etf-dc",sa:false,ucits:false,provider:"Global X"},
-  {id:89,ticker:"AINF",name:"iShares AI Infrastructure UCITS ETF",isin:"IE000YRNO5B4",exchange:"LSE / Xetra",country:"Irlanda",role:"Infraestructura de IA (UCITS). Verificar ISIN",type:"etf",vertical:"ETF Data Centers",vtClass:"vt-etf-dc",sa:false,ucits:true,provider:"BlackRock"},
-  {id:90,ticker:"GRID",name:"First Trust Nasdaq Clean Edge Smart Grid",isin:"US33738R1077",exchange:"NASDAQ",country:"US",role:"Transformadores, red el\u00e9ctrica (Schneider, ABB, Eaton)",type:"etf",vertical:"ETF Energ\u00eda",vtClass:"vt-etf-energy",sa:false,ucits:false,provider:"First Trust"},
-  {id:91,ticker:"XLU",name:"Utilities Select Sector SPDR",isin:"US81369Y8030",exchange:"NYSE Arca",country:"US",role:"El\u00e9ctricas puras US (NextEra, Constellation)",type:"etf",vertical:"ETF Energ\u00eda",vtClass:"vt-etf-energy",sa:false,ucits:false,provider:"State Street"},
-  {id:92,ticker:"AIPO",name:"Defiance AI & Power Infrastructure UCITS ETF",isin:"IE000JWJVL04",exchange:"LSE",country:"Irlanda",role:"IA + infraestructura energ\u00e9tica (UCITS). Verificar ISIN",type:"etf",vertical:"ETF Energ\u00eda",vtClass:"vt-etf-energy",sa:false,ucits:true,provider:"Defiance"},
-  {id:93,ticker:"KCHIP",name:"KraneShares SSE STAR Market 50",isin:"US5007673065",exchange:"NYSE Arca",country:"US",role:"Top 50 del Nasdaq chino (SMIC, equipos precisi\u00f3n)",type:"etf",vertical:"ETF Asia",vtClass:"vt-etf-asia",sa:false,ucits:false,provider:"KraneShares"},
-  {id:94,ticker:"AAXJ",name:"iShares MSCI All Country Asia ex Japan",isin:"US4642882579",exchange:"NASDAQ",country:"US",role:"Hardware de Taiw\u00e1n y Corea (Samsung, SK Hynix, Foxconn)",type:"etf",vertical:"ETF Asia",vtClass:"vt-etf-asia",sa:false,ucits:false,provider:"BlackRock"},
-  {id:95,ticker:"EWT",name:"iShares MSCI Taiwan",isin:"US4642867570",exchange:"NYSE Arca",country:"US",role:"F\u00e1brica f\u00edsica de infra IA global (TSMC, Hon Hai)",type:"etf",vertical:"ETF Asia",vtClass:"vt-etf-asia",sa:false,ucits:false,provider:"BlackRock"},
-  {id:96,ticker:"CQQQ",name:"Invesco China Technology",isin:"US46138E7179",exchange:"NYSE Arca",country:"US",role:"Hardware y software chino",type:"etf",vertical:"ETF Asia",vtClass:"vt-etf-asia",sa:false,ucits:false,provider:"Invesco"},
-  {id:97,ticker:"KALL",name:"KraneShares MSCI All China Index",isin:"US5007672083",exchange:"NYSE Arca",country:"US",role:"Exposici\u00f3n general a tech china",type:"etf",vertical:"ETF Asia",vtClass:"vt-etf-asia",sa:false,ucits:false,provider:"KraneShares"},
-  {id:98,ticker:"EXV3",name:"iShares STOXX Europe 600 Technology",isin:"DE000A0H08Q4",exchange:"Xetra",country:"Alemania",role:"Tecnolog\u00eda europea (ASML, SAP)",type:"etf",vertical:"ETF Europa",vtClass:"vt-etf-eu",sa:false,ucits:true,provider:"BlackRock"},
-  {id:99,ticker:"COPX",name:"Global X Copper Miners",isin:"US37954Y8553",exchange:"NYSE Arca",country:"US",role:"Minas de cobre (Freeport, Antofagasta)",type:"etf",vertical:"ETF Materias Primas",vtClass:"vt-etf-mat",sa:false,ucits:false,provider:"Global X"},
-  {id:100,ticker:"REMX",name:"VanEck Rare Earth/Strategic Metals",isin:"US92189F7691",exchange:"NYSE Arca",country:"US",role:"Tierras raras y litio (MP Materials, Albemarle)",type:"etf",vertical:"ETF Materias Primas",vtClass:"vt-etf-mat",sa:false,ucits:false,provider:"VanEck"},
-  {id:101,ticker:"URA",name:"Global X Uranium",isin:"US37954Y8710",exchange:"NYSE Arca",country:"US",role:"Minas de uranio y tech nuclear (Cameco)",type:"etf",vertical:"ETF Materias Primas",vtClass:"vt-etf-mat",sa:false,ucits:false,provider:"Global X"},
-  {id:102,ticker:"URNM",name:"Sprott Uranium Miners",isin:"US85210W1080",exchange:"NYSE Arca",country:"US",role:"Mineras de uranio puras (Cameco, NexGen)",type:"etf",vertical:"ETF Materias Primas",vtClass:"vt-etf-mat",sa:false,ucits:false,provider:"Sprott"},
-  {id:103,ticker:"FIW",name:"First Trust Water ETF",isin:"US33733E4053",exchange:"NYSE Arca",country:"US",role:"Gesti\u00f3n h\u00eddrica y enfriamiento industrial",type:"etf",vertical:"ETF Materias Primas",vtClass:"vt-etf-mat",sa:false,ucits:false,provider:"First Trust"},
-  {id:104,ticker:"NLR",name:"VanEck Uranium+Nuclear ETF",isin:"US92189F5877",exchange:"NYSE Arca",country:"US",role:"Uranio y energ\u00eda nuclear",type:"etf",vertical:"ETF Materias Primas",vtClass:"vt-etf-mat",sa:false,ucits:false,provider:"VanEck"},
-  {id:105,ticker:"GDX",name:"VanEck Gold Miners ETF",isin:"US92189F1063",exchange:"NYSE Arca",country:"US",role:"Mineras de oro. Cobertura macro contra riesgo sist\u00e9mico",type:"etf",vertical:"ETF Cobertura",vtClass:"vt-etf-macro",sa:true},
-  // === TRUST ===
-  {id:106,ticker:"U.UN",name:"Sprott Physical Uranium Trust",isin:"CA85210A1049",exchange:"TSX",country:"Canad\u00e1",role:"Trust de uranio f\u00edsico. Compra y almacena uranio",type:"trust",vertical:"Trust",vtClass:"vt-trust",sa:false}
+const ASSETS=[
+{id:1,ticker:"GOOGL",name:"Alphabet (Google)",isin:"US02079K3059",exchange:"NASDAQ",country:"US",role:"B\u00fasquedas, cloud (GCP)",type:"stock",vertical:"Magnificent Seven",vc:"#f59e0b",sa:false},
+{id:2,ticker:"AMZN",name:"Amazon",isin:"US0231351067",exchange:"NASDAQ",country:"US",role:"E-commerce, cloud (AWS)",type:"stock",vertical:"Magnificent Seven",vc:"#f59e0b",sa:false},
+{id:3,ticker:"AAPL",name:"Apple",isin:"US0378331005",exchange:"NASDAQ",country:"US",role:"Hardware consumo, servicios",type:"stock",vertical:"Magnificent Seven",vc:"#f59e0b",sa:false},
+{id:4,ticker:"META",name:"Meta Platforms",isin:"US30303M1027",exchange:"NASDAQ",country:"US",role:"Redes sociales, metaverso",type:"stock",vertical:"Magnificent Seven",vc:"#f59e0b",sa:false},
+{id:5,ticker:"MSFT",name:"Microsoft",isin:"US5949181045",exchange:"NASDAQ",country:"US",role:"Software, cloud (Azure), IA",type:"stock",vertical:"Magnificent Seven",vc:"#f59e0b",sa:false},
+{id:6,ticker:"NVDA",name:"NVIDIA",isin:"US67066G1040",exchange:"NASDAQ",country:"US",role:"GPUs, aceleradores IA",type:"stock",vertical:"Magnificent Seven",vc:"#f59e0b",sa:true},
+{id:7,ticker:"TSLA",name:"Tesla",isin:"US88160R1014",exchange:"NASDAQ",country:"US",role:"Veh\u00edculos el\u00e9ctricos, energ\u00eda",type:"stock",vertical:"Magnificent Seven",vc:"#f59e0b",sa:false},
+{id:8,ticker:"AMD",name:"Advanced Micro Devices",isin:"US0079031078",exchange:"NASDAQ",country:"US",role:"GPUs competidor (MI300)",type:"stock",vertical:"Semiconductores",vc:"#3b82f6",sa:false},
+{id:9,ticker:"AVGO",name:"Broadcom",isin:"US11135F1012",exchange:"NASDAQ",country:"US",role:"Networking, ASICs para IA",type:"stock",vertical:"Semiconductores",vc:"#3b82f6",sa:false},
+{id:10,ticker:"INTC",name:"Intel",isin:"US4581401001",exchange:"NASDAQ",country:"US",role:"CPUs Xeon, Gaudi, fabricaci\u00f3n US. CALL en 13F de SA LP",type:"stock",vertical:"Semiconductores",vc:"#3b82f6",sa:true},
+{id:11,ticker:"MU",name:"Micron Technology",isin:"US5951121038",exchange:"NASDAQ",country:"US",role:"Memoria HBM3E",type:"stock",vertical:"Semiconductores",vc:"#3b82f6",sa:false},
+{id:12,ticker:"TSM",name:"TSMC (ADR)",isin:"US8740391003",exchange:"NYSE",country:"Taiw\u00e1n (ADR)",role:"Fundici\u00f3n de chips avanzados",type:"stock",vertical:"Semiconductores",vc:"#3b82f6",sa:false,adr:true},
+{id:13,ticker:"000660.KS",name:"SK Hynix",isin:"KR7000660001",exchange:"KRX (KOSPI)",country:"Corea del Sur",role:"Memoria HBM (proveedor #1 NVIDIA)",type:"stock",vertical:"Semiconductores",vc:"#3b82f6",sa:false},
+{id:14,ticker:"005930.KS",name:"Samsung Electronics",isin:"KR7005930003",exchange:"KRX (KOSPI)",country:"Corea del Sur",role:"Memorias HBM",type:"stock",vertical:"Semiconductores",vc:"#3b82f6",sa:false},
+{id:15,ticker:"ASML",name:"ASML (Euronext)",isin:"NL0010273215",exchange:"Euronext Amsterdam",country:"Pa\u00edses Bajos",role:"M\u00e1quinas de litograf\u00eda",type:"stock",vertical:"Semiconductores",vc:"#3b82f6",sa:false},
+{id:16,ticker:"TSEM",name:"Tower Semiconductor",isin:"IL0010823792",exchange:"NASDAQ",country:"Israel",role:"Fundici\u00f3n especializada",type:"stock",vertical:"Semiconductores",vc:"#3b82f6",sa:true},
+{id:17,ticker:"WDC",name:"Western Digital",isin:"US9581021055",exchange:"NASDAQ",country:"US",role:"Almacenamiento/Memoria NAND (ex-SanDisk)",type:"stock",vertical:"Semiconductores",vc:"#3b82f6",sa:false},
+{id:18,ticker:"0981.HK",name:"SMIC (HK)",isin:"KYG8020E1017",exchange:"HKEX",country:"China",role:"Principal fundici\u00f3n china",type:"stock",vertical:"Semiconductores",vc:"#3b82f6",sa:false},
+{id:19,ticker:"TXN",name:"Texas Instruments",isin:"US8825081040",exchange:"NASDAQ",country:"US",role:"Chips anal\u00f3gicos para control de energ\u00eda",type:"stock",vertical:"Semiconductores",vc:"#3b82f6",sa:false},
+{id:20,ticker:"AMAT",name:"Applied Materials",isin:"US0382221051",exchange:"NASDAQ",country:"US",role:"Equipos de fabricaci\u00f3n de semis",type:"stock",vertical:"Semiconductores",vc:"#3b82f6",sa:false},
+{id:21,ticker:"ANET",name:"Arista Networks",isin:"US0404131064",exchange:"NASDAQ",country:"US",role:"Switches Ethernet alta velocidad",type:"stock",vertical:"Servidores y Red",vc:"#06b6d4",sa:false},
+{id:22,ticker:"SMCI",name:"Super Micro Computer",isin:"US86800U1043",exchange:"NASDAQ",country:"US",role:"Servidores optimizados IA",type:"stock",vertical:"Servidores y Red",vc:"#06b6d4",sa:false},
+{id:23,ticker:"DELL",name:"Dell Technologies",isin:"US24703L2025",exchange:"NYSE",country:"US",role:"Servidores empresariales",type:"stock",vertical:"Servidores y Red",vc:"#06b6d4",sa:false},
+{id:24,ticker:"HPE",name:"Hewlett Packard Enterprise",isin:"US42824C1099",exchange:"NYSE",country:"US",role:"Servidores e infra de almacenamiento",type:"stock",vertical:"Servidores y Red",vc:"#06b6d4",sa:false},
+{id:25,ticker:"CSCO",name:"Cisco Systems",isin:"US17275R1023",exchange:"NASDAQ",country:"US",role:"Networking",type:"stock",vertical:"Servidores y Red",vc:"#06b6d4",sa:false},
+{id:26,ticker:"2317.TW",name:"Foxconn (Hon Hai)",isin:"TW0002317005",exchange:"TWSE",country:"Taiw\u00e1n",role:"Fabrica servidores Blackwell de NVIDIA",type:"stock",vertical:"Servidores y Red",vc:"#06b6d4",sa:false},
+{id:27,ticker:"2382.TW",name:"Quanta Computer",isin:"TW0002382009",exchange:"TWSE",country:"Taiw\u00e1n",role:"Servidores de dise\u00f1o abierto",type:"stock",vertical:"Servidores y Red",vc:"#06b6d4",sa:false},
+{id:28,ticker:"000977.SZ",name:"Inspur Electronic",isin:"CNE0000011V0",exchange:"SZSE",country:"China",role:"L\u00edder chino en servidores IA",type:"stock",vertical:"Servidores y Red",vc:"#06b6d4",sa:false},
+{id:29,ticker:"2395.TW",name:"Advantech",isin:"TW0002395001",exchange:"TWSE",country:"Taiw\u00e1n",role:"Hardware industrial/edge",type:"stock",vertical:"Servidores y Red",vc:"#06b6d4",sa:false},
+{id:30,ticker:"LITE",name:"Lumentum Holdings",isin:"US55024U1097",exchange:"NASDAQ",country:"US",role:"\u00d3ptica, comunicaciones",type:"stock",vertical:"\u00d3ptica",vc:"#8b5cf6",sa:true},
+{id:31,ticker:"COHR",name:"Coherent Corp",isin:"US19247G1076",exchange:"NYSE",country:"US",role:"\u00d3ptica",type:"stock",vertical:"\u00d3ptica",vc:"#8b5cf6",sa:true},
+{id:32,ticker:"NOKIA.HE",name:"Nokia",isin:"FI0009000681",exchange:"Helsinki",country:"Finlandia",role:"Networking/Infraestructura",type:"stock",vertical:"\u00d3ptica",vc:"#8b5cf6",sa:false},
+{id:33,ticker:"ERIC-B.ST",name:"Ericsson",isin:"SE0000108656",exchange:"Stockholm",country:"Suecia",role:"Networking/Infraestructura",type:"stock",vertical:"\u00d3ptica",vc:"#8b5cf6",sa:false},
+{id:34,ticker:"CRWV",name:"CoreWeave",isin:"US21872Q1013",exchange:"NASDAQ",country:"US",role:"Cloud GPU / hosting IA. CALL en 13F. IPO mar-2025",type:"stock",vertical:"Cloud GPU",vc:"#6366f1",sa:true,note:"Verificar ISIN (IPO reciente)"},
+{id:35,ticker:"APLD",name:"Applied Digital",isin:"US03827U1051",exchange:"NASDAQ",country:"US",role:"Minera BTC \u2192 Data centers IA",type:"stock",vertical:"Cloud GPU",vc:"#6366f1",sa:true},
+{id:36,ticker:"BE",name:"Bloom Energy",isin:"US0937121079",exchange:"NYSE",country:"US",role:"Celdas de combustible, energ\u00eda in-situ",type:"stock",vertical:"Energ\u00eda",vc:"#f97316",sa:true},
+{id:37,ticker:"CEG",name:"Constellation Energy",isin:"US21037T1097",exchange:"NASDAQ",country:"US",role:"Mayor operador nuclear US",type:"stock",vertical:"Energ\u00eda",vc:"#f97316",sa:false},
+{id:38,ticker:"NEE",name:"NextEra Energy",isin:"US65339F1012",exchange:"NYSE",country:"US",role:"Renovables",type:"stock",vertical:"Energ\u00eda",vc:"#f97316",sa:false},
+{id:39,ticker:"VST",name:"Vistra Energy",isin:"US92840M1027",exchange:"NYSE",country:"US",role:"Energ\u00eda el\u00e9ctrica",type:"stock",vertical:"Energ\u00eda",vc:"#f97316",sa:true},
+{id:40,ticker:"EQT",name:"EQT Corporation",isin:"US26884L1098",exchange:"NYSE",country:"US",role:"Gas natural",type:"stock",vertical:"Energ\u00eda",vc:"#f97316",sa:true},
+{id:41,ticker:"LBRT",name:"Liberty Energy",isin:"US53115L1044",exchange:"NYSE",country:"US",role:"Servicios energ\u00e9ticos",type:"stock",vertical:"Energ\u00eda",vc:"#f97316",sa:true},
+{id:42,ticker:"ETN",name:"Eaton Corporation",isin:"IE00B8KQN827",exchange:"NYSE",country:"Irlanda",role:"Distribuci\u00f3n el\u00e9ctrica, UPS",type:"stock",vertical:"Energ\u00eda",vc:"#f97316",sa:false},
+{id:43,ticker:"SU.PA",name:"Schneider Electric",isin:"FR0000121972",exchange:"Euronext Paris",country:"Francia",role:"Gesti\u00f3n de energ\u00eda, UPS",type:"stock",vertical:"Energ\u00eda",vc:"#f97316",sa:false},
+{id:44,ticker:"ABB",name:"ABB",isin:"CH0012221716",exchange:"SIX",country:"Suiza",role:"Equipos el\u00e9ctricos industriales",type:"stock",vertical:"Energ\u00eda",vc:"#f97316",sa:false},
+{id:45,ticker:"PRY.MI",name:"Prysmian",isin:"IT0004176001",exchange:"Borsa Italiana",country:"Italia",role:"Cables de alta tensi\u00f3n",type:"stock",vertical:"Energ\u00eda",vc:"#f97316",sa:false},
+{id:46,ticker:"NEX.PA",name:"Nexans",isin:"FR0000044448",exchange:"Euronext Paris",country:"Francia",role:"Cables de alta tensi\u00f3n",type:"stock",vertical:"Energ\u00eda",vc:"#f97316",sa:false},
+{id:47,ticker:"IBE.MC",name:"Iberdrola",isin:"ES0144580Y14",exchange:"BME",country:"Espa\u00f1a",role:"PPAs con tecnol\u00f3gicas",type:"stock",vertical:"Energ\u00eda",vc:"#f97316",sa:false},
+{id:48,ticker:"ELE.MC",name:"Endesa",isin:"ES0130670112",exchange:"BME",country:"Espa\u00f1a",role:"PPAs con tecnol\u00f3gicas",type:"stock",vertical:"Energ\u00eda",vc:"#f97316",sa:false},
+{id:49,ticker:"ACS.MC",name:"ACS",isin:"ES0167050915",exchange:"BME",country:"Espa\u00f1a",role:"Infraestructura energ\u00e9tica",type:"stock",vertical:"Energ\u00eda",vc:"#f97316",sa:false},
+{id:50,ticker:"RR.L",name:"Rolls-Royce",isin:"GB00B63H8491",exchange:"LSE",country:"UK",role:"Reactores modulares (SMR)",type:"stock",vertical:"Energ\u00eda",vc:"#f97316",sa:false},
+{id:51,ticker:"CCJ",name:"Cameco",isin:"CA13321L1085",exchange:"NYSE / TSX",country:"Canad\u00e1",role:"Mayor productor de uranio",type:"stock",vertical:"Nuclear",vc:"#10b981",sa:false},
+{id:52,ticker:"OKLO",name:"Oklo",isin:"US6788921005",exchange:"NYSE",country:"US",role:"Microreactores (Sam Altman)",type:"stock",vertical:"Nuclear",vc:"#10b981",sa:false},
+{id:53,ticker:"SMR",name:"NuScale Power",isin:"US67079K1007",exchange:"NYSE",country:"US",role:"Reactores modulares peque\u00f1os",type:"stock",vertical:"Nuclear",vc:"#10b981",sa:false},
+{id:54,ticker:"KAP.L",name:"Kazatomprom (GDR)",isin:"US63253R2013",exchange:"LSE",country:"Kazajist\u00e1n",role:"Productor de uranio",type:"stock",vertical:"Nuclear",vc:"#10b981",sa:false},
+{id:55,ticker:"NXE",name:"NexGen Energy",isin:"CA65340P1062",exchange:"NYSE / TSX",country:"Canad\u00e1",role:"Miner\u00eda de uranio",type:"stock",vertical:"Nuclear",vc:"#10b981",sa:false},
+{id:56,ticker:"VRT",name:"Vertiv",isin:"IE00BFMHRM44",exchange:"NYSE",country:"Irlanda",role:"Refrigeraci\u00f3n l\u00edquida, racks IA",type:"stock",vertical:"Refrigeraci\u00f3n",vc:"#ec4899",sa:false},
+{id:57,ticker:"MOD",name:"Modine Manufacturing",isin:"US6076071053",exchange:"NYSE",country:"US",role:"Transferencia de calor",type:"stock",vertical:"Refrigeraci\u00f3n",vc:"#ec4899",sa:false},
+{id:58,ticker:"MTRS.ST",name:"Munters",isin:"SE0009806607",exchange:"Nasdaq Stockholm",country:"Suecia",role:"Control de clima industrial",type:"stock",vertical:"Refrigeraci\u00f3n",vc:"#ec4899",sa:false},
+{id:59,ticker:"FCX",name:"Freeport-McMoRan",isin:"US35671D8570",exchange:"NYSE",country:"US",role:"Minas de cobre",type:"stock",vertical:"Materias Primas",vc:"#a78bfa",sa:false},
+{id:60,ticker:"ANTO.L",name:"Antofagasta",isin:"GB0000456144",exchange:"LSE",country:"UK",role:"Minas de cobre",type:"stock",vertical:"Materias Primas",vc:"#a78bfa",sa:false},
+{id:61,ticker:"ALB",name:"Albemarle",isin:"US0126531013",exchange:"NYSE",country:"US",role:"Litio",type:"stock",vertical:"Materias Primas",vc:"#a78bfa",sa:false},
+{id:62,ticker:"MP",name:"MP Materials",isin:"US5533681012",exchange:"NYSE",country:"US",role:"Tierras raras",type:"stock",vertical:"Materias Primas",vc:"#a78bfa",sa:false},
+{id:63,ticker:"EQIX",name:"Equinix",isin:"US29444U7000",exchange:"NASDAQ",country:"US",role:"Mayor propietario global de data centers",type:"stock",vertical:"Data Centers",vc:"#14b8a6",sa:false},
+{id:64,ticker:"DLR",name:"Digital Realty",isin:"US2538681030",exchange:"NYSE",country:"US",role:"Segundo mayor operador",type:"stock",vertical:"Data Centers",vc:"#14b8a6",sa:false},
+{id:65,ticker:"AMT",name:"American Tower",isin:"US03027X1000",exchange:"NYSE",country:"US",role:"Torres de celdas",type:"stock",vertical:"Data Centers",vc:"#14b8a6",sa:false},
+{id:66,ticker:"CORZ",name:"Core Scientific",isin:"US21874P1084",exchange:"NASDAQ",country:"US",role:"Miner\u00eda BTC \u2192 Data centers IA. 13D activista",type:"stock",vertical:"Miner\u00eda BTC",vc:"#ef4444",sa:true},
+{id:67,ticker:"RIOT",name:"Riot Platforms",isin:"US7672921050",exchange:"NASDAQ",country:"US",role:"Miner\u00eda BTC",type:"stock",vertical:"Miner\u00eda BTC",vc:"#ef4444",sa:true},
+{id:68,ticker:"HUT",name:"Hut 8 Corp",isin:"US44812J1025",exchange:"NASDAQ / TSX",country:"Canad\u00e1/US",role:"Miner\u00eda BTC \u2192 Data centers",type:"stock",vertical:"Miner\u00eda BTC",vc:"#ef4444",sa:true},
+{id:69,ticker:"BTDR",name:"Bitdeer Technologies",isin:"KY09320M1069",exchange:"NASDAQ",country:"Cayman Islands",role:"Miner\u00eda BTC \u2192 Infraestructura",type:"stock",vertical:"Miner\u00eda BTC",vc:"#ef4444",sa:true},
+{id:70,ticker:"BITF",name:"Bitfarms",isin:"CA09173B1076",exchange:"NASDAQ / TSX",country:"Canad\u00e1",role:"Miner\u00eda BTC",type:"stock",vertical:"Miner\u00eda BTC",vc:"#ef4444",sa:true},
+{id:71,ticker:"CLSK",name:"CleanSpark",isin:"US18452B2088",exchange:"NASDAQ",country:"US",role:"Miner\u00eda BTC",type:"stock",vertical:"Miner\u00eda BTC",vc:"#ef4444",sa:true},
+{id:72,ticker:"IREN",name:"IREN (Iris Energy)",isin:"AU0000210046",exchange:"NASDAQ",country:"Australia",role:"Miner\u00eda BTC \u2192 Data centers",type:"stock",vertical:"Miner\u00eda BTC",vc:"#ef4444",sa:true},
+{id:73,ticker:"CIFR",name:"Cipher Mining",isin:"US17180Q1058",exchange:"NASDAQ",country:"US",role:"Miner\u00eda BTC",type:"stock",vertical:"Miner\u00eda BTC",vc:"#ef4444",sa:false},
+{id:74,ticker:"WULF",name:"TeraWulf",isin:"US88080T1043",exchange:"NASDAQ",country:"US",role:"Miner\u00eda BTC \u2192 Data centers",type:"stock",vertical:"Miner\u00eda BTC",vc:"#ef4444",sa:false},
+{id:75,ticker:"GLXY",name:"Galaxy Digital",isin:"KYG3740V1041",exchange:"TSX",country:"Cayman/Canad\u00e1",role:"Cripto/Infraestructura",type:"stock",vertical:"Miner\u00eda BTC",vc:"#ef4444",sa:true},
+{id:76,ticker:"\u2014",name:"Huawei (Ascend)",isin:"NO COTIZA",exchange:"\u2014",country:"China",role:"Empresa privada. No invertible.",type:"stock",vertical:"Software",vc:"#64748b",sa:false,priv:true},
+{id:77,ticker:"BIDU",name:"Baidu (ADR)",isin:"US0567521085",exchange:"NASDAQ",country:"China (ADR)",role:"Chips Kunlun para servicios IA",type:"stock",vertical:"Software",vc:"#64748b",sa:false,adr:true},
+{id:78,ticker:"SAP",name:"SAP SE",isin:"DE0007164600",exchange:"XETRA / NYSE",country:"Alemania",role:"Software empresarial",type:"stock",vertical:"Software",vc:"#64748b",sa:false},
+{id:79,ticker:"SMH",name:"VanEck Semiconductor ETF",isin:"US92189F6065",exchange:"NASDAQ",country:"US",role:"Cadena completa semiconductores",type:"etf",vertical:"ETF Semis",vc:"#3b82f6",sa:false,ucits:false,provider:"VanEck"},
+{id:80,ticker:"SMH.L",name:"VanEck Semiconductor UCITS",isin:"IE00BMC38736",exchange:"LSE",country:"Irlanda",role:"Semiconductores (UCITS)",type:"etf",vertical:"ETF Semis",vc:"#3b82f6",sa:false,ucits:true,provider:"VanEck"},
+{id:81,ticker:"SOXX",name:"iShares Semiconductor ETF",isin:"US4642875235",exchange:"NASDAQ",country:"US",role:"Semiconductores amplio",type:"etf",vertical:"ETF Semis",vc:"#3b82f6",sa:false,ucits:false,provider:"BlackRock"},
+{id:82,ticker:"CNDX.L",name:"iShares NASDAQ 100 UCITS",isin:"IE00B53SZB19",exchange:"LSE",country:"Irlanda",role:"Proxy hiperscalers + software",type:"etf",vertical:"ETF Software",vc:"#6366f1",sa:false,ucits:true,provider:"BlackRock"},
+{id:83,ticker:"INTL.L",name:"WisdomTree AI UCITS",isin:"IE00BDVPNG13",exchange:"LSE",country:"Irlanda",role:"Exposici\u00f3n tem\u00e1tica IA",type:"etf",vertical:"ETF Software",vc:"#6366f1",sa:false,ucits:true,provider:"WisdomTree"},
+{id:84,ticker:"KLWD.L",name:"WisdomTree Cloud UCITS",isin:"IE00BJGWQN72",exchange:"LSE",country:"Irlanda",role:"Software cloud (baja liquidez)",type:"etf",vertical:"ETF Software",vc:"#6366f1",sa:false,ucits:true,provider:"WisdomTree"},
+{id:85,ticker:"MAGS",name:"Roundhill Magnificent Seven",isin:"US53656F5028",exchange:"NASDAQ",country:"US",role:"Replica las 7 megacaps tech",type:"etf",vertical:"ETF Software",vc:"#6366f1",sa:false,ucits:false,provider:"Roundhill"},
+{id:86,ticker:"CHAT",name:"Roundhill Generative AI",isin:"US53656F8808",exchange:"NYSE Arca",country:"US",role:"Hardware y software IA generativa",type:"etf",vertical:"ETF Software",vc:"#6366f1",sa:false,ucits:false,provider:"Roundhill"},
+{id:87,ticker:"SRVR",name:"Pacer Data & Infra REIT",isin:"US69374H8815",exchange:"CBOE BZX",country:"US",role:"REITs de data centers",type:"etf",vertical:"ETF Data Centers",vc:"#14b8a6",sa:false,ucits:false,provider:"Pacer"},
+{id:88,ticker:"VPN",name:"Global X Data Center REITs",isin:"US37960A7972",exchange:"NASDAQ",country:"US",role:"REITs + hardware conectividad",type:"etf",vertical:"ETF Data Centers",vc:"#14b8a6",sa:false,ucits:false,provider:"Global X"},
+{id:89,ticker:"AINF",name:"iShares AI Infrastructure UCITS",isin:"IE000YRNO5B4",exchange:"LSE / Xetra",country:"Irlanda",role:"Infraestructura IA (UCITS)",type:"etf",vertical:"ETF Data Centers",vc:"#14b8a6",sa:false,ucits:true,provider:"BlackRock"},
+{id:90,ticker:"GRID",name:"First Trust Smart Grid",isin:"US33738R1077",exchange:"NASDAQ",country:"US",role:"Red el\u00e9ctrica (Schneider, ABB, Eaton)",type:"etf",vertical:"ETF Energ\u00eda",vc:"#f97316",sa:false,ucits:false,provider:"First Trust"},
+{id:91,ticker:"XLU",name:"Utilities Select SPDR",isin:"US81369Y8030",exchange:"NYSE Arca",country:"US",role:"El\u00e9ctricas US",type:"etf",vertical:"ETF Energ\u00eda",vc:"#f97316",sa:false,ucits:false,provider:"State Street"},
+{id:92,ticker:"AIPO",name:"Defiance AI & Power UCITS",isin:"IE000JWJVL04",exchange:"LSE",country:"Irlanda",role:"IA + infraestructura energ\u00e9tica",type:"etf",vertical:"ETF Energ\u00eda",vc:"#f97316",sa:false,ucits:true,provider:"Defiance"},
+{id:93,ticker:"KCHIP",name:"KraneShares STAR Market 50",isin:"US5007673065",exchange:"NYSE Arca",country:"US",role:"Top 50 Nasdaq chino",type:"etf",vertical:"ETF Asia",vc:"#ec4899",sa:false,ucits:false,provider:"KraneShares"},
+{id:94,ticker:"AAXJ",name:"iShares MSCI Asia ex Japan",isin:"US4642882579",exchange:"NASDAQ",country:"US",role:"Hardware Taiw\u00e1n y Corea",type:"etf",vertical:"ETF Asia",vc:"#ec4899",sa:false,ucits:false,provider:"BlackRock"},
+{id:95,ticker:"EWT",name:"iShares MSCI Taiwan",isin:"US4642867570",exchange:"NYSE Arca",country:"US",role:"F\u00e1brica f\u00edsica de infra IA (TSMC)",type:"etf",vertical:"ETF Asia",vc:"#ec4899",sa:false,ucits:false,provider:"BlackRock"},
+{id:96,ticker:"CQQQ",name:"Invesco China Technology",isin:"US46138E7179",exchange:"NYSE Arca",country:"US",role:"Hardware y software chino",type:"etf",vertical:"ETF Asia",vc:"#ec4899",sa:false,ucits:false,provider:"Invesco"},
+{id:97,ticker:"KALL",name:"KraneShares All China",isin:"US5007672083",exchange:"NYSE Arca",country:"US",role:"Tech china general",type:"etf",vertical:"ETF Asia",vc:"#ec4899",sa:false,ucits:false,provider:"KraneShares"},
+{id:98,ticker:"EXV3",name:"iShares Europe 600 Tech",isin:"DE000A0H08Q4",exchange:"Xetra",country:"Alemania",role:"Tecnolog\u00eda europea (ASML, SAP)",type:"etf",vertical:"ETF Europa",vc:"#60a5fa",sa:false,ucits:true,provider:"BlackRock"},
+{id:99,ticker:"COPX",name:"Global X Copper Miners",isin:"US37954Y8553",exchange:"NYSE Arca",country:"US",role:"Minas de cobre",type:"etf",vertical:"ETF Mat. Primas",vc:"#a78bfa",sa:false,ucits:false,provider:"Global X"},
+{id:100,ticker:"REMX",name:"VanEck Rare Earth",isin:"US92189F7691",exchange:"NYSE Arca",country:"US",role:"Tierras raras y litio",type:"etf",vertical:"ETF Mat. Primas",vc:"#a78bfa",sa:false,ucits:false,provider:"VanEck"},
+{id:101,ticker:"URA",name:"Global X Uranium",isin:"US37954Y8710",exchange:"NYSE Arca",country:"US",role:"Uranio y tech nuclear",type:"etf",vertical:"ETF Mat. Primas",vc:"#a78bfa",sa:false,ucits:false,provider:"Global X"},
+{id:102,ticker:"URNM",name:"Sprott Uranium Miners",isin:"US85210W1080",exchange:"NYSE Arca",country:"US",role:"Mineras de uranio puras",type:"etf",vertical:"ETF Mat. Primas",vc:"#a78bfa",sa:false,ucits:false,provider:"Sprott"},
+{id:103,ticker:"FIW",name:"First Trust Water",isin:"US33733E4053",exchange:"NYSE Arca",country:"US",role:"Gesti\u00f3n h\u00eddrica / enfriamiento",type:"etf",vertical:"ETF Mat. Primas",vc:"#a78bfa",sa:false,ucits:false,provider:"First Trust"},
+{id:104,ticker:"NLR",name:"VanEck Uranium+Nuclear",isin:"US92189F5877",exchange:"NYSE Arca",country:"US",role:"Uranio y energ\u00eda nuclear",type:"etf",vertical:"ETF Mat. Primas",vc:"#a78bfa",sa:false,ucits:false,provider:"VanEck"},
+{id:105,ticker:"GDX",name:"VanEck Gold Miners",isin:"US92189F1063",exchange:"NYSE Arca",country:"US",role:"Cobertura macro (oro)",type:"etf",vertical:"ETF Cobertura",vc:"#f59e0b",sa:true,ucits:false,provider:"VanEck"},
+{id:106,ticker:"U.UN",name:"Sprott Physical Uranium Trust",isin:"CA85210A1049",exchange:"TSX",country:"Canad\u00e1",role:"Trust de uranio f\u00edsico",type:"trust",vertical:"Trust",vc:"#10b981",sa:false}
 ];
 
-// Get all unique verticals
-const verticals = [...new Set(ASSETS.map(a => a.vertical))];
-
 // State
-let activeType = 'all';
-let activeVertical = null;
-let searchQuery = '';
+let activeType='all', activeVertical=null, query='';
+const overlay=document.getElementById('overlay');
+const overlayBg=document.getElementById('overlayBg');
+const panelClose=document.getElementById('panelClose');
+const panelContent=document.getElementById('panelContent');
 
-// Render vertical filter buttons
-const vfContainer = document.getElementById('verticalFilters');
-function renderVerticalFilters() {
-  const filtered = activeType === 'all' ? verticals : verticals.filter(v => {
-    return ASSETS.some(a => a.vertical === v && (activeType === 'all' || a.type === activeType));
-  });
-  vfContainer.innerHTML = '<div class="filter-btn' + (!activeVertical ? ' active' : '') + '" data-v="">Todas</div>' +
-    filtered.map(v => `<div class="filter-btn${activeVertical===v?' active':''}" data-v="${v}">${v}</div>`).join('');
-  vfContainer.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      activeVertical = btn.dataset.v || null;
-      render();
-    });
-  });
+// Verticals with colors
+const verticals=[...new Map(ASSETS.map(a=>[a.vertical,a.vc])).entries()];
+
+// Type pills
+function renderTypePills(){
+  const counts={all:ASSETS.length};
+  ASSETS.forEach(a=>{counts[a.type]=(counts[a.type]||0)+1});
+  const labels={all:'Todos',stock:'Acciones',etf:'ETFs',trust:'Trusts'};
+  document.getElementById('typePills').innerHTML=Object.entries(labels).map(([k,v])=>
+    `<button class="pill${activeType===k?' active':''}" data-t="${k}">${v}<span class="count">${counts[k]||0}</span></button>`
+  ).join('');
+  document.querySelectorAll('.pill[data-t]').forEach(b=>b.onclick=()=>{activeType=b.dataset.t;activeVertical=null;render()});
 }
 
-// Type tabs
-document.querySelectorAll('.type-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    activeType = tab.dataset.type;
-    activeVertical = null;
-    document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    render();
-  });
-});
+// Vertical chips
+function renderChips(){
+  const vis=activeType==='all'?verticals:verticals.filter(([v])=>ASSETS.some(a=>a.vertical===v&&a.type===activeType));
+  document.getElementById('chipBar').innerHTML=
+    `<button class="chip${!activeVertical?' active':''}" data-v="">Todas</button>`+
+    vis.map(([v,c])=>`<button class="chip${activeVertical===v?' active':''}" data-v="${v}"><span class="dot" style="background:${c}"></span>${v}</button>`).join('');
+  document.querySelectorAll('.chip[data-v]').forEach(b=>b.onclick=()=>{activeVertical=b.dataset.v||null;render()});
+}
 
-// Search
-document.getElementById('search').addEventListener('input', e => {
-  searchQuery = e.target.value.toLowerCase();
-  render();
-});
-
-function getFiltered() {
-  return ASSETS.filter(a => {
-    if (activeType !== 'all' && a.type !== activeType) return false;
-    if (activeVertical && a.vertical !== activeVertical) return false;
-    if (searchQuery) {
-      const hay = [a.ticker,a.name,a.isin,a.exchange,a.country,a.role,a.vertical,a.provider||''].join(' ').toLowerCase();
-      return hay.includes(searchQuery);
-    }
+// Filter
+function getFiltered(){
+  return ASSETS.filter(a=>{
+    if(activeType!=='all'&&a.type!==activeType)return false;
+    if(activeVertical&&a.vertical!==activeVertical)return false;
+    if(query){const h=[a.ticker,a.name,a.isin,a.exchange,a.country,a.role,a.vertical,a.provider||''].join(' ').toLowerCase();return h.includes(query)}
     return true;
   });
 }
 
-function renderCard(a) {
-  const badges = [];
-  if (a.type === 'stock') badges.push('<span class="badge badge-stock">Stock</span>');
-  if (a.type === 'etf') badges.push('<span class="badge badge-etf">ETF</span>');
-  if (a.type === 'trust') badges.push('<span class="badge badge-trust">Trust</span>');
-  if (a.ucits) badges.push('<span class="badge badge-ucits">UCITS</span>');
-  if (a.sa) badges.push('<span class="badge badge-sa-portfolio">SA LP 13F</span>');
-  if (a.adr) badges.push('<span class="badge badge-adr">ADR</span>');
-  if (a.private) badges.push('<span class="badge badge-private">Privada</span>');
-
-  const tickerClass = a.private ? 'ticker not-traded' : 'ticker';
-  const isinDisplay = a.isin === 'NO COTIZA' ? '<span style="color:var(--red)">No cotiza</span>' : a.isin;
-
-  let meta = `
-    <div class="meta-item"><span class="label">ISIN</span><span class="value">${isinDisplay}</span></div>
-    <div class="meta-item"><span class="label">Bolsa</span><span class="value">${a.exchange}</span></div>
-    <div class="meta-item"><span class="label">Pa\u00eds</span><span class="value">${a.country}</span></div>
-    <div class="meta-item"><span class="label">Vertical</span><span class="value">${a.vertical}</span></div>
-  `;
-  if (a.provider) {
-    meta += `<div class="meta-item"><span class="label">Proveedor</span><span class="value">${a.provider}</span></div>`;
+// Render cards
+function render(){
+  renderTypePills();
+  renderChips();
+  const items=getFiltered();
+  const grid=document.getElementById('grid');
+  const noRes=document.getElementById('noResults');
+  const stats=document.getElementById('statsLine');
+  if(!items.length){grid.innerHTML='';noRes.style.display='block';stats.innerHTML='';return}
+  noRes.style.display='none';
+  const sc=items.filter(i=>i.type==='stock').length;
+  const ec=items.filter(i=>i.type==='etf').length;
+  const tc=items.filter(i=>i.type==='trust').length;
+  const sac=items.filter(i=>i.sa).length;
+  stats.innerHTML=`<span><b>${items.length}</b> activos</span><span><b>${sc}</b> acciones</span><span><b>${ec}</b> ETFs</span><span><b>${sac}</b> en SA LP</span>`;
+  // Group
+  const grouped={};
+  items.forEach(a=>{if(!grouped[a.vertical])grouped[a.vertical]=[];grouped[a.vertical].push(a)});
+  let html='',idx=0;
+  for(const[vertical,assets]of Object.entries(grouped)){
+    html+=`<div class="section-label">${vertical}</div>`;
+    for(const a of assets){
+      const badges=[];
+      const btype=a.type==='stock'?'b-stock':a.type==='etf'?'b-etf':'b-trust';
+      badges.push(`<span class="c-badge ${btype}">${a.type}</span>`);
+      if(a.ucits)badges.push(`<span class="c-badge b-ucits">UCITS</span>`);
+      if(a.sa)badges.push(`<span class="c-badge b-sa">SA LP</span>`);
+      html+=`<div class="card" data-id="${a.id}" style="animation-delay:${idx*30}ms">
+        <div class="stripe" style="background:${a.vc}"></div>
+        <div class="c-top">
+          <span class="c-ticker">${a.ticker}</span>
+          <span>${badges.join('')}</span>
+        </div>
+        <div class="c-name">${a.name}</div>
+        <div class="c-country">${a.country} \u00b7 ${a.exchange}</div>
+      </div>`;
+      idx++;
+    }
   }
-  if (a.note) {
-    meta += `<div class="meta-item" style="grid-column:1/-1"><span class="label">Nota</span><span class="value" style="color:var(--yellow)">${a.note}</span></div>`;
-  }
+  grid.innerHTML=html;
+  grid.querySelectorAll('.card').forEach(c=>c.onclick=()=>openPanel(+c.dataset.id));
+}
 
-  return `<div class="card">
-    <div class="vertical-tag ${a.vtClass}"></div>
-    <div class="top-row">
-      <span class="${tickerClass}">${a.ticker}</span>
-      <div class="badges">${badges.join('')}</div>
+// Panel
+function openPanel(id){
+  const a=ASSETS.find(x=>x.id===id);if(!a)return;
+  const btype=a.type==='stock'?'b-stock':a.type==='etf'?'b-etf':'b-trust';
+  const badges=[`<span class="p-badge ${btype}">${a.type}</span>`];
+  if(a.ucits)badges.push(`<span class="p-badge b-ucits">UCITS</span>`);
+  if(a.sa)badges.push(`<span class="p-badge b-sa">SA LP 13F</span>`);
+  if(a.adr)badges.push(`<span class="p-badge" style="background:rgba(139,92,246,.1);color:#8b5cf6">ADR</span>`);
+  if(a.priv)badges.push(`<span class="p-badge" style="background:rgba(100,116,139,.1);color:#64748b">Privada</span>`);
+
+  let providerHtml=a.provider?`<div class="p-field"><span class="fl">Proveedor</span><span class="fv">${a.provider}</span></div>`:'';
+  let noteHtml=a.note?`<div class="p-field" style="grid-column:1/-1"><span class="fl">Nota</span><span class="fv" style="color:#f59e0b">${a.note}</span></div>`:'';
+
+  panelContent.innerHTML=`
+    <div class="p-header">
+      <div class="p-vertical" style="color:${a.vc}">${a.vertical}</div>
+      <div class="p-ticker">${a.ticker}</div>
+      <div class="p-name">${a.name}</div>
+      <div class="p-badges">${badges.join('')}</div>
     </div>
-    <div class="name">${a.name}</div>
-    <div class="role">${a.role}</div>
-    <div class="meta">${meta}</div>
-  </div>`;
-}
+    <div class="p-body">
+      <div class="p-section">
+        <div class="p-section-title">Descripci\u00f3n</div>
+        <div class="p-role">${a.role}</div>
+      </div>
+      <div class="p-section">
+        <div class="p-section-title">Datos del activo</div>
+        <div class="p-grid">
+          <div class="p-field"><span class="fl">ISIN</span><span class="fv">${a.isin==='NO COTIZA'?'<span style="color:#ef4444">No cotiza</span>':a.isin}</span></div>
+          <div class="p-field"><span class="fl">Bolsa</span><span class="fv">${a.exchange}</span></div>
+          <div class="p-field"><span class="fl">Pa\u00eds</span><span class="fv">${a.country}</span></div>
+          <div class="p-field"><span class="fl">Tipo</span><span class="fv">${a.type.toUpperCase()}</span></div>
+          ${providerHtml}${noteHtml}
+        </div>
+      </div>
 
-function render() {
-  renderVerticalFilters();
-  const items = getFiltered();
-  const grid = document.getElementById('grid');
-  const noRes = document.getElementById('noResults');
-  const statsBar = document.getElementById('statsBar');
+      <div class="hyp-divider"></div>
+      <div class="hyp-title">Hip\u00f3tesis de inversi\u00f3n</div>
 
-  if (items.length === 0) {
-    grid.innerHTML = '';
-    noRes.style.display = 'block';
-    statsBar.innerHTML = '';
-    return;
-  }
-  noRes.style.display = 'none';
+      <div class="hyp-field">
+        <div class="hl">Tesis</div>
+        <div class="hv">Pendiente de rellenar...</div>
+      </div>
 
-  // Stats
-  const stocks = items.filter(i=>i.type==='stock').length;
-  const etfs = items.filter(i=>i.type==='etf').length;
-  const trusts = items.filter(i=>i.type==='trust').length;
-  const saCount = items.filter(i=>i.sa).length;
-  const ucitsCount = items.filter(i=>i.ucits).length;
-  const countries = [...new Set(items.map(i=>i.country))].length;
-  statsBar.innerHTML = `
-    <div class="stat"><b>${items.length}</b> activos</div>
-    <div class="stat"><b>${stocks}</b> acciones</div>
-    <div class="stat"><b>${etfs}</b> ETFs</div>
-    <div class="stat"><b>${trusts}</b> trusts</div>
-    <div class="stat"><b>${saCount}</b> en portfolio SA LP</div>
-    <div class="stat"><b>${ucitsCount}</b> UCITS</div>
-    <div class="stat"><b>${countries}</b> pa\u00edses</div>
+      <div class="hyp-meta">
+        <div class="hyp-field">
+          <div class="hl">Convicci\u00f3n</div>
+          <div class="conviction-row">
+            ${[1,2,3,4,5].map(()=>`<div class="conviction-dot"></div>`).join('')}
+            <span style="font-size:11px;color:var(--text3);margin-left:4px">\u2014 / 5</span>
+          </div>
+        </div>
+        <div class="hyp-field">
+          <div class="hl">Horizonte</div>
+          <div class="hv">\u2014</div>
+        </div>
+      </div>
+
+      <div class="hyp-field" style="margin-top:16px">
+        <div class="hl">Catalizadores</div>
+        <div class="catalyst-list">
+          <div class="cat-item">Pendiente de an\u00e1lisis</div>
+          <div class="cat-item">Pendiente de an\u00e1lisis</div>
+        </div>
+      </div>
+
+      <div class="hyp-field">
+        <div class="hl">Riesgos</div>
+        <div class="risk-list">
+          <div class="risk-item">Pendiente de an\u00e1lisis</div>
+          <div class="risk-item">Pendiente de an\u00e1lisis</div>
+        </div>
+      </div>
+    </div>
   `;
-
-  // Group by vertical
-  const grouped = {};
-  items.forEach(a => {
-    if (!grouped[a.vertical]) grouped[a.vertical] = [];
-    grouped[a.vertical].push(a);
-  });
-
-  let html = '';
-  for (const [vertical, assets] of Object.entries(grouped)) {
-    html += `<div class="section-label">${vertical} (${assets.length})</div>`;
-    html += assets.map(renderCard).join('');
-  }
-  grid.innerHTML = html;
+  overlay.classList.add('open');
+  document.body.style.overflow='hidden';
 }
 
+function closePanel(){
+  overlay.classList.remove('open');
+  document.body.style.overflow='';
+}
+overlayBg.onclick=closePanel;
+panelClose.onclick=closePanel;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePanel()});
+
+// Search
+document.getElementById('search').addEventListener('input',e=>{query=e.target.value.toLowerCase();render()});
+
+// Init
 render();
 </script>
 </body>
