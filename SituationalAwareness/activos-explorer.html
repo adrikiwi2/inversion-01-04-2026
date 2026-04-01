@@ -711,8 +711,23 @@ function render(){
 }
 
 // Panel
+// === HYPOTHESES DATA (populated from research docs) ===
+const HYP={
+1:{thesis:"Lado demanda: consumidor masivo de infra IA (GCP), no proveedor. Posee data centers y PPAs renovables pero no genera energ\u00eda ni resuelve el cuello de botella f\u00edsico. SA LP no lo tiene en cartera.",conv:2,horizon:"12\u201318 meses",cats:["Capex cloud en expansi\u00f3n sostenida 2026","Nuevos PPAs de energ\u00eda renovable para data centers"],risks:["Presi\u00f3n regulatoria antitrust sobre dominancia en data centers","Costes de energ\u00eda espiralan sin control sobre generaci\u00f3n"],sa:"No en 13F Q4 2025"},
+2:{thesis:"AWS posee footprint masivo de data centers pero es consumidor de potencia, no generador. Limitado por disponibilidad de energ\u00eda en regiones clave. Lado demanda, no oferta.",conv:2,horizon:"12\u201318 meses",cats:["Capex AWS 2026 probablemente >50B$","Nuevas regiones de data center con suministro el\u00e9ctrico garantizado"],risks:["Restricciones de red el\u00e9ctrica limitan escalado vs. competidores","Negocio retail de bajo margen presiona capacidad de inversi\u00f3n"],sa:"No en 13F Q4 2025"},
+3:{thesis:"Perif\u00e9rico a la tesis de infra IA. IA on-device (Neural Engine) es ortogonal al cuello de botella de potencia/GPU de data centers. Exposici\u00f3n m\u00ednima a infraestructura.",conv:1,horizon:"+2 a\u00f1os",cats:["Adopci\u00f3n de Apple Intelligence impulsa compute on-device","Posible expansi\u00f3n de data centers propios para servicios IA"],risks:["Saturaci\u00f3n del mercado de smartphones","Presi\u00f3n regulatoria sobre App Store comprime m\u00e1rgenes de servicios"],sa:"No en 13F Q4 2025"},
+4:{thesis:"Consumidor pesado de compute/potencia para entrenar LLaMA y servir metaverso. Posee data centers pero no genera energ\u00eda. Capex IA masivo (~37B$+ en 2025) pero sigue siendo lado demanda.",conv:2,horizon:"12\u201318 meses",cats:["Earnings Q1 2026 con capex IA sostenido/incrementado","Nuevos anuncios de construcci\u00f3n de data centers"],risks:["Competencia por acceso a compute con otros hiperscalers (escalada de precios)","Retrasos regulatorios en permisos de data centers"],sa:"No en 13F Q4 2025"},
+5:{thesis:"Mega-consumidor de GPU compute v\u00eda partnership con OpenAI. Azure enfrenta restricciones de potencia. Lado demanda, no oferta. La tesis de SA LP: generaci\u00f3n de energ\u00eda y activos f\u00edsicos son el cuello de botella, no licencias de software.",conv:2,horizon:"12\u201318 meses",cats:["Capex Q1 2026 m\u00e1s alto de la historia para expansi\u00f3n de Azure","Potenciales partnerships estrat\u00e9gicos con generadores de energ\u00eda (SMR/nuclear)"],risks:["Presi\u00f3n en precios de Azure si la oferta de compute aumenta (commoditizaci\u00f3n)","Retrasos en suministro el\u00e9ctrico impactan timelines de entrenamiento de OpenAI"],sa:"No en 13F Q4 2025"},
+6:{thesis:"SA LP liquid\u00f3/redujo expl\u00edcitamente esta posici\u00f3n en Q4 2025. Tesis: los chips NO son el cuello de botella, la potencia el\u00e9ctrica S\u00cd lo es. NVIDIA se beneficia del s\u00edntoma, no de la restricci\u00f3n. Rot\u00f3 capital de 'dise\u00f1adores de chips' a 'due\u00f1os de vatios'.",conv:1,horizon:"6 meses",cats:["Demanda de Blackwell sigue fuerte en 2026","Competencia de AMD MI300x ganando share en inferencia"],risks:["Poder de pricing se erosiona si la oferta de GPUs crece vs. disponibilidad de potencia/refrigeraci\u00f3n","Tesis SA LP: valor atrapado en dise\u00f1o de chips vs. propiedad de infraestructura","Restricciones geopol\u00edticas de semiconductores a China"],sa:"LIQUIDADO / REDUCIDO en Q4 2025"},
+7:{thesis:"Beneficiario indirecto v\u00eda almacenamiento energ\u00e9tico (bater\u00edas) y generaci\u00f3n renovable (SolarCity). Potencial para soluciones de estabilidad de red para data centers. \u00c1ngulo especulativo de infraestructura.",conv:2,horizon:"+2 a\u00f1os",cats:["Escalado de despliegue de almacenamiento energ\u00e9tico Tesla en 2026","Contratos de servicios de red para estabilizaci\u00f3n de potencia de data centers IA"],risks:["Negocio de almacenamiento es peque\u00f1a porci\u00f3n de ingresos vs. automotriz","Incertidumbre regulatoria en mercados energ\u00e9ticos"],sa:"No en 13F Q4 2025"},
+8:{thesis:"Alternativa GPU a NVIDIA (MI300x) pero enfrenta el mismo headwind de tesis: los chips no son el cuello de botella. AMD tambi\u00e9n es 'dise\u00f1ador de chips', no 'due\u00f1o de vatios'. Misma l\u00f3gica de rotaci\u00f3n que NVIDIA.",conv:1,horizon:"6 meses",cats:["Wins de MI300x en cargas de inferencia (cuota vs NVIDIA)","Partnerships con cloud providers para ASICs custom"],risks:["Ventajas arquitect\u00f3nicas de NVIDIA (ecosistema CUDA) dif\u00edciles de superar","Misma compresi\u00f3n de m\u00e1rgenes que dise\u00f1adores de chips cuando oferta crece","Exposici\u00f3n geopol\u00edtica a fabricaci\u00f3n en TSMC (Taiw\u00e1n)"],sa:"No en 13F Q4 2025"},
+9:{thesis:"Broadcom suministra ASICs de networking y chips custom para clusters de IA, pero SA LP redujo expl\u00edcitamente esta posici\u00f3n. Networking es importante pero no es el foco de 'due\u00f1os de vatios'. Los chips no son la restricci\u00f3n.",conv:2,horizon:"6 meses",cats:["Demanda de ASIC custom para networking de clusters IA de nueva generaci\u00f3n","Competencia con Arista Networks en switching/networking"],risks:["M\u00e1rgenes de ASIC custom se comprimen con m\u00e1s competencia","Networking es 5-10% del capex de data centers vs. GPUs y potencia","Tesis SA LP: networking es problema resuelto, potencia no lo es"],sa:"LIQUIDADO / REDUCIDO en Q4 2025"},
+10:{thesis:"SA LP mantiene posici\u00f3n con opciones CALL (apuesta de convexidad). No es por CPUs ni Gaudi, sino por fabricaci\u00f3n dom\u00e9stica de chips en EE.UU. 'Soberan\u00eda computacional americana': EE.UU. necesita capacidad de fundici\u00f3n onshore separada de la dependencia de TSMC.",conv:3,horizon:"18\u201336 meses",cats:["Mejoras de nodo de proceso Intel Foundry (7nm, 5nm ramp 2026-2027)","Despliegue de fondos CHIPS Act y utilizaci\u00f3n de capacidad","Wins estrat\u00e9gicos fabricando ASICs custom para aceleradores IA"],risks:["Intel lucha con competencia de nodo vs. TSMC 3nm/2nm","Alto capex burn con compromisos inciertos de clientes de foundry","Dependencia de subsidios gubernamentales (CHIPS Act) crea riesgo pol\u00edtico"],sa:"EN CARTERA (~749M$, ~2.7%). CALL OPTIONS = convexidad"}
+};
+
 function openPanel(id){
   const a=ASSETS.find(x=>x.id===id);if(!a)return;
+  const h=HYP[id]; // hypothesis data (may be undefined)
   const btype=a.type==='stock'?'b-stock':a.type==='etf'?'b-etf':'b-trust';
   const badges=[`<span class="p-badge ${btype}">${a.type}</span>`];
   if(a.ucits)badges.push(`<span class="p-badge b-ucits">UCITS</span>`);
@@ -722,6 +737,15 @@ function openPanel(id){
 
   let providerHtml=a.provider?`<div class="p-field"><span class="fl">Proveedor</span><span class="fv">${a.provider}</span></div>`:'';
   let noteHtml=a.note?`<div class="p-field" style="grid-column:1/-1"><span class="fl">Nota</span><span class="fv" style="color:#f59e0b">${a.note}</span></div>`:'';
+
+  // Hypothesis rendering
+  const hasHyp=!!h;
+  const thesisHtml=hasHyp?`<div style="font-size:14px;color:var(--text);line-height:1.6">${h.thesis}</div>`:`<div class="hv">Pendiente de rellenar...</div>`;
+  const convHtml=hasHyp?[1,2,3,4,5].map(i=>`<div class="conviction-dot${i<=h.conv?' filled':''}"></div>`).join('')+`<span style="font-size:11px;color:var(--text2);margin-left:4px">${h.conv} / 5</span>`:[1,2,3,4,5].map(()=>`<div class="conviction-dot"></div>`).join('')+`<span style="font-size:11px;color:var(--text3);margin-left:4px">\u2014 / 5</span>`;
+  const horizonHtml=hasHyp?`<div style="font-size:13px;color:var(--text)">${h.horizon}</div>`:`<div class="hv">\u2014</div>`;
+  const catsHtml=hasHyp?h.cats.map(c=>`<div class="cat-item">${c}</div>`).join(''):`<div class="cat-item">Pendiente de an\u00e1lisis</div>`;
+  const risksHtml=hasHyp?h.risks.map(r=>`<div class="risk-item">${r}</div>`).join(''):`<div class="risk-item">Pendiente de an\u00e1lisis</div>`;
+  const saHtml=hasHyp&&h.sa?`<div class="hyp-field"><div class="hl">Posici\u00f3n SA LP</div><div style="font-size:13px;color:${h.sa.includes('LIQUIDADO')||h.sa.includes('No en')?'var(--text2)':'var(--accent)'}; line-height:1.5">${h.sa}</div></div>`:'';
 
   panelContent.innerHTML=`
     <div class="p-header">
@@ -747,41 +771,34 @@ function openPanel(id){
       </div>
 
       <div class="hyp-divider"></div>
-      <div class="hyp-title">Hip\u00f3tesis de inversi\u00f3n</div>
+      <div class="hyp-title">Hip\u00f3tesis de inversi\u00f3n${hasHyp?'':' <span style="font-size:9px;color:var(--text3);font-weight:400;letter-spacing:0;text-transform:none">(pendiente)</span>'}</div>
 
       <div class="hyp-field">
         <div class="hl">Tesis</div>
-        <div class="hv">Pendiente de rellenar...</div>
+        ${thesisHtml}
       </div>
 
       <div class="hyp-meta">
         <div class="hyp-field">
           <div class="hl">Convicci\u00f3n</div>
-          <div class="conviction-row">
-            ${[1,2,3,4,5].map(()=>`<div class="conviction-dot"></div>`).join('')}
-            <span style="font-size:11px;color:var(--text3);margin-left:4px">\u2014 / 5</span>
-          </div>
+          <div class="conviction-row">${convHtml}</div>
         </div>
         <div class="hyp-field">
           <div class="hl">Horizonte</div>
-          <div class="hv">\u2014</div>
+          ${horizonHtml}
         </div>
       </div>
 
+      ${saHtml}
+
       <div class="hyp-field" style="margin-top:16px">
         <div class="hl">Catalizadores</div>
-        <div class="catalyst-list">
-          <div class="cat-item">Pendiente de an\u00e1lisis</div>
-          <div class="cat-item">Pendiente de an\u00e1lisis</div>
-        </div>
+        <div class="catalyst-list">${catsHtml}</div>
       </div>
 
       <div class="hyp-field">
         <div class="hl">Riesgos</div>
-        <div class="risk-list">
-          <div class="risk-item">Pendiente de an\u00e1lisis</div>
-          <div class="risk-item">Pendiente de an\u00e1lisis</div>
-        </div>
+        <div class="risk-list">${risksHtml}</div>
       </div>
     </div>
   `;
