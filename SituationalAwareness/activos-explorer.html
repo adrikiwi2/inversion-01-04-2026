@@ -450,6 +450,25 @@
     gap: 12px;
   }
 
+  /* Research source underline */
+  .src-research {
+    border-left: 2px solid rgba(59,130,246,.35);
+    padding-left: 10px;
+    position: relative;
+  }
+  .src-research::after {
+    content: 'Research SA LP';
+    position: absolute;
+    top: -2px;
+    right: 0;
+    font-size: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(59,130,246,.4);
+    pointer-events: none;
+  }
+
   /* Empty / no results */
   .no-results {
     text-align: center;
@@ -740,12 +759,13 @@ function openPanel(id){
 
   // Hypothesis rendering
   const hasHyp=!!h;
-  const thesisHtml=hasHyp?`<div style="font-size:14px;color:var(--text);line-height:1.6">${h.thesis}</div>`:`<div class="hv">Pendiente de rellenar...</div>`;
+  const src=hasHyp?' src-research':'';
+  const thesisHtml=hasHyp?`<div class="${src}" style="font-size:14px;color:var(--text);line-height:1.6">${h.thesis}</div>`:`<div class="hv">Pendiente de rellenar...</div>`;
   const convHtml=hasHyp?[1,2,3,4,5].map(i=>`<div class="conviction-dot${i<=h.conv?' filled':''}"></div>`).join('')+`<span style="font-size:11px;color:var(--text2);margin-left:4px">${h.conv} / 5</span>`:[1,2,3,4,5].map(()=>`<div class="conviction-dot"></div>`).join('')+`<span style="font-size:11px;color:var(--text3);margin-left:4px">\u2014 / 5</span>`;
-  const horizonHtml=hasHyp?`<div style="font-size:13px;color:var(--text)">${h.horizon}</div>`:`<div class="hv">\u2014</div>`;
-  const catsHtml=hasHyp?h.cats.map(c=>`<div class="cat-item">${c}</div>`).join(''):`<div class="cat-item">Pendiente de an\u00e1lisis</div>`;
-  const risksHtml=hasHyp?h.risks.map(r=>`<div class="risk-item">${r}</div>`).join(''):`<div class="risk-item">Pendiente de an\u00e1lisis</div>`;
-  const saHtml=hasHyp&&h.sa?`<div class="hyp-field"><div class="hl">Posici\u00f3n SA LP</div><div style="font-size:13px;color:${h.sa.includes('LIQUIDADO')||h.sa.includes('No en')?'var(--text2)':'var(--accent)'}; line-height:1.5">${h.sa}</div></div>`:'';
+  const horizonHtml=hasHyp?`<div class="${src}" style="font-size:13px;color:var(--text)">${h.horizon}</div>`:`<div class="hv">\u2014</div>`;
+  const catsHtml=hasHyp?`<div class="${src}">`+h.cats.map(c=>`<div class="cat-item">${c}</div>`).join('')+'</div>':`<div class="cat-item">Pendiente de an\u00e1lisis</div>`;
+  const risksHtml=hasHyp?`<div class="${src}">`+h.risks.map(r=>`<div class="risk-item">${r}</div>`).join('')+'</div>':`<div class="risk-item">Pendiente de an\u00e1lisis</div>`;
+  const saHtml=hasHyp&&h.sa?`<div class="hyp-field"><div class="hl">Posici\u00f3n SA LP</div><div class="${src}" style="font-size:13px;color:${h.sa.includes('LIQUIDADO')||h.sa.includes('No en')?'var(--text2)':'var(--accent)'}; line-height:1.5">${h.sa}</div></div>`:'';
 
   panelContent.innerHTML=`
     <div class="p-header">
