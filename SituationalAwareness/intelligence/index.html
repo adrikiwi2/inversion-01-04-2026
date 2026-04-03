@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intelligence Engine — SA LP Thesis Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+   ═══════════════════════════════════════════ */
+:root {
+  --bg-void:    #050508;
+  --bg-surface: #0C0C10;
+  --bg-card:    #111116;
+  --bg-raised:  #18181E;
+  --border:     rgba(255,255,255,0.06);
+  --border-lit: rgba(255,255,255,0.10);
+  --text-primary:   #E8E8ED;
+  --text-secondary: #8B8B96;
+  --text-muted:     #55555F;
+  --accent-blue:    #3B82F6;
+  --accent-blue-dim:#1E40AF;
+  --accent-amber:   #F59E0B;
+  --accent-emerald: #10B981;
+  --accent-rose:    #F43F5E;
+  --accent-violet:  #8B5CF6;
+  --font-sans:  'Outfit', -apple-system, sans-serif;
+  --font-mono:  'Fira Code', 'SF Mono', monospace;
+  --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring:cubic-bezier(0.32, 0.72, 0, 1);
+  --radius-sm:  6px;
+  --radius-md:  12px;
+  --radius-lg:  20px;
+  --radius-xl:  28px;
+}
+
+/* ═══════════════════════════════════════════
+   RESET & BASE
+   ═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-void);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+::selection { background: var(--accent-blue); color: #fff; }
+
+/* ═══════════════════════════════════════════
+   AMBIENT BACKGROUND
+   ═══════════════════════════════════════════ */
+.ambient {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 800px 600px at 20% 10%, rgba(30,64,175,0.07), transparent),
+    radial-gradient(ellipse 600px 500px at 80% 80%, rgba(139,92,246,0.04), transparent),
+    radial-gradient(ellipse 500px 400px at 50% 50%, rgba(245,158,11,0.02), transparent);
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════ */
+.wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+section { padding: 100px 0; }
+@media (max-width: 768px) {
+  section { padding: 64px 0; }
+  .wrap { padding: 0 16px; }
+}
+
+/* ═══════════════════════════════════════════
+   SCROLL REVEAL
+   ═══════════════════════════════════════════ */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-d1 { transition-delay: 80ms; }
+.reveal-d2 { transition-delay: 160ms; }
+.reveal-d3 { transition-delay: 240ms; }
+.reveal-d4 { transition-delay: 320ms; }
+.reveal-d5 { transition-delay: 400ms; }
+
+/* ═══════════════════════════════════════════
+   TYPOGRAPHY
+   ═══════════════════════════════════════════ */
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  margin-bottom: 24px;
+}
+.eyebrow .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent-emerald);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+h1 {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  color: var(--text-primary);
+}
+h2 {
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 16px;
+}
+h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+.subtitle {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  color: var(--text-secondary);
+  max-width: 60ch;
+  line-height: 1.7;
+}
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+/* ═══════════════════════════════════════════
+   CARDS (Double-Bezel)
+   ═══════════════════════════════════════════ */
+.card-shell {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 3px;
+  transition: border-color 0.4s var(--ease-spring);
+}
+.card-shell:hover { border-color: var(--border-lit); }
+.card-core {
+  background: var(--bg-card);
+  border-radius: calc(var(--radius-xl) - 3px);
+  padding: 32px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  position: relative;
+  overflow: hidden;
+}
+@media (max-width: 768px) {
+  .card-core { padding: 20px; }
+}
+
+/* ═══════════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════════ */
+.hero {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 80px;
+  padding-bottom: 80px;
+}
+.hero h1 .accent { color: var(--accent-blue); }
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-top: 56px;
+  max-width: 720px;
+}
+.hero-stat {
+  background: var(--bg-surface);
+  padding: 24px 20px;
+  text-align: center;
+}
+.hero-stat .val {
+  font-family: var(--font-mono);
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--accent-blue);
+  line-height: 1;
+}
+.hero-stat .label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 8px;
+}
+@media (max-width: 640px) {
+  .hero-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ═══════════════════════════════════════════
+   ARCHITECTURE
+   ═══════════════════════════════════════════ */
+.arch-flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+  padding: 20px 0;
+  -webkit-overflow-scrolling: touch;
+}
+.arch-node {
+  flex-shrink: 0;
+  text-align: center;
+  padding: 20px 28px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  min-width: 140px;
+  transition: border-color 0.3s, transform 0.3s var(--ease-spring);
+}
+.arch-node:hover {
+  border-color: var(--accent-blue);
+  transform: translateY(-2px);
+}
+.arch-node .icon-wrap {
+  width: 40px; height: 40px;
+  margin: 0 auto 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+.arch-node .node-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.arch-node .node-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  font-family: var(--font-mono);
+}
+.arch-arrow {
+  flex-shrink: 0;
+  width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+.arch-arrow svg { width: 24px; height: 24px; }
+
+/* Capa labels */
+.capa-label {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 999px;
+  margin-bottom: 12px;
+}
+.capa-1 { background: rgba(59,130,246,0.12); color: var(--accent-blue); }
+.capa-2 { background: rgba(139,92,246,0.12); color: var(--accent-violet); }
+.capa-3 { background: rgba(245,158,11,0.12); color: var(--accent-amber); }
+
+/* ═══════════════════════════════════════════
+   BENTO GRID — FREQUENCY TIERS
+   ═══════════════════════════════════════════ */
+.bento {
+  display: grid;
+  gap: 3px;
+  background: var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+.bento-2x2 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+}
+.bento-cell {
+  background: var(--bg-card);
+  padding: 36px;
+  position: relative;
+}
+.bento-cell.span-2 { grid-column: span 2; }
+@media (max-width: 768px) {
+  .bento-2x2 { grid-template-columns: 1fr; }
+  .bento-cell.span-2 { grid-column: span 1; }
+  .bento-cell { padding: 24px; }
+}
+
+/* Frequency badge */
+.freq-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+.freq-daily   { background: rgba(59,130,246,0.1);  color: var(--accent-blue); }
+.freq-weekly  { background: rgba(16,185,129,0.1);  color: var(--accent-emerald); }
+.freq-monthly { background: rgba(245,158,11,0.1);  color: var(--accent-amber); }
+.freq-quarterly { background: rgba(139,92,246,0.1); color: var(--accent-violet); }
+.freq-adhoc   { background: rgba(244,63,94,0.1);   color: var(--accent-rose); }
+
+/* Data point list */
+.data-points {
+  list-style: none;
+  margin-top: 16px;
+}
+.data-points li {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.data-points li:last-child { border-bottom: none; }
+.data-points .dp-icon {
+  flex-shrink: 0;
+  width: 18px; height: 18px;
+  margin-top: 2px;
+  color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════
+   TIER DETAIL SECTIONS
+   ═══════════════════════════════════════════ */
+.tier-section { border-top: 1px solid var(--border); }
+.tier-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+.tier-icon {
+  flex-shrink: 0;
+  width: 56px; height: 56px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tier-icon svg { width: 28px; height: 28px; }
+.tier-meta {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* Source cards grid */
+.sources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+.source-card {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  transition: border-color 0.3s, transform 0.3s var(--ease-spring);
+  cursor: default;
+}
+.source-card:hover {
+  border-color: var(--border-lit);
+  transform: translateY(-1px);
+}
+.source-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+.source-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.source-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-top: 8px;
+}
+.tag-free { background: rgba(16,185,129,0.1); color: var(--accent-emerald); }
+.tag-scrape { background: rgba(245,158,11,0.1); color: var(--accent-amber); }
+
+/* ═══════════════════════════════════════════
+   PROMPT PREVIEW
+   ═══════════════════════════════════════════ */
+.prompt-block {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-top: 20px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  max-height: 200px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.prompt-block .kw { color: var(--accent-blue); }
+.prompt-block .str { color: var(--accent-emerald); }
+.prompt-block .cmt { color: var(--text-muted); }
+
+/* ═══════════════════════════════════════════
+   TECH STACK
+   ═══════════════════════════════════════════ */
+.stack-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-top: 32px;
+}
+.stack-item {
+  background: var(--bg-card);
+  padding: 28px;
+}
+.stack-item .stack-name {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+.stack-item .stack-role {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+@media (max-width: 768px) {
+  .stack-grid { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════
+   STATUS / PROGRESS
+   ═══════════════════════════════════════════ */
+.status-list { margin-top: 32px; }
+.status-row {
+  display: grid;
+  grid-template-columns: 1fr 140px 100px;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 16px;
+}
+.status-row:first-child { border-top: 1px solid var(--border); }
+.status-name { font-weight: 500; }
+.status-file {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.status-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  text-align: center;
+}
+.badge-done { background: rgba(16,185,129,0.12); color: var(--accent-emerald); }
+.badge-pending { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+.badge-spec { background: rgba(59,130,246,0.1); color: var(--accent-blue); }
+@media (max-width: 640px) {
+  .status-row { grid-template-columns: 1fr 90px; }
+  .status-file { display: none; }
+}
+
+/* ═══════════════════════════════════════════
+   THESIS QUOTE
+   ═══════════════════════════════════════════ */
+.thesis-quote {
+  border-left: 2px solid var(--accent-blue);
+  padding: 24px 32px;
+  background: rgba(59,130,246,0.03);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  margin: 40px 0;
+}
+.thesis-quote p {
+  font-size: 1.15rem;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+.thesis-quote .attr {
+  font-style: normal;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 12px;
+  font-family: var(--font-mono);
+}
+
+/* ═══════════════════════════════════════════
+   JSON SCHEMA PREVIEW
+   ═══════════════════════════════════════════ */
+.json-preview {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  overflow-x: auto;
+}
+.json-preview .jk { color: var(--accent-blue); }
+.json-preview .js { color: var(--accent-emerald); }
+.json-preview .jn { color: var(--accent-amber); }
+.json-preview .jc { color: var(--text-muted); font-style: italic; }
+
+/* ═══════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════ */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 48px 0;
+  text-align: center;
+}
+footer p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+footer .mono { color: var(--text-secondary); }
+
+/* ═══════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-lit); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+
+/* ═══════════════════════════════════════════
+   SECTION DIVIDER
+   ═══════════════════════════════════════════ */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0;
+}
+
+/* Ad-hoc trigger cards */
+.trigger-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+.trigger-card {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  border-left: 3px solid var(--accent-rose);
+  transition: border-color 0.3s, transform 0.3s var(--ease-spring);
+}
+.trigger-card:hover {
+  border-color: var(--border-lit);
+  border-left-color: var(--accent-rose);
+  transform: translateY(-1px);
+}
+.trigger-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+}
+.trigger-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.trigger-tickers {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--accent-blue);
+  margin-top: 10px;
+}
+
+/* Nav */
+nav {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  background: rgba(12,12,16,0.85);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+nav a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 999px;
+  transition: color 0.2s, background 0.2s;
+  white-space: nowrap;
+}
+nav a:hover {
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.06);
+}
+@media (max-width: 768px) {
+  nav { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="ambient"></div>
+
+<nav>
+  <a href="#arch">Arquitectura</a>
+  <a href="#tiers">Frecuencias</a>
+  <a href="#adhoc">Ad-hoc</a>
+  <a href="#stack">Stack</a>
+  <a href="#status">Estado</a>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     HERO
+     ══════════════════════════════════════════ -->
+<section class="hero">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow">
+        <span class="dot"></span>
+        Intelligence Engine v1
+      </div>
+    </div>
+    <h1 class="reveal reveal-d1">
+      Monitorizar la tesis.<br>
+      <span class="accent">Automatizar la ventaja.</span>
+    </h1>
+    <p class="subtitle reveal reveal-d2" style="margin-top:24px;">
+      Sistema de inteligencia automatizado que recolecta datos de fuentes p&uacute;blicas,
+      los estructura en JSON y alimenta LLMs para analizar la tesis de infraestructura
+      f&iacute;sica de IA de Situational Awareness LP &mdash; sin APIs de pago.
+    </p>
+
+    <div class="thesis-quote reveal reveal-d3">
+      <p>
+        &ldquo;La infraestructura f&iacute;sica (energ&iacute;a, data centers, conectividad) es el cuello de botella
+        de la IA en 2026&ndash;2028, no el software ni los chips.
+        El valor migra a los due&ntilde;os de los vatios.&rdquo;
+      </p>
+      <div class="attr">&mdash; Tesis SA LP, 106 activos monitorizados</div>
+    </div>
+
+    <div class="hero-stats reveal reveal-d4">
+      <div class="hero-stat">
+        <div class="val">5</div>
+        <div class="label">Frecuencias</div>
+      </div>
+      <div class="hero-stat">
+        <div class="val">34</div>
+        <div class="label">Tickers</div>
+      </div>
+      <div class="hero-stat">
+        <div class="val">18+</div>
+        <div class="label">Fuentes</div>
+      </div>
+      <div class="hero-stat">
+        <div class="val">$0</div>
+        <div class="label">Coste API</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════
+     ARCHITECTURE
+     ══════════════════════════════════════════ -->
+<section id="arch">
+  <div class="wrap">
+    <div class="eyebrow reveal">Sistema</div>
+    <h2 class="reveal reveal-d1">Arquitectura de 3 capas</h2>
+    <p class="subtitle reveal reveal-d2">
+      Separaci&oacute;n estricta entre recolecci&oacute;n autom&aacute;tica de datos (Capa 1),
+      an&aacute;lisis por LLM (Capa 2) y visualizaci&oacute;n (Capa 3).
+      Cada capa opera independientemente.
+    </p>
+
+    <div class="arch-flow reveal reveal-d3" style="margin-top:40px;">
+      <!-- Capa 1 -->
+      <div class="arch-node">
+        <div class="icon-wrap" style="background:rgba(59,130,246,0.1);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="1.5"><path d="M12 2v4m0 12v4M2 12h4m12 0h4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+        </div>
+        <div class="capa-label capa-1">Capa 1</div>
+        <div class="node-label">Fetchers</div>
+        <div class="node-sub">Python scripts</div>
+      </div>
+      <div class="arch-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14m-4-4l4 4-4 4"/></svg>
+      </div>
+      <!-- JSON -->
+      <div class="arch-node">
+        <div class="icon-wrap" style="background:rgba(245,158,11,0.1);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-amber)" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+        </div>
+        <div class="node-label">JSON Bundle</div>
+        <div class="node-sub">data/*.json</div>
+      </div>
+      <div class="arch-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14m-4-4l4 4-4 4"/></svg>
+      </div>
+      <!-- Capa 2 -->
+      <div class="arch-node">
+        <div class="icon-wrap" style="background:rgba(139,92,246,0.1);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-violet)" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.22 4.22l2.83 2.83m9.9 9.9l2.83 2.83M1 12h4m14 0h4M4.22 19.78l2.83-2.83m9.9-9.9l2.83-2.83"/></svg>
+        </div>
+        <div class="capa-label capa-2">Capa 2</div>
+        <div class="node-label">LLM Analysis</div>
+        <div class="node-sub">Claude / Gemini</div>
+      </div>
+      <div class="arch-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14m-4-4l4 4-4 4"/></svg>
+      </div>
+      <!-- Capa 3 -->
+      <div class="arch-node">
+        <div class="icon-wrap" style="background:rgba(245,158,11,0.1);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-amber)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+        </div>
+        <div class="capa-label capa-3">Capa 3</div>
+        <div class="node-label">Dashboard</div>
+        <div class="node-sub">HTML interactivo</div>
+      </div>
+    </div>
+
+    <!-- JSON output schema -->
+    <div class="reveal reveal-d4" style="margin-top:48px;">
+      <h3>Output schema (daily bundle)</h3>
+      <div class="json-preview">
+{
+  <span class="jk">"date"</span>: <span class="js">"2026-04-03"</span>,
+  <span class="jk">"prices"</span>: { <span class="jc">// 34 tickers: price, change_1d, change_1w</span> },
+  <span class="jk">"commodities"</span>: {
+    <span class="jk">"copper"</span>: { <span class="jk">"copper_usd_lb"</span>: <span class="jn">4.82</span>, <span class="jk">"copper_usd_ton"</span>: <span class="jn">10626</span> },
+    <span class="jk">"gold"</span>:   { <span class="jk">"gold_spot_usd"</span>: <span class="jn">3124.50</span> },
+    <span class="jk">"natgas"</span>: { <span class="jk">"henry_hub_usd_mmbtu"</span>: <span class="jn">2.34</span> },
+    <span class="jk">"uranium_proxy"</span>: { <span class="jk">"ura_etf"</span>: {}, <span class="jk">"sprott_uranium_trust"</span>: {} }
+  },
+  <span class="jk">"crypto"</span>: {
+    <span class="jk">"btc"</span>:      { <span class="jk">"btc_usd"</span>: <span class="jn">84500</span>, <span class="jk">"change_24h"</span>: <span class="js">"+1.2%"</span> },
+    <span class="jk">"hashrate"</span>: { <span class="jk">"hashrate_ehs"</span>: <span class="jn">742.3</span> }
+  },
+  <span class="jk">"macro"</span>:       { <span class="jk">"fear_greed"</span>: { <span class="jk">"score"</span>: <span class="jn">62</span>, <span class="jk">"rating"</span>: <span class="js">"Greed"</span> } },
+  <span class="jk">"sec_filings"</span>: [ <span class="jc">// SA LP 13F, CORZ 13D</span> ],
+  <span class="jk">"news"</span>:        { <span class="jc">// 6 buckets tem&aacute;ticos RSS</span> },
+  <span class="jk">"alerts"</span>:      [ <span class="jc">// activos con movimiento &gt;5% diario</span> ]
+}
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════
+     FREQUENCY TIERS OVERVIEW (Bento)
+     ══════════════════════════════════════════ -->
+<section id="tiers">
+  <div class="wrap">
+    <div class="eyebrow reveal">Frecuencias</div>
+    <h2 class="reveal reveal-d1">4 ciclos + triggers ad-hoc</h2>
+    <p class="subtitle reveal reveal-d2">
+      Cada frecuencia captura un tipo distinto de se&ntilde;al.
+      El daily detecta ruido, el weekly filtra tendencia, el monthly mide fundamentos,
+      el quarterly valida la tesis.
+    </p>
+
+    <div class="bento bento-2x2 reveal reveal-d3" style="margin-top:40px;">
+      <!-- Daily -->
+      <div class="bento-cell">
+        <div class="freq-badge freq-daily">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+          Diario
+        </div>
+        <h3>Precios, Commodities, Noticias</h3>
+        <ul class="data-points">
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22,7 13.5,15.5 8.5,10.5 2,17"/></svg>
+            34 tickers via Yahoo Finance v8 (5d chart)
+          </li>
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Cobre, oro, gas natural, uranio (proxies)
+          </li>
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 20v-6h4v6m5 0V8l-7-4-7 4v12h14z"/></svg>
+            BTC price + hashrate (CoinGecko + Blockchain.com)
+          </li>
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2v-9c0-1.1.9-2 2-2h2"/></svg>
+            SEC EDGAR RSS (SA LP + CORZ filings)
+          </li>
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V9a2 2 0 012-2h2a2 2 0 012 2v9a2 2 0 01-2 2z"/></svg>
+            6 queries Google News RSS tem&aacute;ticos
+          </li>
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Alertas autom&aacute;ticas: movimientos &gt;5%
+          </li>
+        </ul>
+      </div>
+
+      <!-- Weekly -->
+      <div class="bento-cell">
+        <div class="freq-badge freq-weekly">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Semanal
+        </div>
+        <h3>Hashrate, Short Interest, Insiders</h3>
+        <ul class="data-points">
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 00-8 0v2"/></svg>
+            BTC difficulty adjustment + reconversi&oacute;n signal
+          </li>
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22,7 13.5,15.5 8.5,10.5 2,17"/><polyline points="16,7 22,7 22,13"/></svg>
+            Short interest (% float) para 17 tickers
+          </li>
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            SEC EDGAR Form 4 &mdash; insider trading
+          </li>
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M2 12h20"/></svg>
+            ETF flows (SMH, COPX, URA, GRID, SRVR, GDX)
+          </li>
+        </ul>
+      </div>
+
+      <!-- Monthly -->
+      <div class="bento-cell">
+        <div class="freq-badge freq-monthly">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9"/></svg>
+          Mensual
+        </div>
+        <h3>Data Centers, Superciclo, Macro</h3>
+        <ul class="data-points">
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+            Ocupaci&oacute;n DC (NoVA, Dallas, Phoenix, EU)
+          </li>
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4"/></svg>
+            Lead times: transformadores, switchgear, cooling
+          </li>
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            PJM interconnection queue (GW pendientes)
+          </li>
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            FRED API: CPI, Fed Funds, Industrial Production
+          </li>
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18.364 5.636a9 9 0 11-12.728 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+            Superciclo: cobre, uranio, litio, tierras raras
+          </li>
+        </ul>
+      </div>
+
+      <!-- Quarterly -->
+      <div class="bento-cell">
+        <div class="freq-badge freq-quarterly">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Trimestral
+        </div>
+        <h3>13F SA LP, Earnings, Capex</h3>
+        <ul class="data-points">
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+            13F-HR de SA LP (CIK 0002045724)
+          </li>
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+            13D/A de CORZ (posici&oacute;n activista)
+          </li>
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+            Earnings hiperscalers: GOOGL, AMZN, MSFT, META, NVDA
+          </li>
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Capex guidance &mdash; se&ntilde;al de demanda de infraestructura
+          </li>
+          <li>
+            <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+            RED FLAG: cualquier recorte de capex &gt;10%
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════
+     AD-HOC TRIGGERS
+     ══════════════════════════════════════════ -->
+<section id="adhoc">
+  <div class="wrap">
+    <div class="eyebrow reveal">
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--accent-rose);"></span>
+      Triggers ad-hoc
+    </div>
+    <h2 class="reveal reveal-d1">Eventos que rompen el ciclo</h2>
+    <p class="subtitle reveal reveal-d2">
+      Breaking news, regulaci&oacute;n, geopol&iacute;tica. Cuando el mercado no espera al lunes.
+      Cada trigger tiene un prompt JSON estructurado listo para enviar al LLM.
+    </p>
+
+    <div class="trigger-grid reveal reveal-d3">
+      <div class="trigger-card">
+        <div class="trigger-title">Regulaci&oacute;n Nuclear</div>
+        <div class="trigger-desc">Certificaci&oacute;n NRC, rechazo o retraso en SMR. Cambia el timeline de despliegue nuclear descentralizado.</div>
+        <div class="trigger-tickers">OKLO &middot; SMR &middot; CEG &middot; CCJ &middot; RR.L</div>
+      </div>
+      <div class="trigger-card">
+        <div class="trigger-title">Export Controls</div>
+        <div class="trigger-desc">Sanciones o restricciones a semiconductores. ASML, TSMC, SMIC. Beneficia reshoring (INTC, TSEM).</div>
+        <div class="trigger-tickers">INTC &middot; TSEM &middot; ASML &middot; NVDA &middot; SMH</div>
+      </div>
+      <div class="trigger-card">
+        <div class="trigger-title">Tensi&oacute;n Taiw&aacute;n-China</div>
+        <div class="trigger-desc">Escalada militar, bloqueo, sanciones. TSMC = 49% producci&oacute;n mundial de chips avanzados.</div>
+        <div class="trigger-tickers">TSMC &middot; INTC &middot; TSEM &middot; EWT &middot; AAXJ</div>
+      </div>
+      <div class="trigger-card">
+        <div class="trigger-title">Nuevo PPA Nuclear</div>
+        <div class="trigger-desc">Hiperscaler firma contrato de energ&iacute;a. Se&ntilde;al m&aacute;s directa de demanda real de vatios para IA.</div>
+        <div class="trigger-tickers">BE &middot; CEG &middot; VST &middot; NEE</div>
+      </div>
+      <div class="trigger-card">
+        <div class="trigger-title">Filing 13D/A de SA LP</div>
+        <div class="trigger-desc">Movimiento activista sobre CORZ. Cambio en shares, % ownership, o purpose of transaction.</div>
+        <div class="trigger-tickers">CORZ &middot; CRWV</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════
+     TICKERS
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow reveal">Universo</div>
+    <h2 class="reveal reveal-d1">34 tickers monitorizados</h2>
+    <p class="subtitle reveal reveal-d2">
+      Portfolio core SA LP + watchlist + ETFs sectoriales.
+      Cada uno se descarga diariamente con precio, cambio 1d y 1w.
+    </p>
+
+    <div style="margin-top:32px;" class="reveal reveal-d3">
+      <h3 style="color:var(--accent-blue);margin-bottom:12px;">Core SA LP <span class="mono" style="color:var(--text-muted);font-weight:400;">19 posiciones</span></h3>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        <span class="ticker-chip">CRWV</span><span class="ticker-chip">BE</span><span class="ticker-chip">TSEM</span><span class="ticker-chip">LITE</span><span class="ticker-chip">COHR</span><span class="ticker-chip">INTC</span><span class="ticker-chip">APLD</span><span class="ticker-chip">CORZ</span><span class="ticker-chip">RIOT</span><span class="ticker-chip">HUT</span><span class="ticker-chip">BTDR</span><span class="ticker-chip">CLSK</span><span class="ticker-chip">IREN</span><span class="ticker-chip">BITF</span><span class="ticker-chip">VST</span><span class="ticker-chip">EQT</span><span class="ticker-chip">LBRT</span><span class="ticker-chip">GLXY</span><span class="ticker-chip">GDX</span>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;" class="reveal reveal-d4">
+      <h3 style="color:var(--accent-emerald);margin-bottom:12px;">Watchlist <span class="mono" style="color:var(--text-muted);font-weight:400;">10 activos</span></h3>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        <span class="ticker-chip tc-green">NVDA</span><span class="ticker-chip tc-green">EQIX</span><span class="ticker-chip tc-green">ETN</span><span class="ticker-chip tc-green">VRT</span><span class="ticker-chip tc-green">CEG</span><span class="ticker-chip tc-green">OKLO</span><span class="ticker-chip tc-green">SMR</span><span class="ticker-chip tc-green">CCJ</span><span class="ticker-chip tc-green">FCX</span><span class="ticker-chip tc-green">ANET</span>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;" class="reveal reveal-d5">
+      <h3 style="color:var(--accent-amber);margin-bottom:12px;">ETFs <span class="mono" style="color:var(--text-muted);font-weight:400;">5 sectoriales</span></h3>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        <span class="ticker-chip tc-amber">SMH</span><span class="ticker-chip tc-amber">COPX</span><span class="ticker-chip tc-amber">URA</span><span class="ticker-chip tc-amber">GRID</span><span class="ticker-chip tc-amber">SRVR</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.ticker-chip {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 5px 12px;
+  background: rgba(59,130,246,0.08);
+  color: var(--accent-blue);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 6px;
+  transition: background 0.2s, transform 0.2s var(--ease-spring);
+  cursor: default;
+}
+.ticker-chip:hover { background: rgba(59,130,246,0.15); transform: translateY(-1px); }
+.tc-green { background: rgba(16,185,129,0.08); color: var(--accent-emerald); border-color: rgba(16,185,129,0.15); }
+.tc-green:hover { background: rgba(16,185,129,0.15); }
+.tc-amber { background: rgba(245,158,11,0.08); color: var(--accent-amber); border-color: rgba(245,158,11,0.15); }
+.tc-amber:hover { background: rgba(245,158,11,0.15); }
+</style>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════
+     TECH STACK & DATA SOURCES
+     ══════════════════════════════════════════ -->
+<section id="stack">
+  <div class="wrap">
+    <div class="eyebrow reveal">Infraestructura</div>
+    <h2 class="reveal reveal-d1">Stack y fuentes de datos</h2>
+    <p class="subtitle reveal reveal-d2">
+      Todo gratuito. Python + requests + bs4 para Capa 1.
+      Claude, Gemini o Perplexity para Capa 2. HTML est&aacute;tico para Capa 3.
+    </p>
+
+    <div class="stack-grid reveal reveal-d3">
+      <div class="stack-item">
+        <div class="stack-name">Python 3.10+</div>
+        <div class="stack-role">Runtime de fetchers</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-name">requests</div>
+        <div class="stack-role">HTTP client</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-name">beautifulsoup4</div>
+        <div class="stack-role">XML/HTML parsing (RSS)</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-name">Claude API</div>
+        <div class="stack-role">Capa 2 an&aacute;lisis (opcional)</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-name">Gemini</div>
+        <div class="stack-role">Google Finance nativo</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-name">Perplexity</div>
+        <div class="stack-role">Speed search + filings</div>
+      </div>
+    </div>
+
+    <h3 class="reveal" style="margin-top:48px;">Fuentes de datos gratuitas</h3>
+    <div class="sources-grid reveal reveal-d1">
+      <div class="source-card">
+        <div class="source-name">Yahoo Finance v8</div>
+        <div class="source-desc">Precios, chart 5d, futuros (GC=F, HG=F, NG=F)</div>
+        <span class="source-tag tag-free">API gratuita</span>
+      </div>
+      <div class="source-card">
+        <div class="source-name">CoinGecko</div>
+        <div class="source-desc">BTC/USD, cambio 24h, market data</div>
+        <span class="source-tag tag-free">API gratuita</span>
+      </div>
+      <div class="source-card">
+        <div class="source-name">Blockchain.com</div>
+        <div class="source-desc">Hashrate BTC 14 d&iacute;as, dificultad</div>
+        <span class="source-tag tag-free">API gratuita</span>
+      </div>
+      <div class="source-card">
+        <div class="source-name">SEC EDGAR</div>
+        <div class="source-desc">13F, 13D/A, Form 4, 8-K filings</div>
+        <span class="source-tag tag-free">API gratuita</span>
+      </div>
+      <div class="source-card">
+        <div class="source-name">FRED</div>
+        <div class="source-desc">CPI, Fed Funds Rate, Industrial Production</div>
+        <span class="source-tag tag-free">API gratuita</span>
+      </div>
+      <div class="source-card">
+        <div class="source-name">CNN Fear & Greed</div>
+        <div class="source-desc">Indicador de sentimiento del mercado</div>
+        <span class="source-tag tag-free">API gratuita</span>
+      </div>
+      <div class="source-card">
+        <div class="source-name">Google News RSS</div>
+        <div class="source-desc">Headlines por keyword, 6 queries tem&aacute;ticos</div>
+        <span class="source-tag tag-free">RSS p&uacute;blico</span>
+      </div>
+      <div class="source-card">
+        <div class="source-name">Kitco</div>
+        <div class="source-desc">Oro spot (fallback a Yahoo GC=F)</div>
+        <span class="source-tag tag-scrape">Scrape</span>
+      </div>
+      <div class="source-card">
+        <div class="source-name">PJM.com</div>
+        <div class="source-desc">Cola de interconexi&oacute;n el&eacute;ctrica (GW)</div>
+        <span class="source-tag tag-scrape">Scrape</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════
+     IMPLEMENTATION STATUS
+     ══════════════════════════════════════════ -->
+<section id="status">
+  <div class="wrap">
+    <div class="eyebrow reveal">Progreso</div>
+    <h2 class="reveal reveal-d1">Estado de implementaci&oacute;n</h2>
+    <p class="subtitle reveal reveal-d2">
+      Capa 1 en desarrollo activo.
+      El fetcher diario ya es funcional. Faltan 5 m&oacute;dulos para completar el sistema.
+    </p>
+
+    <div class="status-list reveal reveal-d3">
+      <div class="status-row">
+        <div>
+          <div class="status-name">Fetcher Diario</div>
+          <div class="status-file">fetch_daily.py</div>
+        </div>
+        <div class="status-file">372 l&iacute;neas</div>
+        <div><span class="status-badge badge-done">Completo</span></div>
+      </div>
+      <div class="status-row">
+        <div>
+          <div class="status-name">Spec Diario</div>
+          <div class="status-file">daily.md</div>
+        </div>
+        <div class="status-file">3 prompts</div>
+        <div><span class="status-badge badge-spec">Spec</span></div>
+      </div>
+      <div class="status-row">
+        <div>
+          <div class="status-name">Spec Semanal</div>
+          <div class="status-file">weekly.md</div>
+        </div>
+        <div class="status-file">3 prompts</div>
+        <div><span class="status-badge badge-spec">Spec</span></div>
+      </div>
+      <div class="status-row">
+        <div>
+          <div class="status-name">Spec Mensual</div>
+          <div class="status-file">monthly.md</div>
+        </div>
+        <div class="status-file">2 prompts</div>
+        <div><span class="status-badge badge-spec">Spec</span></div>
+      </div>
+      <div class="status-row">
+        <div>
+          <div class="status-name">Spec Trimestral</div>
+          <div class="status-file">quarterly.md</div>
+        </div>
+        <div class="status-file">3 prompts</div>
+        <div><span class="status-badge badge-spec">Spec</span></div>
+      </div>
+      <div class="status-row">
+        <div>
+          <div class="status-name">Spec Ad-hoc</div>
+          <div class="status-file">adhoc.md</div>
+        </div>
+        <div class="status-file">5 prompts</div>
+        <div><span class="status-badge badge-spec">Spec</span></div>
+      </div>
+
+      <div class="status-row" style="opacity:0.5;">
+        <div>
+          <div class="status-name">Fetcher Semanal</div>
+          <div class="status-file">fetch_weekly.py</div>
+        </div>
+        <div class="status-file">&mdash;</div>
+        <div><span class="status-badge badge-pending">Pendiente</span></div>
+      </div>
+      <div class="status-row" style="opacity:0.5;">
+        <div>
+          <div class="status-name">Fetcher Mensual</div>
+          <div class="status-file">fetch_monthly.py</div>
+        </div>
+        <div class="status-file">&mdash;</div>
+        <div><span class="status-badge badge-pending">Pendiente</span></div>
+      </div>
+      <div class="status-row" style="opacity:0.5;">
+        <div>
+          <div class="status-name">Fetcher Trimestral</div>
+          <div class="status-file">fetch_quarterly.py</div>
+        </div>
+        <div class="status-file">&mdash;</div>
+        <div><span class="status-badge badge-pending">Pendiente</span></div>
+      </div>
+      <div class="status-row" style="opacity:0.5;">
+        <div>
+          <div class="status-name">Analyze Bundle</div>
+          <div class="status-file">analyze_bundle.py</div>
+        </div>
+        <div class="status-file">&mdash;</div>
+        <div><span class="status-badge badge-pending">Pendiente</span></div>
+      </div>
+      <div class="status-row" style="opacity:0.5;">
+        <div>
+          <div class="status-name">Orquestador CLI</div>
+          <div class="status-file">run.py</div>
+        </div>
+        <div class="status-file">&mdash;</div>
+        <div><span class="status-badge badge-pending">Pendiente</span></div>
+      </div>
+      <div class="status-row" style="opacity:0.5;">
+        <div>
+          <div class="status-name">Requirements</div>
+          <div class="status-file">requirements.txt</div>
+        </div>
+        <div class="status-file">&mdash;</div>
+        <div><span class="status-badge badge-pending">Pendiente</span></div>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="reveal reveal-d4" style="margin-top:40px;">
+      <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:8px;">
+        <span style="color:var(--text-secondary);">Progreso global</span>
+        <span class="mono" style="color:var(--accent-blue);">2 / 12</span>
+      </div>
+      <div style="height:4px;background:var(--bg-raised);border-radius:2px;overflow:hidden;">
+        <div style="height:100%;width:16.6%;background:var(--accent-blue);border-radius:2px;transition:width 1s var(--ease-out);"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+     ══════════════════════════════════════════ -->
+<footer>
+  <div class="wrap">
+    <p>
+      Intelligence Engine &mdash; <span class="mono">SA LP Thesis Monitor</span>
+    </p>
+    <p style="margin-top:8px;font-size:0.78rem;">
+      Abril 2026 &middot; $0 en APIs &middot; 106 activos &middot; 19 verticales
+    </p>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════
+     SCROLL REVEAL JS
+     ══════════════════════════════════════════ -->
+<script>
+(function() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+})();
+</script>
+
+</body>
+</html>
