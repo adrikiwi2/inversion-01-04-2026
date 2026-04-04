@@ -1,0 +1,1 @@
+Escrito y validado en [analysis_weekly_2026-04-04.json](D:/pps/inversion-01-04-2026/SituationalAwareness/intelligence/fetcher/data/analysis_weekly_2026-04-04.json). El JSON parsea correctamente.

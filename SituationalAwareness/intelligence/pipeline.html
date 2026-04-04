@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pipeline Trace — Intelligence Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#050508;--surface:#0C0C10;--card:#111116;--raised:#18181E;
+  --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.10);
+  --t1:#E8E8ED;--t2:#8B8B96;--t3:#55555F;
+  --blue:#3B82F6;--blue-d:#1E40AF;--amber:#F59E0B;--emerald:#10B981;
+  --rose:#F43F5E;--violet:#8B5CF6;--cyan:#06B6D4;
+  --sans:'Outfit',sans-serif;--mono:'Fira Code',monospace;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--sans);background:var(--void);color:var(--t1);line-height:1.6;overflow-x:hidden}
+::selection{background:var(--blue);color:#fff}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+.ambient{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 700px 500px at 15% 8%,rgba(30,64,175,.06),transparent),
+  radial-gradient(ellipse 500px 400px at 85% 70%,rgba(139,92,246,.04),transparent)}
+
+.wrap{max-width:900px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+section{padding:80px 0}
+@media(max-width:768px){section{padding:48px 0}.wrap{padding:0 16px}}
+
+.rv{opacity:0;transform:translateY(20px);transition:opacity .65s var(--ease),transform .65s var(--ease)}
+.rv.vis{opacity:1;transform:translateY(0)}
+.rv-d1{transition-delay:60ms}.rv-d2{transition-delay:120ms}.rv-d3{transition-delay:180ms}
+
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);padding:6px 14px;border:1px solid var(--border);border-radius:999px;margin-bottom:20px}
+h1{font-size:clamp(2rem,4.5vw,3rem);font-weight:800;letter-spacing:-.04em;line-height:1.08}
+h1 span{color:var(--blue)}
+h2{font-size:clamp(1.4rem,3vw,1.8rem);font-weight:700;letter-spacing:-.02em;line-height:1.15;margin-bottom:12px}
+h3{font-size:1rem;font-weight:600;margin-bottom:6px}
+.sub{font-size:clamp(.9rem,1.6vw,1.05rem);color:var(--t2);max-width:60ch;line-height:1.7}
+.mono{font-family:var(--mono);font-size:.85em}
+.divider{height:1px;background:var(--border)}
+
+nav{position:fixed;top:16px;right:24px;z-index:100;display:flex;gap:2px;padding:4px;background:rgba(12,12,16,.85);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:999px}
+nav a{color:var(--t3);text-decoration:none;font-size:.75rem;font-weight:500;padding:5px 12px;border-radius:999px;transition:all .2s;white-space:nowrap}
+nav a:hover{color:var(--t1);background:rgba(255,255,255,.06)}
+@media(max-width:768px){nav{display:none}}
+
+/* ── Pipeline Step ── */
+.step{position:relative;padding-left:64px;margin-bottom:48px}
+.step::before{content:'';position:absolute;left:23px;top:48px;bottom:-48px;width:2px;background:var(--border)}
+.step:last-child::before{display:none}
+.step-num{position:absolute;left:0;top:0;width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;font-size:.9rem;border:2px solid var(--border);background:var(--void);z-index:2}
+.step-num.s-fetch{border-color:var(--blue);color:var(--blue);background:rgba(59,130,246,.05)}
+.step-num.s-proc{border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,.05)}
+.step-num.s-llm{border-color:var(--violet);color:var(--violet);background:rgba(139,92,246,.05)}
+.step-num.s-out{border-color:var(--emerald);color:var(--emerald);background:rgba(16,185,129,.05)}
+@media(max-width:768px){.step{padding-left:48px}.step-num{width:36px;height:36px;font-size:.75rem}.step::before{left:17px}}
+
+/* ── Data Box ── */
+.dbox{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:12px;font-family:var(--mono);font-size:.78rem;line-height:1.7;color:var(--t2);overflow-x:auto;white-space:pre-wrap;word-break:break-word}
+.dbox .k{color:var(--blue)}.dbox .v{color:var(--emerald)}.dbox .n{color:var(--amber)}.dbox .c{color:var(--t3);font-style:italic}
+
+/* ── Arrow connector ── */
+.arrow{display:flex;align-items:center;justify-content:center;padding:8px 0;color:var(--t3)}
+.arrow svg{width:20px;height:20px}
+
+/* ── Compression Meter ── */
+.comp{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 16px;background:var(--raised);border-radius:8px;font-size:.82rem}
+.comp-bar{flex:1;height:6px;background:var(--card);border-radius:3px;overflow:hidden;max-width:200px}
+.comp-fill{height:100%;border-radius:3px;transition:width .8s var(--ease)}
+.comp-label{font-family:var(--mono);font-size:.75rem;color:var(--t3)}
+
+/* ── Trace Card ── */
+.trace{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-top:20px}
+.trace-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.trace-badge{font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 10px;border-radius:999px;text-transform:uppercase;letter-spacing:.06em}
+.tb-in{background:rgba(59,130,246,.1);color:var(--blue)}
+.tb-proc{background:rgba(245,158,11,.1);color:var(--amber)}
+.tb-prompt{background:rgba(139,92,246,.1);color:var(--violet)}
+.tb-out{background:rgba(16,185,129,.1);color:var(--emerald)}
+
+.trace-flow{display:flex;align-items:stretch;gap:12px;margin-top:16px}
+.trace-col{flex:1;min-width:0}
+.trace-col-title{font-family:var(--mono);font-size:.7rem;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+@media(max-width:768px){.trace-flow{flex-direction:column}}
+
+/* ── Quote ── */
+.quote{border-left:2px solid var(--blue);padding:12px 20px;background:rgba(59,130,246,.03);border-radius:0 8px 8px 0;margin:12px 0;font-size:.9rem;color:var(--t2);font-style:italic;line-height:1.7}
+
+/* ── Inline tag ── */
+.itag{display:inline-block;font-family:var(--mono);font-size:.68rem;padding:1px 7px;border-radius:999px;margin:1px 2px}
+.itag-blue{background:rgba(59,130,246,.08);color:var(--blue)}
+.itag-amber{background:rgba(245,158,11,.08);color:var(--amber)}
+.itag-emerald{background:rgba(16,185,129,.08);color:var(--emerald)}
+.itag-violet{background:rgba(139,92,246,.08);color:var(--violet)}
+.itag-rose{background:rgba(244,63,94,.08);color:var(--rose)}
+
+footer{border-top:1px solid var(--border);padding:32px 0;text-align:center;font-size:.75rem;color:var(--t3)}
+</style>
+</head>
+<body>
+<div class="ambient"></div>
+
+<nav>
+  <a href="dashboard.html">Dashboard</a>
+  <a href="index.html">Engine</a>
+  <a href="roadmap.html">Roadmap</a>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     HERO
+     ══════════════════════════════════════════ -->
+<section style="padding-bottom:40px;">
+<div class="wrap">
+  <div class="eyebrow rv">Pipeline Trace</div>
+  <h1 class="rv rv-d1">De datos crudos a<br><span>una frase.</span></h1>
+  <p class="sub rv rv-d2" style="margin-top:16px;">
+    C&oacute;mo 27,759 bytes de precios, noticias y commodities se comprimen
+    en una sola frase de dashboard. Cada paso trazable, cada decisi&oacute;n explicable.
+  </p>
+
+  <div class="comp rv rv-d3">
+    <span style="color:var(--t1);">Compresi&oacute;n total</span>
+    <div class="comp-bar"><div class="comp-fill" style="width:3%;background:linear-gradient(90deg,var(--blue),var(--emerald))"></div></div>
+    <span class="comp-label">27,759 B &rarr; 174 chars (ratio 160:1)</span>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════
+     PIPELINE OVERVIEW
+     ══════════════════════════════════════════ -->
+<section>
+<div class="wrap">
+  <h2 class="rv">El pipeline en 4 pasos</h2>
+
+  <!-- Step 1: FETCH -->
+  <div class="step rv">
+    <div class="step-num s-fetch">F</div>
+    <h3>Paso 1: Fetch &mdash; Recolecci&oacute;n autom&aacute;tica</h3>
+    <p class="sub">Python scripts que llaman a APIs p&uacute;blicas gratuitas. Sin LLM, sin inteligencia. Solo datos crudos.</p>
+    <div class="dbox">
+<span class="c">// fetch_daily.py hace 7 llamadas independientes:</span>
+
+<span class="k">Yahoo Finance v8</span> &times; 103 tickers  &rarr; precio, change_1d, change_1w
+<span class="k">Yahoo Finance v8</span> &times; 3 futuros    &rarr; HG=F (cobre), GC=F (oro), NG=F (gas)
+<span class="k">CoinGecko API</span>                    &rarr; BTC/USD, change_24h
+<span class="k">Blockchain.com API</span>               &rarr; hashrate (14d), EH/s
+<span class="k">CNN Fear &amp; Greed API</span>             &rarr; score, rating
+<span class="k">SEC EDGAR full-text</span>              &rarr; filings SA LP + CORZ (hoy)
+<span class="k">Google News RSS</span> &times; 6 queries     &rarr; headlines por tema
+
+<span class="c">// Rate limiting: 1 seg cada 5 requests. Total: ~25 seg</span>
+<span class="c">// Output: data/daily_2026-04-04.json (27,759 bytes)</span>
+    </div>
+    <div class="comp">
+      <span>Output Capa 1</span>
+      <div class="comp-bar"><div class="comp-fill" style="width:100%;background:var(--blue)"></div></div>
+      <span class="comp-label">27,759 bytes &middot; 103 tickers &middot; 18 noticias &middot; 8 alertas</span>
+    </div>
+  </div>
+
+  <!-- Step 2: STRUCTURE -->
+  <div class="step rv">
+    <div class="step-num s-proc">S</div>
+    <h3>Paso 2: Estructuraci&oacute;n &mdash; JSON normalizado</h3>
+    <p class="sub">El fetcher ya estructura los datos en un schema predefinido. No hay "preprocesamiento" separado &mdash; la estructura ES el preprocesamiento.</p>
+    <div class="dbox">
+{
+  <span class="k">"prices"</span>: {     <span class="c">// 103 objetos {ticker, price, change_1d, change_1w}</span>
+    <span class="k">"LITE"</span>: { <span class="k">"price"</span>: <span class="n">826.88</span>, <span class="k">"change_1d"</span>: <span class="v">"+8.14%"</span> },
+    <span class="k">"CORZ"</span>: { <span class="k">"price"</span>: <span class="n">16.23</span>,  <span class="k">"change_1d"</span>: <span class="v">"+6.08%"</span> },
+    <span class="c">// ... 101 m&aacute;s</span>
+  },
+  <span class="k">"commodities"</span>: { <span class="c">// cobre, oro, gas, uranio proxy</span> },
+  <span class="k">"crypto"</span>:      { <span class="k">"btc"</span>: {<span class="k">"btc_usd"</span>: <span class="n">66952</span>}, <span class="k">"hashrate"</span>: {<span class="k">"hashrate_ehs"</span>: <span class="n">964.38</span>} },
+  <span class="k">"macro"</span>:       { <span class="k">"fear_greed"</span>: {<span class="k">"score"</span>: <span class="n">19.3</span>, <span class="k">"rating"</span>: <span class="v">"extreme fear"</span>} },
+  <span class="k">"sec_filings"</span>: [],
+  <span class="k">"news"</span>:        { <span class="c">// 6 categor&iacute;as &times; 3 headlines = 18 items</span> },
+  <span class="k">"alerts"</span>:      [ <span class="c">// 8 tickers con movimiento &gt;5%</span> ]
+}
+    </div>
+    <div class="comp">
+      <span>Estructura</span>
+      <div class="comp-bar"><div class="comp-fill" style="width:80%;background:var(--amber)"></div></div>
+      <span class="comp-label">27,759 B &rarr; 22,614 chars de prompt (truncado news a 2/cat)</span>
+    </div>
+  </div>
+
+  <!-- Step 3: LLM -->
+  <div class="step rv">
+    <div class="step-num s-llm">L</div>
+    <h3>Paso 3: LLM &mdash; An&aacute;lisis con GPT-5.4 via Codex CLI</h3>
+    <p class="sub">El JSON completo se env&iacute;a como contexto a GPT-5.4 junto con un prompt que define el schema de salida y el marco de an&aacute;lisis (la tesis de SA LP).</p>
+    <div class="dbox">
+<span class="c">// El prompt tiene 3 componentes:</span>
+
+<span class="k">SYSTEM_CONTEXT</span> (fijo, 280 chars):
+  <span class="v">"Eres un analista senior... TESIS: la infraestructura f&iacute;sica
+   es el cuello de botella... SA LP: 19 posiciones core..."</span>
+
+<span class="k">DATOS</span> (variable, ~22K chars):
+  <span class="c">El JSON bundle completo del fetch, inline en el prompt</span>
+
+<span class="k">SCHEMA</span> (fijo, ~500 chars):
+  <span class="v">"Escribe JSON con: market_summary, thesis_status,
+   thesis_confidence, key_signals [{signal, direction,
+   impact, tickers_affected, thesis_vector}],
+   alerts_analysis, news_highlights, commodities_read,
+   fear_greed_read, action_items, one_liner"</span>
+
+<span class="k">FOCUS</span> (fijo, ~120 chars):
+  <span class="v">"Analiza movimientos &gt;5%, noticias relevantes, commodities
+   y Fear&amp;Greed. Si F&amp;G en extremos, comenta implicaciones."</span>
+
+<span class="c">// Ejecuci&oacute;n: codex exec --full-auto (stdin pipe)</span>
+<span class="c">// Modelo: GPT-5.4 | Coste: $0 (ChatGPT Plus)</span>
+<span class="c">// Tiempo: ~45 seg</span>
+    </div>
+    <div class="comp">
+      <span>Output LLM</span>
+      <div class="comp-bar"><div class="comp-fill" style="width:31%;background:var(--violet)"></div></div>
+      <span class="comp-label">22,614 chars prompt &rarr; 8,694 bytes an&aacute;lisis (compresi&oacute;n 2.6:1)</span>
+    </div>
+  </div>
+
+  <!-- Step 4: DASHBOARD -->
+  <div class="step rv">
+    <div class="step-num s-out">D</div>
+    <h3>Paso 4: Dashboard &mdash; Renderizado visual</h3>
+    <p class="sub">El HTML lee el JSON de an&aacute;lisis y lo presenta. Cada secci&oacute;n del dashboard mapea directamente a un campo del JSON.</p>
+    <div class="dbox">
+<span class="k">analysis_daily_2026-04-04.json</span> &rarr; dashboard.html
+
+<span class="k">.one_liner</span>          &rarr; Cita principal del d&iacute;a
+<span class="k">.thesis_status</span>      &rarr; Gauge "strengthening"
+<span class="k">.thesis_confidence</span>  &rarr; Gauge 8/10 pips
+<span class="k">.key_signals[]</span>      &rarr; Cards "Key Signals" con dots + tags
+<span class="k">.alerts_analysis[]</span>  &rarr; Tabla "Alertas &gt;5%"
+<span class="k">.commodities_read</span>   &rarr; Card "Commodities"
+<span class="k">.fear_greed_read</span>    &rarr; Card "Fear &amp; Greed" + score del bundle
+<span class="k">.news_highlights[]</span>  &rarr; Card "News" con badges relevance
+<span class="k">.action_items[]</span>     &rarr; Lista "Action Items"
+    </div>
+    <div class="comp">
+      <span>Visualizaci&oacute;n final</span>
+      <div class="comp-bar"><div class="comp-fill" style="width:3%;background:var(--emerald)"></div></div>
+      <span class="comp-label">8,694 B JSON &rarr; ~20 elementos visuales en pantalla</span>
+    </div>
+  </div>
+
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════
+     TRACE: ONE-LINER
+     ══════════════════════════════════════════ -->
+<section>
+<div class="wrap">
+  <h2 class="rv">Traza 1: El one-liner</h2>
+  <p class="sub rv rv-d1">C&oacute;mo 27K bytes se comprimen en 174 caracteres.</p>
+
+  <div class="trace rv rv-d2">
+    <div class="trace-flow">
+      <div class="trace-col">
+        <div class="trace-col-title"><span class="trace-badge tb-in">Input crudo</span></div>
+        <div style="font-size:.78rem;color:var(--t2);line-height:1.6;">
+          <span class="itag itag-blue">LITE +8.14%</span>
+          <span class="itag itag-blue">CORZ +6.08%</span>
+          <span class="itag itag-blue">TSEM +5.74%</span>
+          <span class="itag itag-emerald">F&amp;G 19.3</span>
+          <span class="itag itag-amber">Cu $5.56</span>
+          <span class="itag itag-amber">Au $4651</span>
+          <span class="itag itag-violet">Diablo Canyon NRC</span>
+          <span class="itag itag-violet">CoreWeave $8.5B</span>
+          <span class="itag itag-rose">TSLA -5.42%</span>
+          <span class="itag itag-rose">INTL.L -24.5%</span>
+          <div style="margin-top:6px;color:var(--t3);font-size:.72rem;">+ 93 tickers m&aacute;s, 18 headlines, hashrate, SEC filings...</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;padding:0 8px;color:var(--t3);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14m-4-4l4 4-4 4"/></svg>
+      </div>
+      <div class="trace-col">
+        <div class="trace-col-title"><span class="trace-badge tb-prompt">Prompt + Schema</span></div>
+        <div style="font-size:.78rem;color:var(--t2);line-height:1.6;">
+          <span class="itag itag-violet">TESIS</span> &ldquo;infra f&iacute;sica = cuello de botella&rdquo;<br>
+          <span class="itag itag-violet">FOCUS</span> &ldquo;movimientos &gt;5%, commodities, F&amp;G&rdquo;<br>
+          <span class="itag itag-violet">SCHEMA</span> &ldquo;...one_liner: 1 frase resumen&rdquo;<br>
+          <div style="margin-top:6px;color:var(--t3);font-size:.72rem;">GPT-5.4 recibe la tesis como lente de an&aacute;lisis y el schema como restricci&oacute;n de output</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;padding:0 8px;color:var(--t3);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14m-4-4l4 4-4 4"/></svg>
+      </div>
+      <div class="trace-col">
+        <div class="trace-col-title"><span class="trace-badge tb-out">Output</span></div>
+        <div class="quote" style="font-size:.82rem;">
+          &ldquo;El d&iacute;a confirma que el valor sigue migrando hacia los due&ntilde;os de cuellos de botella f&iacute;sicos de IA: &oacute;ptica, capacidad energizada y base-load fiable ganan importancia mientras el mercado permanece en miedo extremo.&rdquo;
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:16px;font-size:.78rem;color:var(--t3);line-height:1.6;">
+      <strong style="color:var(--t2);">Por qu&eacute; esta frase y no otra:</strong> GPT-5.4 identific&oacute; que los 3 mayores movers positivos
+      (LITE, CORZ, TSEM) pertenecen a 3 vectores distintos de la tesis (&oacute;ptica, reconversi&oacute;n, foundry),
+      que el F&amp;G en extreme fear crea divergencia con las se&ntilde;ales f&iacute;sicas positivas, y que la noticia de
+      Diablo Canyon refuerza el vector nuclear. Sintetiz&oacute; todo bajo el paraguas de &ldquo;due&ntilde;os de cuellos de botella f&iacute;sicos&rdquo;.
+    </div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════
+     TRACE: THESIS GAUGE
+     ══════════════════════════════════════════ -->
+<section>
+<div class="wrap">
+  <h2 class="rv">Traza 2: El Thesis Gauge</h2>
+  <p class="sub rv rv-d1">4 frecuencias, 4 lentes distintas, 4 veredictos independientes.</p>
+
+  <div class="trace rv rv-d2">
+    <div style="display:grid;grid-template-columns:80px 1fr 100px 40px;gap:8px;align-items:center;font-size:.82rem;">
+      <div style="font-family:var(--mono);font-weight:600;color:var(--t3);">Freq</div>
+      <div style="font-family:var(--mono);font-weight:600;color:var(--t3);">Input principal</div>
+      <div style="font-family:var(--mono);font-weight:600;color:var(--t3);">Veredicto</div>
+      <div style="font-family:var(--mono);font-weight:600;color:var(--t3);">Conf</div>
+
+      <div><span class="itag itag-blue">Daily</span></div>
+      <div style="color:var(--t2);">103 precios + 8 alertas + F&amp;G 19.3 + 18 headlines + commodities</div>
+      <div><span class="itag itag-emerald">strengthening</span></div>
+      <div style="font-family:var(--mono);color:var(--emerald);">8</div>
+
+      <div><span class="itag itag-emerald">Weekly</span></div>
+      <div style="color:var(--t2);">Hashrate -4.6% 1w + mining margin -15.3% + 22 Form 4 + 17 SI tickers</div>
+      <div><span class="itag itag-emerald">strengthening</span></div>
+      <div style="font-family:var(--mono);color:var(--emerald);">8</div>
+
+      <div><span class="itag itag-amber">Monthly</span></div>
+      <div style="color:var(--t2);">Cu -6.1% 3mo + supercycle 2/5 + 20 DC news + PJM queue + FRED (parcial)</div>
+      <div><span class="itag itag-amber">intact</span></div>
+      <div style="font-family:var(--mono);color:var(--amber);">7</div>
+
+      <div><span class="itag itag-violet">Quarterly</span></div>
+      <div style="color:var(--t2);">7 SA LP filings + 57up/45down + avg +3.7% + hyperscaler capex N/A</div>
+      <div><span class="itag itag-blue">stable</span></div>
+      <div style="font-family:var(--mono);color:var(--blue);">6</div>
+    </div>
+
+    <div style="margin-top:20px;font-size:.78rem;color:var(--t3);line-height:1.6;">
+      <strong style="color:var(--t2);">Patr&oacute;n emergente:</strong> La confianza baja con el horizonte temporal.
+      Daily y weekly (datos duros de precio y hashrate) dan 8/10 porque los n&uacute;meros son claros.
+      Monthly baja a 7 porque los commodities se enfr&iacute;an pero los lead times no normalizan (se&ntilde;al mixta).
+      Quarterly baja a 6 porque falta el dato m&aacute;s cr&iacute;tico: capex de hyperscalers (Yahoo no lo sirve bien).
+      <br><br>
+      <strong style="color:var(--t2);">Implicaci&oacute;n para trazabilidad:</strong> El gauge NO es un promedio.
+      Cada frecuencia usa datos distintos, un prompt distinto con un FOCUS distinto,
+      y el LLM eval&uacute;a la tesis desde un &aacute;ngulo diferente. Un quarterly &ldquo;stable 6&rdquo; no invalida un daily &ldquo;strengthening 8&rdquo;.
+    </div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════
+     TRACE: KEY SIGNALS
+     ══════════════════════════════════════════ -->
+<section>
+<div class="wrap">
+  <h2 class="rv">Traza 3: Key Signals</h2>
+  <p class="sub rv rv-d1">C&oacute;mo el LLM agrupa 103 precios dispersos en 5 se&ntilde;ales narrativas.</p>
+
+  <div class="trace rv rv-d2">
+    <h3 style="margin-bottom:16px;">Signal 1: &ldquo;Fuerte liderazgo en &oacute;ptica e interconexi&oacute;n&rdquo;</h3>
+    <div class="trace-flow">
+      <div class="trace-col">
+        <div class="trace-col-title"><span class="trace-badge tb-in">Datos crudos</span></div>
+        <div class="dbox" style="font-size:.72rem;">
+LITE:  $826.88  <span class="v">+8.14%</span> 1d  <span class="v">+17.67%</span> 1w
+COHR:  $258.16  <span class="v">+4.18%</span> 1d  <span class="v">+6.03%</span> 1w
+ANET:  $126.68  <span class="v">+1.47%</span> 1d  <span class="v">+4.89%</span> 1w
+CSCO:  $67.18   <span class="v">+1.64%</span> 1d  <span class="v">+8.44%</span> 1w
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;padding:0 4px;color:var(--t3);font-size:.7rem;">
+        GPT-5.4<br>agrupa
+      </div>
+      <div class="trace-col">
+        <div class="trace-col-title"><span class="trace-badge tb-out">Signal</span></div>
+        <div style="font-size:.82rem;color:var(--t2);line-height:1.6;">
+          <strong style="color:var(--t1);">&ldquo;Fuerte liderazgo en &oacute;ptica e interconexi&oacute;n para clusters de IA&rdquo;</strong><br>
+          <span class="itag itag-blue">connectivity</span> <span class="itag itag-amber">high impact</span><br>
+          <span class="itag itag-blue">LITE</span> <span class="itag itag-blue">COHR</span> <span class="itag itag-blue">ANET</span> <span class="itag itag-blue">CSCO</span>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:12px;font-size:.75rem;color:var(--t3);line-height:1.6;">
+      <strong style="color:var(--t2);">L&oacute;gica del LLM:</strong> LITE y COHR son proveedores de transceivers &oacute;pticos 400G/800G.
+      ANET y CSCO venden switches de red para data centers.
+      Los 4 suben simult&aacute;neamente &rarr; el LLM interpreta esto como
+      &ldquo;breadth en conectividad&rdquo;, no como 4 eventos aislados.
+      Les asigna <span class="itag itag-blue">connectivity</span> como thesis_vector y <span class="itag itag-amber">high</span> porque la &oacute;ptica es cuello de botella directo.
+    </div>
+  </div>
+
+  <div class="trace rv" style="margin-top:16px;">
+    <h3 style="margin-bottom:16px;">Signal 3: &ldquo;Re-rating de activos BTC reconvertibles a HPC/IA&rdquo;</h3>
+    <div class="trace-flow">
+      <div class="trace-col">
+        <div class="trace-col-title"><span class="trace-badge tb-in">Datos crudos</span></div>
+        <div class="dbox" style="font-size:.72rem;">
+CORZ: <span class="v">+6.08%</span>  RIOT: <span class="v">+2.47%</span>  HUT: <span class="v">+1.58%</span>
+APLD: <span class="v">+0.29%</span>  IREN: <span class="v">+2.16%</span>  CLSK: <span class="v">+3.18%</span>
+BTDR: <span class="v">+0.05%</span>  BITF: <span class="v">+1.30%</span>
+
+<span class="c">+ noticia:</span> <span class="v">"CoreWeave $8.5B loan backed by Meta"</span>
+<span class="c">+ noticia:</span> <span class="v">"Poolside seeks DC in Texas after CRWV deal"</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;padding:0 4px;color:var(--t3);font-size:.7rem;">
+        precios<br>+<br>noticias
+      </div>
+      <div class="trace-col">
+        <div class="trace-col-title"><span class="trace-badge tb-out">Signal</span></div>
+        <div style="font-size:.82rem;color:var(--t2);line-height:1.6;">
+          <strong style="color:var(--t1);">&ldquo;Re-rating de activos BTC reconvertibles a HPC/IA&rdquo;</strong><br>
+          <span class="itag itag-blue">data_centers</span> <span class="itag itag-amber">high impact</span>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:12px;font-size:.75rem;color:var(--t3);line-height:1.6;">
+      <strong style="color:var(--t2);">L&oacute;gica del LLM:</strong> No solo precios &mdash; el LLM cruzó la subida de CORZ (+6.08%) con
+      la noticia de CoreWeave $8.5B. Interpret&oacute; que el rally de los 8 BTC miners es COLECTIVO
+      (no solo CORZ), y que la causa no es BTC price (+0.18%) sino el &ldquo;re-rating&rdquo; de sus
+      activos f&iacute;sicos (MW, cooling, fibra) como infraestructura de IA.
+    </div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════
+     TRACE: COMMODITIES
+     ══════════════════════════════════════════ -->
+<section>
+<div class="wrap">
+  <h2 class="rv">Traza 4: Commodities Read</h2>
+  <p class="sub rv rv-d1">De un n&uacute;mero a una interpretaci&oacute;n en contexto de la tesis.</p>
+
+  <div class="trace rv rv-d2">
+    <div style="display:grid;grid-template-columns:120px 1fr;gap:12px;font-size:.82rem;">
+
+      <div style="font-family:var(--mono);color:var(--amber);font-weight:600;">Cobre</div>
+      <div>
+        <div style="color:var(--t3);font-size:.72rem;">INPUT: <span class="itag itag-blue">HG=F $5.56/lb</span> <span class="itag itag-rose">-1.08% 1d</span></div>
+        <div style="color:var(--t2);margin-top:4px;">&ldquo;5.56 USD/lb sigue siendo un nivel muy exigente pese al -1.08% diario; confirma presi&oacute;n estructural sobre cableado, transformadores, red y build-out el&eacute;ctrico.&rdquo;</div>
+        <div style="color:var(--t3);font-size:.72rem;margin-top:4px;">El LLM sabe que $5.56 es hist&oacute;ricamente alto. Ignora el -1% diario y se enfoca en el NIVEL.</div>
+      </div>
+
+      <div style="font-family:var(--mono);color:var(--amber);font-weight:600;">Oro</div>
+      <div>
+        <div style="color:var(--t3);font-size:.72rem;">INPUT: <span class="itag itag-blue">GC=F $4,651.50</span> <span class="itag itag-rose">-2.75% 1d</span></div>
+        <div style="color:var(--t2);margin-top:4px;">&ldquo;Toma de beneficios m&aacute;s que cambio de r&eacute;gimen; reduce algo la cobertura defensiva t&aacute;ctica.&rdquo;</div>
+        <div style="color:var(--t3);font-size:.72rem;margin-top:4px;">El LLM clasifica -2.75% como &ldquo;toma de beneficios&rdquo; (no p&aacute;nico) y marca impacto bajo para la tesis.</div>
+      </div>
+
+      <div style="font-family:var(--mono);color:var(--amber);font-weight:600;">Gas</div>
+      <div>
+        <div style="color:var(--t3);font-size:.72rem;">INPUT: <span class="itag itag-blue">NG=F $2.80</span> <span class="itag itag-rose">-0.67% 1d</span></div>
+        <div style="color:var(--t2);margin-top:4px;">&ldquo;Alivia marginalmente costes de generaci&oacute;n, favorable para el power stack de data centers.&rdquo;</div>
+        <div style="color:var(--t3);font-size:.72rem;margin-top:4px;">Gas barato = bueno para DCs que usan gas peaker plants. El LLM conecta el dato con la tesis.</div>
+      </div>
+
+      <div style="font-family:var(--mono);color:var(--amber);font-weight:600;">Uranio</div>
+      <div>
+        <div style="color:var(--t3);font-size:.72rem;">INPUT: <span class="itag itag-blue">URA $48.90</span> <span class="itag itag-rose">-0.73% 1d</span> <span class="itag itag-emerald">+4.87% 1w</span></div>
+        <div style="color:var(--t2);margin-top:4px;">&ldquo;Direcci&oacute;n semanal sigue respaldando la b&uacute;squeda de base-load nuclear para IA.&rdquo;</div>
+        <div style="color:var(--t3);font-size:.72rem;margin-top:4px;">El LLM prioriza la tendencia semanal (+4.87%) sobre el ruido diario (-0.73%). Correcto.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════
+     COMPRESSION SUMMARY
+     ══════════════════════════════════════════ -->
+<section>
+<div class="wrap">
+  <h2 class="rv">Resumen de compresi&oacute;n</h2>
+
+  <div class="trace rv rv-d1">
+    <div style="display:grid;grid-template-columns:1fr 100px 100px 80px;gap:8px;font-size:.82rem;">
+      <div style="font-family:var(--mono);font-weight:600;color:var(--t3);">Etapa</div>
+      <div style="font-family:var(--mono);font-weight:600;color:var(--t3);text-align:right;">Bytes</div>
+      <div style="font-family:var(--mono);font-weight:600;color:var(--t3);text-align:right;">Items</div>
+      <div style="font-family:var(--mono);font-weight:600;color:var(--t3);text-align:right;">Ratio</div>
+
+      <div style="color:var(--t2);"><span class="itag itag-blue">F</span> APIs crudas (respuestas HTTP)</div>
+      <div style="font-family:var(--mono);text-align:right;">~150 KB</div>
+      <div style="font-family:var(--mono);text-align:right;">~130 calls</div>
+      <div style="font-family:var(--mono);text-align:right;color:var(--t3);">1:1</div>
+
+      <div style="color:var(--t2);"><span class="itag itag-amber">S</span> JSON estructurado (bundle)</div>
+      <div style="font-family:var(--mono);text-align:right;">27,759 B</div>
+      <div style="font-family:var(--mono);text-align:right;">~250 fields</div>
+      <div style="font-family:var(--mono);text-align:right;color:var(--amber);">5:1</div>
+
+      <div style="color:var(--t2);"><span class="itag itag-violet">L</span> An&aacute;lisis LLM (JSON)</div>
+      <div style="font-family:var(--mono);text-align:right;">8,694 B</div>
+      <div style="font-family:var(--mono);text-align:right;">~40 fields</div>
+      <div style="font-family:var(--mono);text-align:right;color:var(--violet);">17:1</div>
+
+      <div style="color:var(--t2);"><span class="itag itag-emerald">D</span> Dashboard (visual)</div>
+      <div style="font-family:var(--mono);text-align:right;">~2 KB</div>
+      <div style="font-family:var(--mono);text-align:right;">~20 elementos</div>
+      <div style="font-family:var(--mono);text-align:right;color:var(--emerald);">75:1</div>
+
+      <div style="color:var(--t1);font-weight:600;"><span class="itag itag-emerald">1</span> One-liner</div>
+      <div style="font-family:var(--mono);text-align:right;color:var(--emerald);font-weight:600;">174 B</div>
+      <div style="font-family:var(--mono);text-align:right;color:var(--emerald);font-weight:600;">1 frase</div>
+      <div style="font-family:var(--mono);text-align:right;color:var(--emerald);font-weight:600;">860:1</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════
+     TRACEABILITY PROPOSAL
+     ══════════════════════════════════════════ -->
+<section>
+<div class="wrap">
+  <h2 class="rv">Propuesta: Trazabilidad click-through</h2>
+  <p class="sub rv rv-d1">
+    Hoy el pipeline es opaco: ves el output pero no puedes retroceder al input.
+    El primer approach para hacerlo trazable:
+  </p>
+
+  <div class="trace rv rv-d2">
+    <h3 style="color:var(--blue);">Nivel 1: Source linking (bajo esfuerzo)</h3>
+    <div style="font-size:.85rem;color:var(--t2);line-height:1.7;margin-top:8px;">
+      Cada signal/alerta del dashboard incluye un <code style="font-family:var(--mono);background:var(--raised);padding:1px 6px;border-radius:3px;">data-source</code>
+      que apunta al campo exacto del JSON bundle original. Al hacer click en &ldquo;LITE +8.14%&rdquo;
+      se despliega el dato crudo de Yahoo Finance.
+    </div>
+  </div>
+
+  <div class="trace rv" style="margin-top:16px;">
+    <h3 style="color:var(--amber);">Nivel 2: Prompt transparency (medio esfuerzo)</h3>
+    <div style="font-size:.85rem;color:var(--t2);line-height:1.7;margin-top:8px;">
+      Guardar el prompt completo enviado al LLM junto con el an&aacute;lisis
+      (<code style="font-family:var(--mono);background:var(--raised);padding:1px 6px;border-radius:3px;">_meta.prompt_hash</code> o
+      <code style="font-family:var(--mono);background:var(--raised);padding:1px 6px;border-radius:3px;">prompt_daily_2026-04-04.txt</code>).
+      Permite re-ejecutar con el mismo input para verificar reproducibilidad.
+    </div>
+  </div>
+
+  <div class="trace rv" style="margin-top:16px;">
+    <h3 style="color:var(--violet);">Nivel 3: Reasoning chain (alto esfuerzo)</h3>
+    <div style="font-size:.85rem;color:var(--t2);line-height:1.7;margin-top:8px;">
+      Pedir al LLM que incluya un campo <code style="font-family:var(--mono);background:var(--raised);padding:1px 6px;border-radius:3px;">reasoning</code>
+      por cada signal y veredicto. Ejemplo: &ldquo;thesis_status = strengthening PORQUE
+      3 de los 5 mayores movers pertenecen a vectores distintos de la tesis (connectivity,
+      data_centers, energy) y el F&amp;G en extreme fear sugiere infravaloraci&oacute;n.&rdquo;
+      Coste: +30% tokens de output.
+    </div>
+  </div>
+
+  <div class="trace rv" style="margin-top:16px;">
+    <h3 style="color:var(--emerald);">Nivel 4: Diff-over-time (evoluci&oacute;n)</h3>
+    <div style="font-size:.85rem;color:var(--t2);line-height:1.7;margin-top:8px;">
+      Comparar autom&aacute;ticamente el an&aacute;lisis de hoy con el de ayer.
+      &ldquo;thesis_status pas&oacute; de stable a strengthening porque LITE entr&oacute; en alerta
+      y el F&amp;G cay&oacute; de 25 a 19.&rdquo; Requiere un segundo paso de LLM
+      o l&oacute;gica determinista simple sobre los JSON guardados.
+    </div>
+  </div>
+</div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Pipeline Trace &mdash; Intelligence Engine &mdash; SA LP Thesis Monitor</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('vis'); });
+  }, {threshold:.05,rootMargin:'0px 0px -30px 0px'});
+  document.querySelectorAll('.rv').forEach(el => obs.observe(el));
+})();
+</script>
+</body>
+</html>
