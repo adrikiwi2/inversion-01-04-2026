@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intelligence Engine — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void:     #050508;
+  --surface:  #0C0C10;
+  --card:     #111116;
+  --raised:   #18181E;
+  --border:   rgba(255,255,255,.06);
+  --border2:  rgba(255,255,255,.10);
+  --t1: #E8E8ED;
+  --t2: #8B8B96;
+  --t3: #55555F;
+  --blue:     #3B82F6;
+  --blue-d:   #1E40AF;
+  --amber:    #F59E0B;
+  --emerald:  #10B981;
+  --rose:     #F43F5E;
+  --violet:   #8B5CF6;
+  --cyan:     #06B6D4;
+  --sans: 'Outfit', sans-serif;
+  --mono: 'Fira Code', monospace;
+  --ease: cubic-bezier(.16,1,.3,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased}
+body{font-family:var(--sans);background:var(--void);color:var(--t1);line-height:1.6;min-height:100dvh}
+::selection{background:var(--blue);color:#fff}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── Ambient ── */
+.ambient{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 600px 400px at 10% 5%,rgba(30,64,175,.06),transparent),
+    radial-gradient(ellipse 400px 350px at 90% 80%,rgba(16,185,129,.03),transparent);
+}
+
+/* ── Layout ── */
+.shell{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:24px}
+@media(max-width:768px){.shell{padding:16px}}
+
+/* ── Top Bar ── */
+.topbar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:32px}
+.topbar-brand{font-weight:700;font-size:1.1rem;letter-spacing:-.02em;white-space:nowrap}
+.topbar-brand span{color:var(--blue)}
+.topbar-nav{display:flex;gap:6px;margin-left:auto}
+.topbar-nav a{font-size:.78rem;color:var(--t3);text-decoration:none;padding:5px 12px;border:1px solid var(--border);border-radius:999px;transition:all .2s}
+.topbar-nav a:hover{color:var(--t1);border-color:var(--border2)}
+
+/* ── Date Nav ── */
+.date-nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.date-btn{background:none;border:1px solid var(--border);color:var(--t2);border-radius:6px;padding:6px 10px;cursor:pointer;font-family:var(--mono);font-size:.8rem;transition:all .2s}
+.date-btn:hover{border-color:var(--blue);color:var(--t1)}
+.date-btn:active{transform:scale(.97)}
+.date-display{font-family:var(--mono);font-size:1rem;font-weight:600;min-width:120px;text-align:center}
+input[type="date"]{background:var(--card);border:1px solid var(--border);color:var(--t1);font-family:var(--mono);font-size:.8rem;padding:5px 10px;border-radius:6px;cursor:pointer}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.5}
+
+/* ── Trigger Buttons ── */
+.triggers{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px}
+.trigger{display:flex;align-items:center;gap:6px;padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--t2);font-family:var(--mono);font-size:.78rem;font-weight:500;cursor:pointer;transition:all .25s var(--ease);white-space:nowrap}
+.trigger:hover{border-color:var(--blue);color:var(--t1);background:rgba(59,130,246,.05)}
+.trigger:active{transform:scale(.97)}
+.trigger svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+.trigger.running{border-color:var(--amber);color:var(--amber);pointer-events:none}
+.trigger.running svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Thesis Gauge ── */
+.gauge{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1px;background:var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px}
+.gauge-cell{background:var(--card);padding:20px 24px;text-align:center}
+.gauge-val{font-family:var(--mono);font-size:1.5rem;font-weight:700;line-height:1.2}
+.gauge-label{font-size:.72rem;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+.gauge-bar{display:flex;gap:3px;justify-content:center;margin-top:8px}
+.gauge-pip{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--border2);transition:all .3s}
+.gauge-pip.filled{border-color:var(--blue);background:var(--blue);box-shadow:0 0 8px rgba(59,130,246,.3)}
+@media(max-width:640px){.gauge{grid-template-columns:1fr 1fr}}
+
+/* ── Grid ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.grid-3{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px}
+@media(max-width:900px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+/* ── Card ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;transition:border-color .3s}
+.card:hover{border-color:var(--border2)}
+.card-title{font-size:.85rem;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card-title svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.5}
+
+/* ── Status Badge ── */
+.status{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.8rem;font-weight:600;padding:5px 14px;border-radius:999px}
+.status-strengthening{background:rgba(16,185,129,.1);color:var(--emerald)}
+.status-stable{background:rgba(59,130,246,.1);color:var(--blue)}
+.status-weakening{background:rgba(244,63,94,.1);color:var(--rose)}
+.status-intact{background:rgba(245,158,11,.1);color:var(--amber)}
+.status .dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse-s 2s ease-in-out infinite}
+@keyframes pulse-s{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── Signal List ── */
+.signal{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:.85rem}
+.signal:last-child{border-bottom:none}
+.signal-dir{flex-shrink:0;width:8px;height:8px;border-radius:50%;margin-top:6px}
+.signal-dir.bullish,.signal-dir.positive{background:var(--emerald)}
+.signal-dir.bearish,.signal-dir.negative{background:var(--rose)}
+.signal-dir.neutral{background:var(--t3)}
+.signal-text{color:var(--t2)}
+.signal-vector{font-family:var(--mono);font-size:.68rem;color:var(--t3);margin-top:2px}
+.signal-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.stag{font-family:var(--mono);font-size:.65rem;padding:1px 7px;border-radius:999px;background:rgba(59,130,246,.08);color:var(--blue)}
+
+/* ── Alert Row ── */
+.alert-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:.82rem}
+.alert-row:last-child{border-bottom:none}
+.alert-ticker{font-family:var(--mono);font-weight:600;min-width:60px}
+.alert-move{font-family:var(--mono);font-weight:600;min-width:70px}
+.alert-move.up{color:var(--emerald)}
+.alert-move.down{color:var(--rose)}
+.alert-cause{color:var(--t3);flex:1;font-size:.78rem}
+
+/* ── Commodity Row ── */
+.comm-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:.82rem}
+.comm-row:last-child{border-bottom:none}
+.comm-name{font-weight:500}
+.comm-read{color:var(--t3);font-size:.78rem;flex:1;margin-left:12px;text-align:right}
+
+/* ── News Item ── */
+.news-item{padding:8px 0;border-bottom:1px solid var(--border)}
+.news-item:last-child{border-bottom:none}
+.news-hl{font-size:.82rem;color:var(--t2)}
+.news-imp{font-size:.72rem;color:var(--t3);margin-top:2px}
+.news-rel{display:inline-block;font-family:var(--mono);font-size:.65rem;padding:1px 7px;border-radius:999px;margin-right:4px}
+.news-rel.high{background:rgba(16,185,129,.1);color:var(--emerald)}
+.news-rel.medium{background:rgba(245,158,11,.1);color:var(--amber)}
+.news-rel.low{background:rgba(255,255,255,.04);color:var(--t3)}
+
+/* ── One Liner ── */
+.one-liner{font-size:.95rem;color:var(--t2);line-height:1.7;font-style:italic;padding:16px 20px;background:var(--surface);border-left:2px solid var(--blue);border-radius:0 8px 8px 0;margin-bottom:24px}
+
+/* ── Empty State ── */
+.empty{text-align:center;padding:80px 20px;color:var(--t3)}
+.empty h3{font-size:1.2rem;color:var(--t2);margin-bottom:8px}
+.empty p{font-size:.9rem;max-width:45ch;margin:0 auto}
+.empty code{font-family:var(--mono);font-size:.82rem;background:var(--raised);padding:2px 8px;border-radius:4px;color:var(--t2)}
+
+/* ── Actions ── */
+.actions{margin-top:16px}
+.actions li{font-size:.82rem;color:var(--t2);padding:4px 0;padding-left:16px;position:relative}
+.actions li::before{content:'';position:absolute;left:0;top:10px;width:6px;height:6px;border-radius:50%;background:var(--blue)}
+
+/* ── Footer ── */
+footer{text-align:center;padding:32px 0;font-size:.75rem;color:var(--t3);border-top:1px solid var(--border);margin-top:40px}
+</style>
+</head>
+<body>
+<div class="ambient"></div>
+<div class="shell">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-brand">Intelligence <span>Engine</span></div>
+    <div class="date-nav">
+      <button class="date-btn" id="prev-day" title="Dia anterior">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="date-display" id="date-label"></div>
+      <button class="date-btn" id="next-day" title="Dia siguiente">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <input type="date" id="date-pick">
+    </div>
+    <div class="topbar-nav">
+      <a href="index.html">Engine</a>
+      <a href="roadmap.html">Roadmap</a>
+      <a href="../activos-explorer.html">Explorer</a>
+    </div>
+  </div>
+
+  <!-- TRIGGER BUTTONS -->
+  <div class="triggers">
+    <button class="trigger" data-freq="daily" title="python run.py daily">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+      Run Daily
+    </button>
+    <button class="trigger" data-freq="weekly" title="python run.py weekly">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
+      Run Weekly
+    </button>
+    <button class="trigger" data-freq="monthly" title="python run.py monthly">
+      <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3"/></svg>
+      Run Monthly
+    </button>
+    <button class="trigger" data-freq="quarterly" title="python run.py quarterly">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+      Run Quarterly
+    </button>
+    <button class="trigger" data-freq="all" title="python run.py all" style="border-color:var(--blue);color:var(--blue);">
+      <svg viewBox="0 0 24 24"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+      Run All
+    </button>
+  </div>
+
+  <!-- CONTENT (filled by JS) -->
+  <div id="content">
+    <div class="empty">
+      <h3>Cargando...</h3>
+    </div>
+  </div>
+
+  <footer>
+    Intelligence Engine &mdash; SA LP Thesis Monitor &mdash; Coste: $0
+  </footer>
+</div>
+
+<script>
+(function(){
+
+  // ── State ──
+  const DATA_BASE = 'fetcher/data/';
+  let currentDate = new Date().toISOString().slice(0,10);
+
+  const $content = document.getElementById('content');
+  const $dateLabel = document.getElementById('date-label');
+  const $datePick = document.getElementById('date-pick');
+
+  // ── Date Navigation ──
+  function setDate(d) {
+    currentDate = d;
+    $dateLabel.textContent = d;
+    $datePick.value = d;
+    loadDashboard(d);
+  }
+
+  document.getElementById('prev-day').onclick = () => {
+    const d = new Date(currentDate + 'T12:00:00');
+    d.setDate(d.getDate() - 1);
+    setDate(d.toISOString().slice(0,10));
+  };
+  document.getElementById('next-day').onclick = () => {
+    const d = new Date(currentDate + 'T12:00:00');
+    d.setDate(d.getDate() + 1);
+    setDate(d.toISOString().slice(0,10));
+  };
+  $datePick.onchange = () => setDate($datePick.value);
+
+  // ── Load Dashboard ──
+  async function loadDashboard(date) {
+    $content.innerHTML = '<div class="empty"><h3>Cargando...</h3></div>';
+
+    const files = {
+      daily: `${DATA_BASE}analysis_daily_${date}.json`,
+      weekly: `${DATA_BASE}analysis_weekly_${date}.json`,
+      monthly: `${DATA_BASE}analysis_monthly_${date}.json`,
+      quarterly: `${DATA_BASE}analysis_quarterly_${date}.json`,
+      bundle: `${DATA_BASE}daily_${date}.json`,
+    };
+
+    const data = {};
+    for (const [key, url] of Object.entries(files)) {
+      try {
+        const r = await fetch(url);
+        if (r.ok) data[key] = await r.json();
+      } catch {}
+    }
+
+    if (!data.daily && !data.bundle) {
+      $content.innerHTML = `
+        <div class="empty">
+          <h3>Sin datos para ${date}</h3>
+          <p>No hay bundle ni analisis para esta fecha. Ejecuta el fetcher:</p>
+          <p style="margin-top:12px;"><code>python run.py daily</code></p>
+        </div>`;
+      return;
+    }
+
+    render(data, date);
+  }
+
+  // ── Render ──
+  function render(data, date) {
+    const d = data.daily || {};
+    const b = data.bundle || {};
+    const w = data.weekly;
+    const m = data.monthly;
+    const q = data.quarterly;
+
+    let html = '';
+
+    // One-liner
+    if (d.one_liner) {
+      html += `<div class="one-liner">${esc(d.one_liner)}</div>`;
+    }
+
+    // Gauge
+    html += renderGauge(d, w, m, q);
+
+    // Main grid
+    html += '<div class="grid-3">';
+    html += '<div>' + renderSignals(d) + renderAlerts(d) + renderActions(d) + '</div>';
+    html += '<div>' + renderCommodities(d, b) + renderFearGreed(d, b) + renderNews(d) + '</div>';
+    html += '</div>';
+
+    // Extra analyses
+    if (w || m || q) {
+      html += '<div class="grid-2">';
+      if (w) html += renderFreqCard('Weekly', w, 'var(--emerald)');
+      if (m) html += renderFreqCard('Monthly', m, 'var(--amber)');
+      if (q) html += renderFreqCard('Quarterly', q, 'var(--violet)');
+      html += '</div>';
+    }
+
+    $content.innerHTML = html;
+  }
+
+  // ── Gauge ──
+  function renderGauge(d, w, m, q) {
+    const items = [
+      {label: 'Daily', status: d.thesis_status, conf: d.thesis_confidence},
+      {label: 'Weekly', status: w?.thesis_status, conf: w?.thesis_confidence},
+      {label: 'Monthly', status: m?.thesis_status, conf: m?.thesis_confidence},
+      {label: 'Quarterly', status: q?.thesis_status, conf: q?.thesis_confidence},
+    ];
+    let html = '<div class="gauge">';
+    for (const it of items) {
+      const s = normalizeStatus(it.status);
+      const cls = s ? `status-${s}` : '';
+      const conf = it.conf || '—';
+      const pips = typeof conf === 'number'
+        ? Array.from({length:10},(_,i)=>`<div class="gauge-pip${i<conf?' filled':''}"></div>`).join('')
+        : '';
+      html += `<div class="gauge-cell">
+        <div class="gauge-label">${it.label}</div>
+        <div class="gauge-val">${it.status ? `<span class="status ${cls}"><span class="dot"></span>${esc(it.status)}</span>` : '<span style="color:var(--t3)">—</span>'}</div>
+        ${pips ? `<div class="gauge-bar">${pips}</div>` : ''}
+        <div style="font-family:var(--mono);font-size:.72rem;color:var(--t3);margin-top:4px;">${typeof conf==='number'?conf+'/10':''}</div>
+      </div>`;
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function normalizeStatus(s) {
+    if (!s) return '';
+    s = s.toLowerCase().replace(/\s+/g,'_');
+    if (s.includes('strength')) return 'strengthening';
+    if (s.includes('weaken')) return 'weakening';
+    if (s.includes('intact')) return 'intact';
+    return 'stable';
+  }
+
+  // ── Signals ──
+  function renderSignals(d) {
+    const signals = d.key_signals || [];
+    if (!signals.length) return '';
+    let html = `<div class="card"><div class="card-title">
+      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Key Signals</div>`;
+    for (const s of signals) {
+      const dir = (s.direction||'neutral').toLowerCase();
+      const tickers = (s.tickers_affected||[]).map(t=>`<span class="stag">${t}</span>`).join('');
+      html += `<div class="signal">
+        <div class="signal-dir ${dir}"></div>
+        <div>
+          <div class="signal-text">${esc(s.signal)}</div>
+          <div class="signal-vector">${esc(s.thesis_vector||'')} &middot; ${esc(s.impact||'')}</div>
+          <div class="signal-tags">${tickers}</div>
+        </div>
+      </div>`;
+    }
+    html += '</div>';
+    return html;
+  }
+
+  // ── Alerts ──
+  function renderAlerts(d) {
+    const alerts = d.alerts_analysis || [];
+    if (!alerts.length) return '';
+    let html = `<div class="card" style="margin-top:16px;"><div class="card-title">
+      <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Alertas (&gt;5%)</div>`;
+    for (const a of alerts) {
+      const move = a.move || '';
+      const isUp = move.startsWith('+');
+      html += `<div class="alert-row">
+        <div class="alert-ticker">${esc(a.ticker)}</div>
+        <div class="alert-move ${isUp?'up':'down'}">${esc(move)}</div>
+        <div class="alert-cause">${esc(a.probable_cause||'')}</div>
+      </div>`;
+    }
+    html += '</div>';
+    return html;
+  }
+
+  // ── Actions ──
+  function renderActions(d) {
+    const actions = d.action_items || [];
+    if (!actions.length) return '';
+    let html = `<div class="card" style="margin-top:16px;"><div class="card-title">
+      <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Action Items</div><ul class="actions">`;
+    for (const a of actions) html += `<li>${esc(a)}</li>`;
+    html += '</ul></div>';
+    return html;
+  }
+
+  // ── Commodities ──
+  function renderCommodities(d, b) {
+    const cr = d.commodities_read;
+    if (!cr) return '';
+    let html = `<div class="card"><div class="card-title">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      Commodities</div>`;
+    for (const [k, v] of Object.entries(cr)) {
+      html += `<div class="comm-row">
+        <span class="comm-name">${esc(k)}</span>
+        <span class="comm-read">${esc(v)}</span>
+      </div>`;
+    }
+    html += '</div>';
+    return html;
+  }
+
+  // ── Fear & Greed ──
+  function renderFearGreed(d, b) {
+    const fg = d.fear_greed_read || '';
+    const score = b?.macro?.fear_greed?.score;
+    const rating = b?.macro?.fear_greed?.rating;
+    if (!fg && !score) return '';
+    let color = 'var(--t2)';
+    if (score < 25) color = 'var(--rose)';
+    else if (score < 45) color = 'var(--amber)';
+    else if (score > 75) color = 'var(--emerald)';
+    let html = `<div class="card" style="margin-top:16px;"><div class="card-title">
+      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+      Fear & Greed</div>`;
+    if (score != null) {
+      html += `<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px;">
+        <span style="font-family:var(--mono);font-size:2rem;font-weight:700;color:${color}">${score}</span>
+        <span style="font-size:.85rem;color:var(--t3);text-transform:uppercase;">${esc(rating||'')}</span>
+      </div>`;
+    }
+    if (fg) html += `<div style="font-size:.82rem;color:var(--t2);line-height:1.6;">${esc(fg)}</div>`;
+    html += '</div>';
+    return html;
+  }
+
+  // ── News ──
+  function renderNews(d) {
+    const news = d.news_highlights || [];
+    if (!news.length) return '';
+    let html = `<div class="card" style="margin-top:16px;"><div class="card-title">
+      <svg viewBox="0 0 24 24"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1"/></svg>
+      News</div>`;
+    for (const n of news) {
+      const rel = (n.relevance||'low').toLowerCase();
+      html += `<div class="news-item">
+        <div><span class="news-rel ${rel}">${rel}</span><span class="news-hl">${esc(n.headline||'')}</span></div>
+        <div class="news-imp">${esc(n.thesis_impact||'')}</div>
+      </div>`;
+    }
+    html += '</div>';
+    return html;
+  }
+
+  // ── Extra freq card ──
+  function renderFreqCard(label, d, accentColor) {
+    const s = normalizeStatus(d.thesis_status);
+    const cls = s ? `status-${s}` : '';
+    let html = `<div class="card" style="border-left:2px solid ${accentColor};">
+      <div class="card-title" style="color:${accentColor}">${label}</div>
+      <div style="margin-bottom:8px;">
+        <span class="status ${cls}"><span class="dot"></span>${esc(d.thesis_status||'—')}</span>
+        <span style="font-family:var(--mono);font-size:.78rem;color:var(--t3);margin-left:8px;">${d.thesis_confidence||'—'}/10</span>
+      </div>
+      <div style="font-size:.82rem;color:var(--t2);line-height:1.6;font-style:italic;">${esc(d.one_liner||'')}</div>`;
+    if (d.action_items?.length) {
+      html += '<ul class="actions" style="margin-top:10px;">';
+      for (const a of d.action_items.slice(0,3)) html += `<li>${esc(a)}</li>`;
+      html += '</ul>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function esc(s) { if(!s)return''; const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+  // ── Trigger Buttons ──
+  document.querySelectorAll('.trigger').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const freq = btn.dataset.freq;
+      btn.classList.add('running');
+      btn.querySelector('svg').outerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4"/></svg>';
+
+      // Show command to user
+      const cmd = freq === 'all' ? 'python run.py all' : `python run.py ${freq}`;
+      const note = document.createElement('div');
+      note.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);padding:12px 20px;border-radius:10px;font-family:var(--mono);font-size:.82rem;color:var(--t1);z-index:100;box-shadow:0 8px 32px rgba(0,0,0,.5);';
+      note.innerHTML = `Ejecuta en terminal: <code style="color:var(--blue);background:var(--raised);padding:2px 8px;border-radius:4px;">${cmd}</code>`;
+      document.body.appendChild(note);
+
+      // Copy to clipboard
+      navigator.clipboard?.writeText(cmd);
+
+      setTimeout(() => {
+        btn.classList.remove('running');
+        note.remove();
+        // Reload after user presumably ran the command
+      }, 5000);
+    });
+  });
+
+  // ── Init ──
+  setDate(currentDate);
+
+})();
+</script>
+</body>
+</html>
