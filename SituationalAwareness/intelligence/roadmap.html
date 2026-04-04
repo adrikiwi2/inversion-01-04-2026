@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roadmap — Intelligence Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   TOKENS
+   ═══════════════════════════════════════════ */
+:root {
+  --bg-void:    #050508;
+  --bg-surface: #0C0C10;
+  --bg-card:    #111116;
+  --bg-raised:  #18181E;
+  --border:     rgba(255,255,255,0.06);
+  --border-lit: rgba(255,255,255,0.10);
+  --text-pri:   #E8E8ED;
+  --text-sec:   #8B8B96;
+  --text-mut:   #55555F;
+  --blue:       #3B82F6;
+  --blue-dim:   #1E40AF;
+  --amber:      #F59E0B;
+  --emerald:    #10B981;
+  --rose:       #F43F5E;
+  --violet:     #8B5CF6;
+  --cyan:       #06B6D4;
+  --font-sans:  'Outfit', -apple-system, sans-serif;
+  --font-mono:  'Fira Code', 'SF Mono', monospace;
+  --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring:cubic-bezier(0.32, 0.72, 0, 1);
+  --r-sm: 6px; --r-md: 12px; --r-lg: 20px; --r-xl: 28px;
+}
+
+/* ═══════════════════════════════════════════
+   RESET
+   ═══════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-sans);background:var(--bg-void);color:var(--text-pri);line-height:1.6;overflow-x:hidden}
+::selection{background:var(--blue);color:#fff}
+
+/* Ambient */
+.ambient{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 700px 500px at 15% 8%,rgba(30,64,175,0.06),transparent),
+    radial-gradient(ellipse 500px 400px at 85% 70%,rgba(16,185,129,0.04),transparent);
+}
+
+/* Layout */
+.wrap{max-width:960px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+section{padding:80px 0}
+@media(max-width:768px){section{padding:56px 0}.wrap{padding:0 16px}}
+
+/* Scroll reveal */
+.rv{opacity:0;transform:translateY(20px);transition:opacity .65s var(--ease-out),transform .65s var(--ease-out)}
+.rv.vis{opacity:1;transform:translateY(0)}
+.rv-d1{transition-delay:60ms}.rv-d2{transition-delay:120ms}.rv-d3{transition-delay:180ms}
+
+/* Typography */
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text-mut);padding:6px 14px;border:1px solid var(--border);border-radius:999px;margin-bottom:20px}
+.eyebrow .dot{width:6px;height:6px;border-radius:50%;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-size:clamp(2.2rem,5vw,3.5rem);font-weight:800;letter-spacing:-.04em;line-height:1.08}
+h2{font-size:clamp(1.5rem,3vw,2rem);font-weight:700;letter-spacing:-.03em;line-height:1.15;margin-bottom:12px}
+.sub{font-size:clamp(.95rem,1.8vw,1.15rem);color:var(--text-sec);max-width:55ch;line-height:1.7}
+.mono{font-family:var(--font-mono);font-size:.85em}
+.divider{height:1px;background:var(--border)}
+
+/* ═══════════════════════════════════════════
+   PROGRESS HEADER
+   ═══════════════════════════════════════════ */
+.progress-wrap{margin-top:40px}
+.progress-stats{display:flex;gap:32px;margin-bottom:16px;flex-wrap:wrap}
+.progress-stat .val{font-family:var(--font-mono);font-size:1.75rem;font-weight:600;line-height:1}
+.progress-stat .label{font-size:.75rem;color:var(--text-mut);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+.progress-bar-bg{height:6px;background:var(--bg-raised);border-radius:3px;overflow:hidden;margin-top:8px}
+.progress-bar-fill{height:100%;border-radius:3px;transition:width .8s var(--ease-out);background:linear-gradient(90deg,var(--blue),var(--emerald))}
+
+/* ═══════════════════════════════════════════
+   TIMELINE
+   ═══════════════════════════════════════════ */
+.timeline{position:relative;margin-top:48px}
+.timeline::before{content:'';position:absolute;left:23px;top:0;bottom:0;width:2px;background:var(--border)}
+@media(max-width:768px){.timeline::before{left:15px}}
+
+/* Phase block */
+.phase{position:relative;margin-bottom:48px}
+.phase:last-child{margin-bottom:0}
+.phase-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;position:relative}
+.phase-dot{width:48px;height:48px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font-mono);font-weight:700;font-size:.9rem;position:relative;z-index:2;border:2px solid var(--border);background:var(--bg-void);transition:border-color .4s,background .4s}
+.phase.done .phase-dot{border-color:var(--emerald);background:rgba(16,185,129,.08)}
+.phase.active .phase-dot{border-color:var(--blue);background:rgba(59,130,246,.08);box-shadow:0 0 20px rgba(59,130,246,.15)}
+.phase-info{flex:1}
+.phase-title{font-size:1.15rem;font-weight:700;letter-spacing:-.01em}
+.phase-desc{font-size:.85rem;color:var(--text-mut);margin-top:2px}
+.phase-badge{font-family:var(--font-mono);font-size:10px;font-weight:600;padding:3px 10px;border-radius:999px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.badge-done{background:rgba(16,185,129,.1);color:var(--emerald)}
+.badge-active{background:rgba(59,130,246,.1);color:var(--blue)}
+.badge-pending{background:rgba(255,255,255,.04);color:var(--text-mut)}
+
+@media(max-width:768px){
+  .phase-dot{width:32px;height:32px;font-size:.7rem}
+  .phase-header{gap:12px}
+}
+
+/* Task list */
+.tasks{margin-left:72px;display:flex;flex-direction:column;gap:2px}
+@media(max-width:768px){.tasks{margin-left:48px}}
+
+/* Individual task */
+.task{display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:var(--r-sm);transition:background .2s;cursor:pointer;user-select:none}
+.task:hover{background:rgba(255,255,255,.02)}
+.task.checked .task-label{color:var(--text-mut);text-decoration:line-through;text-decoration-color:var(--text-mut)}
+.task.checked .task-file{opacity:.4}
+
+/* Custom checkbox */
+.task-check{width:20px;height:20px;border-radius:5px;border:2px solid var(--border-lit);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:border-color .25s,background .25s}
+.task:hover .task-check{border-color:rgba(255,255,255,.18)}
+.task.checked .task-check{border-color:var(--emerald);background:var(--emerald)}
+.task.checked .task-check svg{opacity:1}
+.task-check svg{width:12px;height:12px;stroke:#fff;stroke-width:2.5;fill:none;opacity:0;transition:opacity .2s}
+
+.task-label{font-size:.9rem;font-weight:500;flex:1;transition:color .3s,text-decoration-color .3s}
+.task-file{font-family:var(--font-mono);font-size:.72rem;color:var(--text-mut);transition:opacity .3s;white-space:nowrap}
+.task-tag{font-family:var(--font-mono);font-size:10px;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.tag-py{background:rgba(59,130,246,.08);color:var(--blue)}
+.tag-md{background:rgba(139,92,246,.08);color:var(--violet)}
+.tag-html{background:rgba(245,158,11,.08);color:var(--amber)}
+.tag-cfg{background:rgba(6,182,212,.08);color:var(--cyan)}
+.tag-llm{background:rgba(139,92,246,.08);color:var(--violet)}
+.tag-ops{background:rgba(244,63,94,.08);color:var(--rose)}
+.tag-research{background:rgba(16,185,129,.08);color:var(--emerald)}
+
+/* Task result panel (execution output) */
+.task-result{
+  margin-left:44px;
+  margin-top:-2px;
+  margin-bottom:6px;
+  padding:12px 16px;
+  background:var(--bg-surface);
+  border:1px solid var(--border);
+  border-left:2px solid var(--emerald);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+  font-size:.78rem;
+  line-height:1.65;
+  color:var(--text-sec);
+}
+.task-result .res-title{
+  font-family:var(--font-mono);
+  font-size:10px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--emerald);
+  margin-bottom:6px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.task-result .res-title svg{width:12px;height:12px;stroke:var(--emerald);fill:none;stroke-width:2}
+.task-result .res-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:8px;
+  margin-top:8px;
+}
+.task-result .res-metric{
+  display:flex;
+  flex-direction:column;
+}
+.task-result .res-val{
+  font-family:var(--font-mono);
+  font-size:.85rem;
+  font-weight:600;
+  color:var(--text-pri);
+}
+.task-result .res-key{
+  font-size:.7rem;
+  color:var(--text-mut);
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+.task-result .res-alert{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  font-family:var(--font-mono);
+  font-size:.72rem;
+  font-weight:500;
+  padding:2px 8px;
+  border-radius:999px;
+  margin:2px 3px 2px 0;
+}
+.alert-up{background:rgba(16,185,129,.1);color:var(--emerald)}
+.alert-down{background:rgba(244,63,94,.1);color:var(--rose)}
+.alert-warn{background:rgba(245,158,11,.1);color:var(--amber)}
+.alert-info{background:rgba(59,130,246,.1);color:var(--blue)}
+@media(max-width:768px){
+  .task-result{margin-left:32px}
+  .task-result .res-grid{grid-template-columns:1fr 1fr}
+}
+
+/* Phase progress mini-bar */
+.phase-progress{margin-left:72px;margin-top:8px;display:flex;align-items:center;gap:10px}
+@media(max-width:768px){.phase-progress{margin-left:48px}}
+.phase-progress .mini-bar{flex:1;max-width:200px;height:3px;background:var(--bg-raised);border-radius:2px;overflow:hidden}
+.phase-progress .mini-fill{height:100%;border-radius:2px;transition:width .6s var(--ease-out)}
+.phase-progress .mini-label{font-family:var(--font-mono);font-size:.72rem;color:var(--text-mut)}
+
+/* ═══════════════════════════════════════════
+   LEGEND
+   ═══════════════════════════════════════════ */
+.legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:32px;padding:20px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r-md)}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--text-sec)}
+.legend-swatch{width:12px;height:12px;border-radius:3px}
+
+/* Footer */
+footer{border-top:1px solid var(--border);padding:40px 0;text-align:center}
+footer p{font-size:.82rem;color:var(--text-mut)}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border-lit);border-radius:3px}
+
+/* Nav pill */
+nav{position:fixed;top:16px;right:24px;z-index:100;display:flex;gap:2px;padding:4px;background:rgba(12,12,16,.85);backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);border:1px solid var(--border);border-radius:999px}
+nav a{color:var(--text-mut);text-decoration:none;font-size:.75rem;font-weight:500;padding:5px 12px;border-radius:999px;transition:color .2s,background .2s;white-space:nowrap}
+nav a:hover{color:var(--text-pri);background:rgba(255,255,255,.06)}
+@media(max-width:768px){nav{display:none}}
+
+/* Reset button */
+.reset-btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:.72rem;color:var(--text-mut);background:none;border:1px solid var(--border);border-radius:999px;padding:4px 12px;cursor:pointer;transition:border-color .2s,color .2s}
+.reset-btn:hover{border-color:var(--rose);color:var(--rose)}
+</style>
+</head>
+<body>
+
+<div class="ambient"></div>
+
+<nav>
+  <a href="index.html">Engine</a>
+  <a href="../activos-explorer.html">Explorer</a>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     HERO
+     ══════════════════════════════════════════ -->
+<section style="padding-bottom:40px;">
+  <div class="wrap">
+    <div class="rv">
+      <div class="eyebrow">
+        <span class="dot" style="background:var(--blue)"></span>
+        Roadmap
+      </div>
+    </div>
+    <h1 class="rv rv-d1">Objetivos y timeline</h1>
+    <p class="sub rv rv-d2" style="margin-top:16px;">
+      Cada hito se puede marcar como completado. El progreso se guarda en tu navegador.
+    </p>
+
+    <!-- Global progress -->
+    <div class="progress-wrap rv rv-d3">
+      <div class="progress-stats">
+        <div class="progress-stat">
+          <div class="val" style="color:var(--emerald)" id="g-done">0</div>
+          <div class="label">Completados</div>
+        </div>
+        <div class="progress-stat">
+          <div class="val" style="color:var(--blue)" id="g-total">0</div>
+          <div class="label">Total tareas</div>
+        </div>
+        <div class="progress-stat">
+          <div class="val" style="color:var(--amber)" id="g-pct">0%</div>
+          <div class="label">Progreso</div>
+        </div>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="g-bar" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════
+     TIMELINE
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="wrap">
+    <div class="timeline" id="timeline">
+
+      <!-- ─── PHASE 0 ─── -->
+      <div class="phase rv" data-phase="0">
+        <div class="phase-header">
+          <div class="phase-dot">P0</div>
+          <div class="phase-info">
+            <div class="phase-title">Research y Fundamentos</div>
+            <div class="phase-desc">Investigaci&oacute;n de la tesis SA LP, taxonom&iacute;a de activos, an&aacute;lisis 13F</div>
+          </div>
+          <span class="phase-badge badge-done">Abr 1</span>
+        </div>
+        <div class="tasks">
+          <div class="task" data-id="p0-thesis">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Tesis de infraestructura f&iacute;sica IA &mdash; Aschenbrenner</span>
+            <span class="task-tag tag-research">Research</span>
+          </div>
+          <div class="task" data-id="p0-taxonomy">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Taxonom&iacute;a de 106 activos (78 stocks + 27 ETFs + 1 trust)</span>
+            <span class="task-file">activos-maestro.md</span>
+            <span class="task-tag tag-md">MD</span>
+          </div>
+          <div class="task" data-id="p0-13f">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">An&aacute;lisis 13F Q4 2025 de SA LP</span>
+            <span class="task-file">05-portfolio-13F.md</span>
+            <span class="task-tag tag-research">Research</span>
+          </div>
+          <div class="task" data-id="p0-verticals">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">19 verticales definidas (Semis, Nuclear, BTC, REITs...)</span>
+            <span class="task-tag tag-research">Research</span>
+          </div>
+          <div class="task" data-id="p0-commodities">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Tesis de materias primas cr&iacute;ticas (Cu, U, Li)</span>
+            <span class="task-file">06-materias-primas.md</span>
+            <span class="task-tag tag-research">Research</span>
+          </div>
+        </div>
+        <div class="phase-progress"><div class="mini-bar"><div class="mini-fill"></div></div><span class="mini-label"></span></div>
+      </div>
+
+      <!-- ─── PHASE 1 ─── -->
+      <div class="phase rv" data-phase="1">
+        <div class="phase-header">
+          <div class="phase-dot">P1</div>
+          <div class="phase-info">
+            <div class="phase-title">Activos Explorer</div>
+            <div class="phase-desc">Dashboard HTML interactivo con hip&oacute;tesis de inversi&oacute;n para 106 activos</div>
+          </div>
+          <span class="phase-badge badge-done">Abr 2</span>
+        </div>
+        <div class="tasks">
+          <div class="task" data-id="p1-html">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Dashboard HTML dark-theme con grid responsive</span>
+            <span class="task-file">activos-explorer.html</span>
+            <span class="task-tag tag-html">HTML</span>
+          </div>
+          <div class="task" data-id="p1-hyp106">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Hip&oacute;tesis completas para los 106 activos</span>
+            <span class="task-tag tag-research">Research</span>
+          </div>
+          <div class="task" data-id="p1-conviction">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Niveles de convicci&oacute;n (1-5), horizonte, cat&aacute;lisis, riesgos</span>
+            <span class="task-tag tag-research">Research</span>
+          </div>
+          <div class="task" data-id="p1-panel">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Panel lateral con detalle al hacer click</span>
+            <span class="task-tag tag-html">HTML</span>
+          </div>
+          <div class="task" data-id="p1-search">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">B&uacute;squeda, filtros por tipo y chips de vertical</span>
+            <span class="task-tag tag-html">HTML</span>
+          </div>
+          <div class="task" data-id="p1-deploy">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Deploy en GitHub Pages (p&uacute;blico y m&oacute;vil)</span>
+            <span class="task-tag tag-ops">Deploy</span>
+          </div>
+        </div>
+        <div class="phase-progress"><div class="mini-bar"><div class="mini-fill"></div></div><span class="mini-label"></span></div>
+      </div>
+
+      <!-- ─── PHASE 2 ─── -->
+      <div class="phase rv" data-phase="2">
+        <div class="phase-header">
+          <div class="phase-dot">P2</div>
+          <div class="phase-info">
+            <div class="phase-title">Intelligence Engine &mdash; Dise&ntilde;o</div>
+            <div class="phase-desc">Arquitectura de 3 capas, prompts por frecuencia, specs completos</div>
+          </div>
+          <span class="phase-badge badge-done">Abr 2-3</span>
+        </div>
+        <div class="tasks">
+          <div class="task" data-id="p2-arch">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Arquitectura Capa 1 / Capa 2 / Capa 3</span>
+            <span class="task-file">README.md</span>
+            <span class="task-tag tag-md">MD</span>
+          </div>
+          <div class="task" data-id="p2-daily-spec">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Spec diario: 3 prompts (precios, noticias, power crunch)</span>
+            <span class="task-file">daily.md</span>
+            <span class="task-tag tag-md">Spec</span>
+          </div>
+          <div class="task" data-id="p2-weekly-spec">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Spec semanal: hashrate, short interest, ETF flows, insiders</span>
+            <span class="task-file">weekly.md</span>
+            <span class="task-tag tag-md">Spec</span>
+          </div>
+          <div class="task" data-id="p2-monthly-spec">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Spec mensual: ocupaci&oacute;n DC, lead times, PJM, FRED, superciclo</span>
+            <span class="task-file">monthly.md</span>
+            <span class="task-tag tag-md">Spec</span>
+          </div>
+          <div class="task" data-id="p2-quarterly-spec">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Spec trimestral: 13F SA LP, earnings hiperscalers, capex</span>
+            <span class="task-file">quarterly.md</span>
+            <span class="task-tag tag-md">Spec</span>
+          </div>
+          <div class="task" data-id="p2-adhoc-spec">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Spec ad-hoc: 5 prompts (nuclear, sanctions, Taiwan, PPA, 13D)</span>
+            <span class="task-file">adhoc.md</span>
+            <span class="task-tag tag-md">Spec</span>
+          </div>
+          <div class="task" data-id="p2-presentation">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">P&aacute;gina de presentaci&oacute;n del engine</span>
+            <span class="task-file">index.html</span>
+            <span class="task-tag tag-html">HTML</span>
+          </div>
+          <div class="task" data-id="p2-roadmap">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Roadmap interactivo (esta p&aacute;gina)</span>
+            <span class="task-file">roadmap.html</span>
+            <span class="task-tag tag-html">HTML</span>
+          </div>
+        </div>
+        <div class="phase-progress"><div class="mini-bar"><div class="mini-fill"></div></div><span class="mini-label"></span></div>
+      </div>
+
+      <!-- ─── PHASE 3 ─── -->
+      <div class="phase rv" data-phase="3">
+        <div class="phase-header">
+          <div class="phase-dot">P3</div>
+          <div class="phase-info">
+            <div class="phase-title">Capa 1 &mdash; Fetchers autom&aacute;ticos</div>
+            <div class="phase-desc">Scripts Python que recolectan datos de fuentes p&uacute;blicas gratuitas</div>
+          </div>
+          <span class="phase-badge badge-active">Abr 4</span>
+        </div>
+        <div class="tasks">
+
+          <!-- DAILY -->
+          <div class="task" data-id="p3-daily">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">fetch_daily.py &mdash; Yahoo Finance, CoinGecko, EDGAR, RSS</span>
+            <span class="task-file">fetch_daily.py</span>
+            <span class="task-tag tag-py">Python</span>
+          </div>
+          <div class="task-result">
+            <div class="res-title">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              Primera ejecuci&oacute;n &mdash; 4 abr 2026
+            </div>
+            <div class="res-grid">
+              <div class="res-metric"><span class="res-val">102 / 102</span><span class="res-key">Tickers OK</span></div>
+              <div class="res-metric"><span class="res-val">$66,937</span><span class="res-key">BTC</span></div>
+              <div class="res-metric"><span class="res-val">964 EH/s</span><span class="res-key">Hashrate</span></div>
+              <div class="res-metric"><span class="res-val">19.3</span><span class="res-key">Fear &amp; Greed (Extreme Fear)</span></div>
+              <div class="res-metric"><span class="res-val">18</span><span class="res-key">Noticias RSS</span></div>
+              <div class="res-metric"><span class="res-val">8</span><span class="res-key">Alertas (&gt;5%)</span></div>
+            </div>
+            <div style="margin-top:8px;">
+              <span class="res-alert alert-up">LITE +8.14%</span>
+              <span class="res-alert alert-up">CORZ +6.08%</span>
+              <span class="res-alert alert-up">TSEM +5.74%</span>
+              <span class="res-alert alert-up">SK Hynix +5.54%</span>
+              <span class="res-alert alert-down">TSLA -5.42%</span>
+              <span class="res-alert alert-down">INTL.L -24.46%</span>
+              <span class="res-alert alert-down">AINF.L -24.62%</span>
+              <span class="res-alert alert-down">KLWD.L -23.70%</span>
+            </div>
+          </div>
+
+          <!-- REQUIREMENTS -->
+          <div class="task" data-id="p3-requirements">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">requirements.txt + .env.template</span>
+            <span class="task-file">requirements.txt</span>
+            <span class="task-tag tag-cfg">Config</span>
+          </div>
+
+          <!-- WEEKLY -->
+          <div class="task" data-id="p3-weekly">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">fetch_weekly.py &mdash; short interest, Form 4, difficulty, ETF flows</span>
+            <span class="task-file">fetch_weekly.py</span>
+            <span class="task-tag tag-py">Python</span>
+          </div>
+          <div class="task-result">
+            <div class="res-title">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              Primera ejecuci&oacute;n &mdash; 4 abr 2026
+            </div>
+            <div class="res-grid">
+              <div class="res-metric"><span class="res-val">964 EH/s</span><span class="res-key">Hashrate (-4.61% 1w)</span></div>
+              <div class="res-metric"><span class="res-val">-15.3%</span><span class="res-key">Mining margin</span></div>
+              <div class="res-metric"><span class="res-val res-signal-strong">STRONG</span><span class="res-key">Reconversion signal</span></div>
+              <div class="res-metric"><span class="res-val">17</span><span class="res-key">Short interest tickers</span></div>
+              <div class="res-metric"><span class="res-val">22</span><span class="res-key">Form 4 filings</span></div>
+              <div class="res-metric"><span class="res-val">10</span><span class="res-key">ETFs checked</span></div>
+            </div>
+            <div style="margin-top:8px;">
+              <span class="res-alert alert-warn">Mining margin negativo: reconversi&oacute;n BTC-&gt;IA m&aacute;s atractiva</span>
+            </div>
+          </div>
+
+          <!-- MONTHLY -->
+          <div class="task" data-id="p3-monthly">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">fetch_monthly.py &mdash; commodities deep, PJM, FRED, news</span>
+            <span class="task-file">fetch_monthly.py</span>
+            <span class="task-tag tag-py">Python</span>
+          </div>
+          <div class="task-result">
+            <div class="res-title">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              Primera ejecuci&oacute;n &mdash; 4 abr 2026
+            </div>
+            <div class="res-grid">
+              <div class="res-metric"><span class="res-val">$5.56/lb</span><span class="res-key">Cobre (-6.10% 3mo)</span></div>
+              <div class="res-metric"><span class="res-val">$4,651/oz</span><span class="res-key">Oro (+4.84% 3mo)</span></div>
+              <div class="res-metric"><span class="res-val">$2.80</span><span class="res-key">Gas nat (-20.52% 3mo)</span></div>
+              <div class="res-metric"><span class="res-val">2/5</span><span class="res-key">Supercycle score (stable)</span></div>
+              <div class="res-metric"><span class="res-val">20</span><span class="res-key">DC news items</span></div>
+              <div class="res-metric"><span class="res-val">5</span><span class="res-key">PJM queue news</span></div>
+            </div>
+            <div style="margin-top:8px;">
+              <span class="res-alert alert-info">FRED DEMO_KEY: CPI/FedFunds requiere API key real</span>
+            </div>
+          </div>
+
+          <!-- QUARTERLY -->
+          <div class="task" data-id="p3-quarterly">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">fetch_quarterly.py &mdash; 13F SA LP, 13D CORZ, earnings scrape</span>
+            <span class="task-file">fetch_quarterly.py</span>
+            <span class="task-tag tag-py">Python</span>
+          </div>
+          <div class="task-result">
+            <div class="res-title">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              Primera ejecuci&oacute;n &mdash; 4 abr 2026 (Q2-2026)
+            </div>
+            <div class="res-grid">
+              <div class="res-metric"><span class="res-val">7</span><span class="res-key">SA LP filings (latest: 2026-02-11)</span></div>
+              <div class="res-metric"><span class="res-val">0</span><span class="res-key">CORZ 13D filings</span></div>
+              <div class="res-metric"><span class="res-val">57 / 45</span><span class="res-key">Up / Down (3mo)</span></div>
+              <div class="res-metric"><span class="res-val">+3.70%</span><span class="res-key">Avg return 3mo</span></div>
+            </div>
+            <div style="margin-top:8px;font-size:.75rem;color:var(--text-sec);">
+              <strong style="color:var(--emerald);">Top 5 gainers:</strong>
+              <span class="res-alert alert-up">LITE +131.6%</span>
+              <span class="res-alert alert-up">TSEM +65.8%</span>
+              <span class="res-alert alert-up">MOD +56.2%</span>
+              <span class="res-alert alert-up">VRT +50.2%</span>
+              <span class="res-alert alert-up">LBRT +49.2%</span>
+            </div>
+            <div style="margin-top:4px;font-size:.75rem;color:var(--text-sec);">
+              <strong style="color:var(--rose);">Top 5 losers:</strong>
+              <span class="res-alert alert-down">OKLO -46.1%</span>
+              <span class="res-alert alert-down">SMR -46.0%</span>
+              <span class="res-alert alert-down">GLXY -32.9%</span>
+              <span class="res-alert alert-down">0981.HK -32.1%</span>
+              <span class="res-alert alert-down">BITF -31.3%</span>
+            </div>
+          </div>
+
+        </div>
+        <div class="phase-progress"><div class="mini-bar"><div class="mini-fill"></div></div><span class="mini-label"></span></div>
+      </div>
+
+      <!-- ─── PHASE 4 ─── -->
+      <div class="phase rv" data-phase="4">
+        <div class="phase-header">
+          <div class="phase-dot">P4</div>
+          <div class="phase-info">
+            <div class="phase-title">Capa 2 &mdash; An&aacute;lisis LLM</div>
+            <div class="phase-desc">Enviar JSON bundles a OpenAI Codex CLI (GPT-5.4, gratis con ChatGPT Plus)</div>
+          </div>
+          <span class="phase-badge badge-active">Abr 4</span>
+        </div>
+        <div class="tasks">
+
+          <!-- ANALYZE BUNDLE -->
+          <div class="task" data-id="p4-bundle">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">analyze_bundle.py &mdash; Codex CLI exec + prompt templates</span>
+            <span class="task-file">analyze_bundle.py</span>
+            <span class="task-tag tag-py">Python</span>
+          </div>
+          <div class="task-result">
+            <div class="res-title">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              Motor de an&aacute;lisis operativo
+            </div>
+            <div style="font-size:.78rem;color:var(--text-sec);line-height:1.6;">
+              Engine: <strong style="color:var(--text-pri);">OpenAI Codex CLI v0.118.0</strong> (GPT-5.4)<br>
+              Modo: <code style="font-family:var(--font-mono);font-size:.75rem;background:var(--bg-raised);padding:1px 6px;border-radius:3px;">codex exec --full-auto</code> con prompt via stdin<br>
+              Coste: <strong style="color:var(--emerald);">$0</strong> (incluido en ChatGPT Plus)<br>
+              Prompts: 4 templates (daily, weekly, monthly, quarterly) con schema JSON forzado
+            </div>
+          </div>
+
+          <!-- CODEX INTEGRATION (replaces Claude/Gemini) -->
+          <div class="task" data-id="p4-codex">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Integraci&oacute;n Codex CLI (GPT-5.4, reemplaza Claude API)</span>
+            <span class="task-tag tag-llm">LLM</span>
+          </div>
+
+          <!-- DAILY ANALYSIS -->
+          <div class="task" data-id="p4-analysis-daily">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">An&aacute;lisis diario ejecutado y validado</span>
+            <span class="task-file">analysis_daily_2026-04-04.json</span>
+            <span class="task-tag tag-llm">LLM</span>
+          </div>
+          <div class="task-result" style="border-left-color:var(--blue);">
+            <div class="res-title" style="color:var(--blue);">
+              <svg viewBox="0 0 24 24" style="stroke:var(--blue)"><polyline points="20 6 9 17 4 12"/></svg>
+              Daily &mdash; 4 abr 2026
+            </div>
+            <div class="res-grid">
+              <div class="res-metric"><span class="res-val" style="color:var(--emerald);">strengthening</span><span class="res-key">Thesis status</span></div>
+              <div class="res-metric"><span class="res-val">8 / 10</span><span class="res-key">Confidence</span></div>
+            </div>
+            <div style="margin-top:8px;font-size:.78rem;color:var(--text-sec);line-height:1.6;">
+              &ldquo;El d&iacute;a confirma que la infraestructura f&iacute;sica de IA sigue ganando valor relativo: &oacute;ptica, capacidad de data center energizada y base-load nuclear se fortalecen mientras el mercado permanece en miedo extremo.&rdquo;
+            </div>
+            <div style="margin-top:6px;">
+              <span class="res-alert alert-up">LITE +8.14% (&oacute;ptica)</span>
+              <span class="res-alert alert-up">CORZ +6.08% (reconversi&oacute;n)</span>
+              <span class="res-alert alert-up">Diablo Canyon aprobado (nuclear)</span>
+              <span class="res-alert alert-info">F&amp;G 19.3 = ventana t&aacute;ctica</span>
+            </div>
+          </div>
+
+          <!-- WEEKLY ANALYSIS -->
+          <div class="task" data-id="p4-analysis-weekly">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">An&aacute;lisis semanal ejecutado y validado</span>
+            <span class="task-file">analysis_weekly_2026-04-04.json</span>
+            <span class="task-tag tag-llm">LLM</span>
+          </div>
+          <div class="task-result" style="border-left-color:var(--blue);">
+            <div class="res-title" style="color:var(--blue);">
+              <svg viewBox="0 0 24 24" style="stroke:var(--blue)"><polyline points="20 6 9 17 4 12"/></svg>
+              Weekly &mdash; 4 abr 2026
+            </div>
+            <div class="res-grid">
+              <div class="res-metric"><span class="res-val" style="color:var(--emerald);">strengthening</span><span class="res-key">Thesis status</span></div>
+              <div class="res-metric"><span class="res-val">8 / 10</span><span class="res-key">Confidence</span></div>
+            </div>
+            <div style="margin-top:8px;font-size:.78rem;color:var(--text-sec);line-height:1.6;">
+              &ldquo;Mining margin en -15.3% y hashrate cayendo: los activos BTC con acceso a potencia est&aacute;n cada vez m&aacute;s incentivados a reconvertirse a IA. El mercado a&uacute;n no refleja del todo ese valor en los due&ntilde;os de los vatios.&rdquo;
+            </div>
+            <div style="margin-top:6px;">
+              <span class="res-alert alert-warn">Mining margin -15.3%</span>
+              <span class="res-alert alert-up">Reconversion signal: STRONG</span>
+              <span class="res-alert alert-info">22 Form 4 filings detectados</span>
+            </div>
+          </div>
+
+          <!-- MONTHLY ANALYSIS -->
+          <div class="task" data-id="p4-analysis-monthly">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">An&aacute;lisis mensual ejecutado y validado</span>
+            <span class="task-file">analysis_monthly_2026-04-04.json</span>
+            <span class="task-tag tag-llm">LLM</span>
+          </div>
+          <div class="task-result" style="border-left-color:var(--amber);">
+            <div class="res-title" style="color:var(--amber);">
+              <svg viewBox="0 0 24 24" style="stroke:var(--amber)"><polyline points="20 6 9 17 4 12"/></svg>
+              Monthly &mdash; 4 abr 2026
+            </div>
+            <div class="res-grid">
+              <div class="res-metric"><span class="res-val" style="color:var(--amber);">intact but less hot</span><span class="res-key">Thesis status</span></div>
+              <div class="res-metric"><span class="res-val">7 / 10</span><span class="res-key">Confidence</span></div>
+            </div>
+            <div style="margin-top:8px;font-size:.78rem;color:var(--text-sec);line-height:1.6;">
+              &ldquo;Se enfr&iacute;a el impulso de commodities, pero no aparece evidencia de normalizaci&oacute;n en ocupaci&oacute;n DC, interconexi&oacute;n ni lead times. Los vatios y la capacidad energizada siguen siendo el activo escaso.&rdquo;
+            </div>
+            <div style="margin-top:6px;">
+              <span class="res-alert alert-info">Supercycle 2/5 stable</span>
+              <span class="res-alert alert-warn">Cobre -6.1% 3mo</span>
+              <span class="res-alert alert-up">Ocupaci&oacute;n DC sin normalizar</span>
+              <span class="res-alert alert-up">Lead times sin comprimir</span>
+            </div>
+          </div>
+
+          <!-- QUARTERLY ANALYSIS -->
+          <div class="task" data-id="p4-analysis-quarterly">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">An&aacute;lisis trimestral ejecutado y validado</span>
+            <span class="task-file">analysis_quarterly_2026-04-04.json</span>
+            <span class="task-tag tag-llm">LLM</span>
+          </div>
+          <div class="task-result" style="border-left-color:var(--violet);">
+            <div class="res-title" style="color:var(--violet);">
+              <svg viewBox="0 0 24 24" style="stroke:var(--violet)"><polyline points="20 6 9 17 4 12"/></svg>
+              Quarterly &mdash; Q2-2026
+            </div>
+            <div class="res-grid">
+              <div class="res-metric"><span class="res-val" style="color:var(--text-sec);">stable</span><span class="res-key">Thesis status</span></div>
+              <div class="res-metric"><span class="res-val">6 / 10</span><span class="res-key">Confidence</span></div>
+            </div>
+            <div style="margin-top:8px;font-size:.78rem;color:var(--text-sec);line-height:1.6;">
+              &ldquo;El valor sigue migrando a los due&ntilde;os de cuellos de botella f&iacute;sicos de IA, pero la falta del dato cr&iacute;tico de capex hyperscaler impide cantar victoria completa.&rdquo;
+            </div>
+            <div style="margin-top:6px;">
+              <span class="res-alert alert-up">7 SA LP filings (latest 2026-02-11)</span>
+              <span class="res-alert alert-up">57 up / 45 down (+3.70% avg)</span>
+              <span class="res-alert alert-warn">Capex hyperscaler: dato no disponible</span>
+              <span class="res-alert alert-up">LITE +131.6% top gainer</span>
+            </div>
+          </div>
+
+        </div>
+        <div class="phase-progress"><div class="mini-bar"><div class="mini-fill"></div></div><span class="mini-label"></span></div>
+      </div>
+
+      <!-- ─── PHASE 5 ─── -->
+      <div class="phase rv" data-phase="5">
+        <div class="phase-header">
+          <div class="phase-dot">P5</div>
+          <div class="phase-info">
+            <div class="phase-title">Capa 3 &mdash; Orquestaci&oacute;n y Dashboard</div>
+            <div class="phase-desc">CLI orquestador, scheduler, dashboard de resultados con alertas</div>
+          </div>
+          <span class="phase-badge badge-pending">Pendiente</span>
+        </div>
+        <div class="tasks">
+          <div class="task" data-id="p5-run">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">run.py &mdash; orquestador CLI (daily|weekly|monthly|quarterly)</span>
+            <span class="task-file">run.py</span>
+            <span class="task-tag tag-py">Python</span>
+          </div>
+          <div class="task" data-id="p5-scheduler">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Scheduler (cron / Task Scheduler) para ejecuci&oacute;n autom&aacute;tica</span>
+            <span class="task-tag tag-ops">Ops</span>
+          </div>
+          <div class="task" data-id="p5-dashboard">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Dashboard HTML de resultados (charts, alertas, timeline)</span>
+            <span class="task-tag tag-html">HTML</span>
+          </div>
+          <div class="task" data-id="p5-alerts">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Sistema de alertas (movimientos >5%, red flags, filings)</span>
+            <span class="task-tag tag-py">Python</span>
+          </div>
+          <div class="task" data-id="p5-history">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Historical data tracking y comparativas temporales</span>
+            <span class="task-tag tag-py">Python</span>
+          </div>
+        </div>
+        <div class="phase-progress"><div class="mini-bar"><div class="mini-fill"></div></div><span class="mini-label"></span></div>
+      </div>
+
+      <!-- ─── PHASE 6 ─── -->
+      <div class="phase rv" data-phase="6">
+        <div class="phase-header">
+          <div class="phase-dot">P6</div>
+          <div class="phase-info">
+            <div class="phase-title">Operaciones y Evoluci&oacute;n</div>
+            <div class="phase-desc">Automatizaci&oacute;n completa, notificaciones, mejora continua</div>
+          </div>
+          <span class="phase-badge badge-pending">Futuro</span>
+        </div>
+        <div class="tasks">
+          <div class="task" data-id="p6-auto-daily">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Ejecuci&oacute;n diaria autom&aacute;tica L-V (fetch + analyze)</span>
+            <span class="task-tag tag-ops">Ops</span>
+          </div>
+          <div class="task" data-id="p6-auto-weekly">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Ejecuci&oacute;n semanal + mensual + trimestral programada</span>
+            <span class="task-tag tag-ops">Ops</span>
+          </div>
+          <div class="task" data-id="p6-notif">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Notificaciones (email, Slack, o Telegram) para alertas rojas</span>
+            <span class="task-tag tag-ops">Ops</span>
+          </div>
+          <div class="task" data-id="p6-backtest">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Backtesting: comparar se&ntilde;ales del engine vs movimientos reales</span>
+            <span class="task-tag tag-py">Python</span>
+          </div>
+          <div class="task" data-id="p6-thesis-track">
+            <div class="task-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="task-label">Thesis tracker: score global de validaci&oacute;n/invalidaci&oacute;n</span>
+            <span class="task-tag tag-html">HTML</span>
+          </div>
+        </div>
+        <div class="phase-progress"><div class="mini-bar"><div class="mini-fill"></div></div><span class="mini-label"></span></div>
+      </div>
+
+    </div><!-- /timeline -->
+
+    <!-- Legend + reset -->
+    <div class="legend rv">
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--emerald)"></div> Completado</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--blue)"></div> En curso</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--text-mut)"></div> Pendiente</div>
+      <div style="flex:1"></div>
+      <button class="reset-btn" id="reset-btn">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 105.58-11.73L1 10"/></svg>
+        Reset
+      </button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Intelligence Engine Roadmap &mdash; <span class="mono">SA LP Thesis Monitor</span></p>
+    <p style="margin-top:6px;font-size:.75rem;">Progreso guardado en localStorage</p>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════
+     JS
+     ══════════════════════════════════════════ -->
+<script>
+(function() {
+  const STORAGE_KEY = 'ie-roadmap-v3';
+
+  // ── Load state ──
+  function loadState() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+    catch { return {}; }
+  }
+  function saveState(state) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  let state = loadState();
+
+  // ── Pre-checked (already done) ──
+  const preDone = [
+    'p0-thesis','p0-taxonomy','p0-13f','p0-verticals','p0-commodities',
+    'p1-html','p1-hyp106','p1-conviction','p1-panel','p1-search','p1-deploy',
+    'p2-arch','p2-daily-spec','p2-weekly-spec','p2-monthly-spec','p2-quarterly-spec','p2-adhoc-spec','p2-presentation','p2-roadmap',
+    'p3-daily','p3-weekly','p3-monthly','p3-quarterly',
+    'p4-bundle','p4-codex','p4-analysis-daily','p4-analysis-weekly','p4-analysis-monthly','p4-analysis-quarterly'
+  ];
+
+  // Initialize: if state is empty, set pre-done items
+  if (Object.keys(state).length === 0) {
+    preDone.forEach(id => { state[id] = true; });
+    saveState(state);
+  }
+
+  // ── Apply state to DOM ──
+  const tasks = document.querySelectorAll('.task');
+  tasks.forEach(t => {
+    const id = t.dataset.id;
+    if (state[id]) t.classList.add('checked');
+
+    t.addEventListener('click', () => {
+      t.classList.toggle('checked');
+      state[id] = t.classList.contains('checked');
+      saveState(state);
+      updateProgress();
+    });
+  });
+
+  // ── Progress calculation ──
+  function updateProgress() {
+    const total = tasks.length;
+    const done = document.querySelectorAll('.task.checked').length;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+
+    document.getElementById('g-done').textContent = done;
+    document.getElementById('g-total').textContent = total;
+    document.getElementById('g-pct').textContent = pct + '%';
+    document.getElementById('g-bar').style.width = pct + '%';
+
+    // Per-phase progress
+    document.querySelectorAll('.phase').forEach(phase => {
+      const pTasks = phase.querySelectorAll('.task');
+      const pDone = phase.querySelectorAll('.task.checked');
+      const pTotal = pTasks.length;
+      const pPct = pTotal ? Math.round((pDone.length / pTotal) * 100) : 0;
+
+      const fill = phase.querySelector('.mini-fill');
+      const label = phase.querySelector('.mini-label');
+      if (fill) fill.style.width = pPct + '%';
+      if (label) label.textContent = pDone.length + '/' + pTotal;
+
+      // Color fill by state
+      if (fill) {
+        if (pPct === 100) fill.style.background = 'var(--emerald)';
+        else if (pPct > 0) fill.style.background = 'var(--blue)';
+        else fill.style.background = 'var(--text-mut)';
+      }
+
+      // Phase dot state
+      const dot = phase.querySelector('.phase-dot');
+      phase.classList.remove('done', 'active');
+      if (pPct === 100) phase.classList.add('done');
+      else if (pPct > 0) phase.classList.add('active');
+    });
+  }
+
+  updateProgress();
+
+  // ── Reset ──
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    if (confirm('Resetear todo el progreso?')) {
+      state = {};
+      saveState(state);
+      tasks.forEach(t => t.classList.remove('checked'));
+      updateProgress();
+    }
+  });
+
+  // ── Scroll reveal ──
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); });
+  }, { threshold: 0.05, rootMargin: '0px 0px -30px 0px' });
+  document.querySelectorAll('.rv').forEach(el => obs.observe(el));
+})();
+</script>
+
+</body>
+</html>
