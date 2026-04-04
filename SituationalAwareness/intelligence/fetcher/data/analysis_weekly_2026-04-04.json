@@ -1,0 +1,91 @@
+{
+  "analysis_type": "weekly",
+  "date": "2026-04-04",
+  "thesis_status": "strengthening",
+  "thesis_confidence": 8,
+  "btc_reconversion_analysis": {
+    "hashrate_trend": "El hashrate global cae a 964.38 EH/s, con -4.61% semanal y -19.15% mensual. La combinación de caída de hashrate y dificultad plana en la última revisión del 2026-04-02 indica estrés económico real en la base minera, no solo volatilidad táctica.",
+    "mining_profitability": "Con BTC en 66913 USD, revenue estimado de 31223.01 USD por EH/día frente a coste eléctrico estimado de 36000 USD por EH/día, el profit estimado es -4776.99 USD por EH/día y el margen -15.3%. Eso valida la tesis de que minar BTC en 2026 está destruyendo valor en activos con acceso a potencia, especialmente si esos mismos vatios pueden monetizarse mejor en HPC/IA.",
+    "reconversion_signal": "strong",
+    "reconversion_thesis": "La señal de reconversión es fuerte porque el negocio incremental de minería está por debajo del coste eléctrico mientras la escasez de capacidad energizada para IA sigue aumentando. En este régimen, los operadores con sites, interconexión, permisos y cooling tienen incentivo económico a pivotar desde hash hacia workloads de IA. La caída del hashrate funciona como evidencia de capitulación marginal y refuerza que el valor migra desde el ASIC hacia el propietario del vatio y del site energizado.",
+    "key_companies": [
+      "CORZ",
+      "APLD",
+      "RIOT",
+      "HUT",
+      "IREN",
+      "BITF",
+      "CLSK",
+      "BTDR"
+    ]
+  },
+  "short_interest_analysis": {
+    "notable_changes": "No hay cambios cuantificables en este bundle porque todas las consultas de short interest devolvieron HTTP 401. La ausencia de dato impide confirmar aumento o compresión de cortos esta semana.",
+    "squeeze_candidates": [
+      {
+        "ticker": "CORZ",
+        "read": "Candidato conceptual, no confirmado por dato. Si el mercado empieza a revalorar sus activos reconvertibles a IA, la narrativa puede moverse más rápido que el consenso bajista tradicional sobre mineros."
+      },
+      {
+        "ticker": "APLD",
+        "read": "Candidato conceptual, no confirmado por dato. Tiene exposición directa a la re-rating de capacidad energizada para HPC/IA frente a economics pobres de minería."
+      },
+      {
+        "ticker": "RIOT",
+        "read": "Candidato conceptual, no confirmado por dato. El mercado podría seguir penalizando su herencia minera incluso cuando el valor opcional de power y land mejora."
+      }
+    ],
+    "bears_building_on": "No demostrable con la evidencia disponible. Si los bajistas están construyendo, probablemente lo hacen sobre names legacy de minería pura; pero este bundle no permite distinguir entre presión bajista real y simple falta de acceso al feed."
+  },
+  "insider_activity": {
+    "summary": "Hay actividad insider reportada en BE, CORZ, CRWV, VRT y OKLO durante la semana, pero el feed llega sin entidad, tipo de formulario ni descripción. Por tanto, la señal informativa es débil: sabemos que hubo filings, no si son compras, ventas programadas o grants.",
+    "notable_trades": [
+      {
+        "ticker": "CORZ",
+        "dates": [
+          "2026-04-02"
+        ],
+        "count": 2,
+        "read": "Relevante por contexto estratégico. La mera aparición de filings en CORZ merece seguimiento manual dado el ángulo activista de reconversión BTC a IA, pero no puede interpretarse como bullish o bearish sin el Form 4 completo."
+      },
+      {
+        "ticker": "CRWV",
+        "dates": [
+          "2026-04-02"
+        ],
+        "count": 5,
+        "read": "Alta densidad de filings en una sola fecha. Sin metadatos, el caso base es actividad administrativa o desbloqueos más que una señal direccional."
+      },
+      {
+        "ticker": "BE",
+        "dates": [
+          "2026-04-01",
+          "2026-04-02",
+          "2026-04-03"
+        ],
+        "count": 5,
+        "read": "Flujo recurrente a lo largo de varios días, pero sin detalle suficiente para inferir convicción insider."
+      }
+    ],
+    "signal": "neutral_to_ambiguous"
+  },
+  "etf_flows_read": {
+    "institutional_interest": "El bloque ETF no muestra capitulación ni euforia. Semis se mantienen algo por encima de tendencia con SOXX en ratio 1.16 y SMH en 1.05, mientras utilities están estables con XLU en 1.01. En cambio, infraestructura física más directa como SRVR (0.63), GRID (0.79), URA (0.91) y URNM (0.86) no muestran todavía una avalancha institucional.",
+    "rotation_signal": "La rotación semanal parece seguir favoreciendo exposición líquida a semis antes que la parte más ilíquida o temprana de power, grid y data centers. Eso sugiere que el mercado reconoce la demanda de IA, pero aún no descuenta plenamente dónde está el verdadero cuello de botella físico.",
+    "thesis_impact": "Levemente positivo para la tesis. La falta de sobrecalentamiento en ETFs de power, uranium y data center implica que el trade de dueños de vatios sigue relativamente poco crowded, mientras los economics negativos de minería ya presionan para reasignar capacidad."
+  },
+  "action_items": [
+    "Validar manualmente short interest en CORZ, APLD, RIOT, HUT e IREN con una fuente alternativa al feed que devolvió 401.",
+    "Descargar y clasificar los Form 4 de CORZ para distinguir ventas automáticas, grants o compras netas reales.",
+    "Seguir semanalmente revenue por EH/día frente a coste eléctrico para medir cuándo el estrés minero fuerza más anuncios de reconversión.",
+    "Priorizar vigilancia sobre CORZ y comparables con activos energizados, fibra y cooling reutilizable para IA.",
+    "Comparar el descenso de hashrate con futuras contrataciones de capacidad HPC para detectar transferencia de oferta desde BTC hacia IA."
+  ],
+  "one_liner": "La semana valida la tesis SA LP: con margen minero en -15.3% y hashrate cayendo, los activos BTC con acceso a potencia están cada vez más incentivados a reconvertirse a IA, mientras el mercado aún no refleja del todo ese valor en los dueños de los vatios.",
+  "_meta": {
+    "engine": "codex-cli",
+    "model": "gpt-5.4",
+    "analyzed_at": "2026-04-04T01:31:12.380916+00:00",
+    "cost": "$0 (ChatGPT Plus)"
+  }
+}

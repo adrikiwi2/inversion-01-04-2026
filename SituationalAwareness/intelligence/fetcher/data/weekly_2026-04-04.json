@@ -1,0 +1,324 @@
+{
+  "date": "2026-04-04",
+  "fetched_at": "2026-04-04T00:48:38.850465+00:00",
+  "btc_mining": {
+    "hashrate_ehs": 964.38,
+    "hashrate_change_1w": "-4.61%",
+    "hashrate_change_1m": "-19.15%",
+    "difficulty_last_adjustment": "-0.00%",
+    "difficulty_last_date": "2026-04-02",
+    "btc_price": 66913,
+    "daily_btc_mined": 450.0,
+    "revenue_per_eh_day_usd": 31223.01,
+    "est_electricity_cost_per_eh_day_usd": 36000.0,
+    "est_profit_per_eh_day_usd": -4776.99,
+    "est_margin_pct": -15.3,
+    "reconversion_signal": "strong"
+  },
+  "short_interest": {
+    "CRWV": {
+      "ticker": "CRWV",
+      "error": "HTTP 401"
+    },
+    "BE": {
+      "ticker": "BE",
+      "error": "HTTP 401"
+    },
+    "CORZ": {
+      "ticker": "CORZ",
+      "error": "HTTP 401"
+    },
+    "LITE": {
+      "ticker": "LITE",
+      "error": "HTTP 401"
+    },
+    "INTC": {
+      "ticker": "INTC",
+      "error": "HTTP 401"
+    },
+    "APLD": {
+      "ticker": "APLD",
+      "error": "HTTP 401"
+    },
+    "RIOT": {
+      "ticker": "RIOT",
+      "error": "HTTP 401"
+    },
+    "HUT": {
+      "ticker": "HUT",
+      "error": "HTTP 401"
+    },
+    "CLSK": {
+      "ticker": "CLSK",
+      "error": "HTTP 401"
+    },
+    "IREN": {
+      "ticker": "IREN",
+      "error": "HTTP 401"
+    },
+    "NVDA": {
+      "ticker": "NVDA",
+      "error": "HTTP 401"
+    },
+    "EQIX": {
+      "ticker": "EQIX",
+      "error": "HTTP 401"
+    },
+    "VRT": {
+      "ticker": "VRT",
+      "error": "HTTP 401"
+    },
+    "OKLO": {
+      "ticker": "OKLO",
+      "error": "HTTP 401"
+    },
+    "SMR": {
+      "ticker": "SMR",
+      "error": "HTTP 401"
+    },
+    "CCJ": {
+      "ticker": "CCJ",
+      "error": "HTTP 401"
+    },
+    "FCX": {
+      "ticker": "FCX",
+      "error": "HTTP 401"
+    }
+  },
+  "insider_trades": [
+    {
+      "ticker": "BE",
+      "entity": null,
+      "form": null,
+      "date": "2026-04-02",
+      "description": ""
+    },
+    {
+      "ticker": "BE",
+      "entity": null,
+      "form": null,
+      "date": "2026-04-02",
+      "description": ""
+    },
+    {
+      "ticker": "BE",
+      "entity": null,
+      "form": null,
+      "date": "2026-04-03",
+      "description": ""
+    },
+    {
+      "ticker": "BE",
+      "entity": null,
+      "form": null,
+      "date": "2026-04-01",
+      "description": ""
+    },
+    {
+      "ticker": "BE",
+      "entity": null,
+      "form": null,
+      "date": "2026-04-03",
+      "description": ""
+    },
+    {
+      "ticker": "CORZ",
+      "entity": null,
+      "form": null,
+      "date": "2026-04-02",
+      "description": ""
+    },
+    {
+      "ticker": "CORZ",
+      "entity": null,
+      "form": null,
+      "date": "2026-04-02",
+      "description": ""
+    },
+    {
+      "ticker": "CRWV",
+      "entity": null,
+      "form": null,
+      "date": "2026-04-02",
+      "description": ""
+    },
+    {
+      "ticker": "CRWV",
+      "entity": null,
+      "form": null,
+      "date": "2026-04-02",
+      "description": ""
+    },
+    {
+      "ticker": "CRWV",
+      "entity": null,
+      "form": null,
+      "date": "2026-04-02",
+      "description": ""
+    },
+    {
+      "ticker": "CRWV",
+      "entity": null,
+      "form": null,
+      "date": "2026-04-02",
+      "description": ""
+    },
+    {
+      "ticker": "CRWV",
+      "entity": null,
+      "form": null,
+      "date": "2026-04-02",
+      "description": ""
+    },
+    {
+      "ticker": "VRT",
+      "entity": null,
+      "form": null,
+      "date": "2026-03-30",
+      "description": ""
+    },
+    {
+      "ticker": "VRT",
+      "entity": null,
+      "form": null,
+      "date": "2026-03-30",
+      "description": ""
+    },
+    {
+      "ticker": "VRT",
+      "entity": null,
+      "form": null,
+      "date": "2026-03-30",
+      "description": ""
+    },
+    {
+      "ticker": "VRT",
+      "entity": null,
+      "form": null,
+      "date": "2026-03-30",
+      "description": ""
+    },
+    {
+      "ticker": "VRT",
+      "entity": null,
+      "form": null,
+      "date": "2026-03-30",
+      "description": ""
+    },
+    {
+      "ticker": "OKLO",
+      "entity": null,
+      "form": null,
+      "date": "2026-04-01",
+      "description": ""
+    },
+    {
+      "ticker": "OKLO",
+      "entity": null,
+      "form": null,
+      "date": "2026-04-03",
+      "description": ""
+    },
+    {
+      "ticker": "OKLO",
+      "entity": null,
+      "form": null,
+      "date": "2026-03-30",
+      "description": ""
+    },
+    {
+      "ticker": "OKLO",
+      "entity": null,
+      "form": null,
+      "date": "2026-03-30",
+      "description": ""
+    },
+    {
+      "ticker": "OKLO",
+      "entity": null,
+      "form": null,
+      "date": "2026-04-03",
+      "description": ""
+    }
+  ],
+  "etf_activity": {
+    "SMH": {
+      "ticker": "SMH",
+      "avg_vol_5d": 11431140,
+      "avg_vol_20d": 10844043,
+      "ratio": 1.05,
+      "flag": "normal"
+    },
+    "SOXX": {
+      "ticker": "SOXX",
+      "avg_vol_5d": 10045580,
+      "avg_vol_20d": 8644956,
+      "ratio": 1.16,
+      "flag": "normal"
+    },
+    "COPX": {
+      "ticker": "COPX",
+      "avg_vol_5d": 4528080,
+      "avg_vol_20d": 5197065,
+      "ratio": 0.87,
+      "flag": "normal"
+    },
+    "URA": {
+      "ticker": "URA",
+      "avg_vol_5d": 3609260,
+      "avg_vol_20d": 3951821,
+      "ratio": 0.91,
+      "flag": "normal"
+    },
+    "URNM": {
+      "ticker": "URNM",
+      "avg_vol_5d": 643040,
+      "avg_vol_20d": 747247,
+      "ratio": 0.86,
+      "flag": "normal"
+    },
+    "GRID": {
+      "ticker": "GRID",
+      "avg_vol_5d": 415100,
+      "avg_vol_20d": 527391,
+      "ratio": 0.79,
+      "flag": "normal"
+    },
+    "SRVR": {
+      "ticker": "SRVR",
+      "avg_vol_5d": 50920,
+      "avg_vol_20d": 80543,
+      "ratio": 0.63,
+      "flag": "normal"
+    },
+    "XLU": {
+      "ticker": "XLU",
+      "avg_vol_5d": 29181240,
+      "avg_vol_20d": 28756030,
+      "ratio": 1.01,
+      "flag": "normal"
+    },
+    "GDX": {
+      "ticker": "GDX",
+      "avg_vol_5d": 32141900,
+      "avg_vol_20d": 33531317,
+      "ratio": 0.96,
+      "flag": "normal"
+    },
+    "EWT": {
+      "ticker": "EWT",
+      "avg_vol_5d": 7440100,
+      "avg_vol_20d": 8133713,
+      "ratio": 0.91,
+      "flag": "normal"
+    }
+  },
+  "alerts": [
+    {
+      "type": "reconversion_signal",
+      "signal": "strong",
+      "margin": -15.3,
+      "note": "Mining margins compressing — reconversion to AI more attractive"
+    }
+  ]
+}

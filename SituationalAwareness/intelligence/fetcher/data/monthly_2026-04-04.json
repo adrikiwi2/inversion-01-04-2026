@@ -1,0 +1,336 @@
+{
+  "date": "2026-04-04",
+  "fetched_at": "2026-04-04T00:49:05.532792+00:00",
+  "commodities_deep": {
+    "copper": {
+      "ticker": "HG=F",
+      "price": 5.56,
+      "currency": "USD",
+      "change_period": "-6.10%",
+      "change_1m": "-4.99%",
+      "high_period": 6.51,
+      "low_period": 5.27,
+      "high_52w": 6.51,
+      "low_52w": 4.1,
+      "unit": "$/lb",
+      "price_per_ton": 12257.69
+    },
+    "gold": {
+      "ticker": "GC=F",
+      "price": 4651.5,
+      "currency": "USD",
+      "change_period": "+4.84%",
+      "change_1m": "-9.15%",
+      "high_period": 5586.2,
+      "low_period": 4100.8,
+      "high_52w": 5586.2,
+      "low_52w": 2949.7,
+      "unit": "$/oz"
+    },
+    "natgas": {
+      "ticker": "NG=F",
+      "price": 2.8,
+      "currency": "USD",
+      "change_period": "-20.52%",
+      "change_1m": "-4.01%",
+      "high_period": 7.83,
+      "low_period": 2.78,
+      "high_52w": 7.83,
+      "low_52w": 2.62,
+      "unit": "$/MMBtu"
+    },
+    "uranium_proxy": {
+      "ura_etf": {
+        "ticker": "URA",
+        "price": 48.9,
+        "currency": "USD",
+        "change_period": "+0.56%",
+        "change_1m": "-7.33%",
+        "high_period": 62.28,
+        "low_period": 44.76,
+        "high_52w": 62.28,
+        "low_52w": 19.5
+      },
+      "sprott_trust": {
+        "ticker": "SRUUF",
+        "price": 20.31,
+        "currency": "USD",
+        "change_period": "+3.61%",
+        "change_1m": "+0.50%",
+        "high_period": 24.77,
+        "low_period": 18.11,
+        "high_52w": 24.77,
+        "low_52w": 12.55
+      },
+      "note": "Para spot real consultar numerco.com"
+    },
+    "lithium_proxy": {
+      "albemarle": {
+        "ticker": "ALB",
+        "price": 178.09,
+        "currency": "USD",
+        "change_period": "+21.87%",
+        "change_1m": "+5.79%",
+        "high_period": 206.0,
+        "low_period": 145.06,
+        "high_52w": 206.0,
+        "low_52w": 49.43
+      },
+      "lit_etf": {
+        "ticker": "LIT",
+        "price": 74.17,
+        "currency": "USD",
+        "change_period": "+10.03%",
+        "change_1m": "+4.26%",
+        "high_period": 78.0,
+        "low_period": 66.58,
+        "high_52w": 78.0,
+        "low_52w": 31.44
+      }
+    },
+    "rare_earths_proxy": {
+      "mp_materials": {
+        "ticker": "MP",
+        "price": 49.73,
+        "currency": "USD",
+        "change_period": "-15.17%",
+        "change_1m": "-19.28%",
+        "high_period": 72.93,
+        "low_period": 44.43,
+        "high_52w": 100.25,
+        "low_52w": 18.64
+      },
+      "remx_etf": {
+        "ticker": "REMX",
+        "price": 88.9,
+        "currency": "USD",
+        "change_period": "+11.53%",
+        "change_1m": "-9.16%",
+        "high_period": 103.68,
+        "low_period": 77.5,
+        "high_52w": 103.68,
+        "low_52w": 32.36
+      }
+    }
+  },
+  "pjm_queue": {
+    "data_available": true,
+    "source": "Google News RSS fallback",
+    "news": [
+      {
+        "title": "PJM’s Speed to Power Problem and How to Fix It - RMI",
+        "link": "https://news.google.com/rss/articles/CBMib0FVX3lxTE90bXVLR0NJdFdGZFNuWEsyOTJlQ3RWVWJQMklIR2JYWFZtUjkzTzBfY2tCejVsUnZsUDJkM2tjNm84ZUJYbVNCSS03NHJTOW9sWmJCaE40SmJ3SVNzUnlOTktsYklNVkxlZ0dOQl9zWQ?oc=5",
+        "pubDate": "Tue, 04 Nov 2025 08:00:00 GMT",
+        "source": "RMI"
+      },
+      {
+        "title": "How M&A Could Unclog PJM’s Interconnection Queue - TD World",
+        "link": "https://news.google.com/rss/articles/CBMiowFBVV95cUxNY1B4OGFELUU1d3M1VkxjdXRBQ0xXakJkeHlRUTMtRlB4cDF5NTEzZ1Rxai1wV2ZEZmV6dkRSM1NQRlFzNzJjTEVkNnpweDBLTmJaWU12cU4zSlplUmRFZFQxNDRqaTFRaHRjUUFnOEZfYVpGdVpSbnYxNW1BdTk1emluM2JYNVRuLVV2TTRDT2cyRjlVeFNzS1RBa2VsOHNZZWlv?oc=5",
+        "pubDate": "Wed, 11 Mar 2026 23:10:40 GMT",
+        "source": "TD World"
+      },
+      {
+        "title": "PJM Capacity Price Hits Cap as Clean Energy Projects Remain Stalled - Inside Climate News",
+        "link": "https://news.google.com/rss/articles/CBMie0FVX3lxTE5YMWl5RDN3ei01dEJnU1pnaDRXdERtUmRyNFFLX0ZBUllkcnVTQkZNUE5QVjdORlBJZXdTX2Y5Zi1SamhwMmVGSUFMS0xqSklHWGYwWjlyYzZiUENiaWJHSG91Vy1ycnJJNTBlR0piZDVMRDVUQmxZSEQwWQ?oc=5",
+        "pubDate": "Tue, 22 Jul 2025 07:00:00 GMT",
+        "source": "Inside Climate News"
+      },
+      {
+        "title": "PJM Auction Procures 134,311 MW of Generation Resources; Supply Responds to Price Signal - PJM Inside Lines",
+        "link": "https://news.google.com/rss/articles/CBMitgFBVV95cUxQdmQzR3IzSktBZWRNVmhUS0dvdVdDdUtRaHBtWkdvTGRmMVJSVXFhdEU0dHFxTld5RlZHRS15UFcwTjhGVFBhOXNDcEZiM195c1FjTzQyMDBlNjRYSUh4dWlqdExxS2gzVkVrYXM2MUlRUTV2cmpPQXFjWWdacWtGNGZSM3JEakFaVTdVbkFud1VwUU0tNFg5SWRWbXNfZ0RtcE9yVkdrdllXV3Z6Ri0yQkRtQzhuZw?oc=5",
+        "pubDate": "Tue, 22 Jul 2025 07:00:00 GMT",
+        "source": "PJM Inside Lines"
+      },
+      {
+        "title": "PJM Chooses 51 Generation Resource Projects To Address Near-Term Electricity Demand Growth - PJM Inside Lines",
+        "link": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxOaG40NGJDX1hhdl95bWVSTzhlV2lpbUI0aU93YVp2Y0hfTktUcmJsV3VQc3JsSFd1TjRHUlhwVWxvcTNtY29HaXcxRHp0Y0VRT1ZaNnhFOENETnljLVo1clNZSDUyUHFOYzFfVFhQWkZBdkliSThQdVRpZXpfMndWSlJ6MF83X29zUjUzUG8zQjUxLUZhVncyQ1BQa1pTdTVBZjVYSThXY0lFUVYyRExwWXlWbHJPT0Nxd0tR?oc=5",
+        "pubDate": "Fri, 02 May 2025 07:00:00 GMT",
+        "source": "PJM Inside Lines"
+      }
+    ]
+  },
+  "macro": {
+    "cpi": {
+      "series": "CPIAUCSL",
+      "error": "HTTP 400"
+    },
+    "fed_funds": {
+      "series": "FEDFUNDS",
+      "error": "HTTP 400"
+    },
+    "industrial_production": {
+      "series": "INDPRO",
+      "error": "HTTP 400"
+    }
+  },
+  "dc_news": {
+    "occupancy": [
+      {
+        "title": "EMEA​ year end data centre report 2025 - JLL",
+        "link": "https://news.google.com/rss/articles/CBMiakFVX3lxTFBPalZHMXZHN3JCam9HQno1Qko0XzVvOUNHM3F6bW5uNzVTNE9VOXpjSFk1NVdhbEcxUHhXeTh2ZlFJSWxkeUxGSmh6Y0Z0TTlaOXlEOTd5X0UtamEzQldYYnFSNWJJaC1TWkE?oc=5",
+        "pubDate": "Mon, 30 Mar 2026 07:00:00 GMT",
+        "source": "JLL"
+      },
+      {
+        "title": "Is There Enough Data Center Capacity for AI? - Goldman Sachs",
+        "link": "https://news.google.com/rss/articles/CBMilAFBVV95cUxOOXlWc0FiWXZ4UjdwLVZpZHVEdGhwYWRVSVQ1eU5MSUNXMFh3d3JObldjaDZkZlpMU1U5ZUMyNjRKN3Q3WGFLWWZRaExvRldsUmJrNmc3RUhfN2thOFpZLXhYSERQMkV1aC1tcUowOW8tRS1wcVN4emh5Z0U1LW9DNm9BdnBpUzRqYi1JNDFhcTN6d1Br?oc=5",
+        "pubDate": "Thu, 11 Dec 2025 08:00:00 GMT",
+        "source": "Goldman Sachs"
+      },
+      {
+        "title": "North America Data Center Trends H2 2025 - CBRE",
+        "link": "https://news.google.com/rss/articles/CBMiggFBVV95cUxQQXE3RkFvSkhaR3RXeThLLWs4bE1xVjRDSDZZTEhya1FMR080UUNIZ3ZkZ09UM0pyMVZ2d1NHcDlYR1pMamJLYlJHSWloVnd6WVRQZW5sS3ljeHFoOFBPTmNvbmJOX0pqWDVrQ09McjhBbk1wU3B4WVpJTDhvM3N5WDJR?oc=5",
+        "pubDate": "Wed, 25 Feb 2026 23:52:10 GMT",
+        "source": "CBRE"
+      },
+      {
+        "title": "Infrastructure problems and low occupancy hamper growth of Africa's data center industry - report - Data Center Dynamics",
+        "link": "https://news.google.com/rss/articles/CBMi1AFBVV95cUxOcENMZkIyNHhKaDk0NlpTZXF4cm1iQkl1d3BtblpJdnlVRFJuTW9NNndUUkJxeDdDWWhmSVRjc0FmT21aelJ4UDRoODNreV9mcnJ4M2FMN0VuVnRGMVV5UFU3WWY4YTltd0ctOHl1Z3RCSmhYY2V4UW5jYUw0T3ZkalM4aWphNHBfUHNJVVA4b2pRaUxUZkZKN29jNDVBS3FiS09mZTNCeWRMSXVFUFk2Q3Fwc3RVOVIxOGlfUHU0MDNMYlRfVi1DdFpDVVNJNWhvZ3dHaA?oc=5",
+        "pubDate": "Wed, 25 Feb 2026 08:00:00 GMT",
+        "source": "Data Center Dynamics"
+      },
+      {
+        "title": "Americas Data Center Update | H2 2025 - Cushman & Wakefield",
+        "link": "https://news.google.com/rss/articles/CBMifEFVX3lxTFBxUkxvT1pzNVBkamIxMVhmd2I3b2stQU41U1I0cXVwTy1tTFF4bE90SUQ4S05vcDVsS1puRVFFVl95Q1k2UEY3eHhudUpsSzA3YUpIdm9SQVM4bF9IUWVSZDQteWYySXc0Q1dYMTFQdGtlYmQwLVZHYmxCOEE?oc=5",
+        "pubDate": "Tue, 24 Feb 2026 08:00:00 GMT",
+        "source": "Cushman & Wakefield"
+      }
+    ],
+    "equipment_lead_times": [
+      {
+        "title": "Transformers in 2026: Shortage, Scramble, or Self-Inflicted Crisis? - POWER Magazine",
+        "link": "https://news.google.com/rss/articles/CBMikwFBVV95cUxOcm55Rl8xTUZKenlHTl95c191TzBMTVhOdHAtZTFaYWctTDdfQ1F4WVA3aUdvWURlcFJMSEZXVlVVdFpLNHhQXzN3T2c3U3hPS0ZHN2VmQUlWTXZhamNBSDF4VDVlS3NiampHaVFYdFlicVBtQTdCZHNyRWRUcFJvN0N4dUlPck1ZQ0xNMFl5SEVrelU?oc=5",
+        "pubDate": "Fri, 02 Jan 2026 08:00:00 GMT",
+        "source": "POWER Magazine"
+      },
+      {
+        "title": "Transformer troubles: manufacturing and policy constraints hit US transformer supply - Wood Mackenzie",
+        "link": "https://news.google.com/rss/articles/CBMivgFBVV95cUxNak1BbjdPNENySmJkT2ltR0x1QXAwWkttbEQ1cElsZEs0SVFPUFB0c0g4SHNxTlViZHg5cUFKU3JTdl9JZmFWbTRfOU9GWVlmQmpuTEQtNnFsZEJOWnZvczNzNjJMTk9mTEtOa1RrakstbzY3U1FMS04xSjA1YWI1aVdMaUh0TzZWdU84UnAzNG1hYUNLS3Z6UF9ubEtOaVl6bHJTakE5RG9zbUp2WEd3cFUwRWRSRHEtZHBVQndB?oc=5",
+        "pubDate": "Wed, 13 Aug 2025 07:00:00 GMT",
+        "source": "Wood Mackenzie"
+      },
+      {
+        "title": "Transformer, breaker backlogs persist, despite reshoring progress - Utility Dive",
+        "link": "https://news.google.com/rss/articles/CBMipgFBVV95cUxNNktuT0VYWWV4MGdfU0dyaU80UUN0UnU4MkhDY3hsLWFTdkZxYWpEM0tocG5qSnNSQk53TlBaNHpJVzMteUZKMWVPa2xSYjhac3JCZENjV1JzUzBoZ3Nsem9RX3dwN290eC1KOHh5d29JT29hUlF0RHN2V18zejNUblhnZURZbzIzSHRldWpOcUpibmRVSFZ1QWpPcG9pcHRJR0hpc1pn?oc=5",
+        "pubDate": "Thu, 29 May 2025 07:00:00 GMT",
+        "source": "Utility Dive"
+      },
+      {
+        "title": "Micron's Singapore expansion could trigger global transformer shortage and delay AI data centers - digitimes",
+        "link": "https://news.google.com/rss/articles/CBMiowFBVV95cUxQZDFReGhDeHF5aXMtcHpJUTdDal9fcXJjNUxseGxUSUFOZmZVTzFuQUZDbEFtem1WMTlrbjNMQ0EzM0pkZmdXdm83aDNZUjV6WWpENkFJTjZhTWFkTXZpdFhhQkpTVmE5TTlXX0ZySFNKRkowUFo4c2l1U0tkZkxxdlVwQ0RLRDQtbWJ5UmR3Q2JBZEhGT09vdlNCZ2J5SmpuaXJR?oc=5",
+        "pubDate": "Wed, 25 Mar 2026 07:00:00 GMT",
+        "source": "digitimes"
+      },
+      {
+        "title": "Transformer shortage risks stalling U.S. energy future - MSN",
+        "link": "https://news.google.com/rss/articles/CBMi6wFBVV95cUxPQm9LaTU4U2ZNSTM1RWdoZHJJX1hTMV9kNFlCV24xYmxycGRhS0ozZzAtbWJDOW5TRThhMzloV3pfbkxBazNKSVdQMmUwZEdMeUhBVWVPRVFtdWNPRFgyWjNaenpyZV9mWWdJRDdnWHRjQjNVd0g4OHhaWEhleTRZQXF4Y2JZMmV0RldTV3ZFUHI0SUUxRHFLWVlEU1FnYU01U2pLcFBMNlg0X1p2aWtNakFhRmdkRnF6QVR6X3ZYRDI3Z1l5bDgzMTFJMU9KcEE4RzV0YTRZd0huNUwzbUE0SXppeFBRaU9nRmFF?oc=5",
+        "pubDate": "Tue, 17 Mar 2026 07:00:00 GMT",
+        "source": "MSN"
+      }
+    ],
+    "ferc_interconnection": [
+      {
+        "title": "FERC rejects RWE complaint over PJM interconnection practices - Utility Dive",
+        "link": "https://news.google.com/rss/articles/CBMilgFBVV95cUxPN2dFOHVndXplZC11eEpQZ3cyN01Xb0phN1F3RGxHVVg3UW9ORDZZaXgyeEVKRTBHOW1Fb1FFRVVKbUItWVJtT2lKNE04MW1ZRlBzUEFwR0V3U3U5X0lvZGE0TTJGbzZsc2dvYlhZX3QzeTYxX19ENUpVUVladVByc0tlazU5RmR6Q3pEajI5YkhPREFETUE?oc=5",
+        "pubDate": "Fri, 20 Mar 2026 07:00:00 GMT",
+        "source": "Utility Dive"
+      },
+      {
+        "title": "The DOE proposes a standardized FERC interconnection process for data centers and other large industrial load - www.hoganlovells.com",
+        "link": "https://news.google.com/rss/articles/CBMizAFBVV95cUxNR1YtOGUwYTJIUlNoVGdNSEJtODlfTjVSRjRkVy1Ubl81RUZFWWRXRnQzczZDZXJLUkVpcUgycEphS3JBalFDbDFzSU5qUUgzVkRvdEZPS3JVT1cxYU9mVklucUcxaHlwQlRTeHJfZEpTOXREdlFmbkFlaGtvaFNtWlI4SmhLUHZnQ21QUHljR1pxTm0zOGw4eXBEckdMNjEycFpncTlqbnRMUTdzWDhvUWNIWktIYjhobjRJSVU3Y3lUQl8xcGxJS3l2M2k?oc=5",
+        "pubDate": "Mon, 27 Oct 2025 07:00:00 GMT",
+        "source": "www.hoganlovells.com"
+      },
+      {
+        "title": "DOE directs FERC to accelerate interconnection of data centers - White & Case LLP",
+        "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxOZ2NVZTlMd29tNlJUel9DSHhlbFlwZGkyUE1xOTNFOUp0ZlVZZjRsVGIxamZQelNJTnNyemg4LXNHZVlnUzRMdHkwbjF0SHJPM3FvTzI3MlUzUVRCbHd1c0ItSXVCYWZTTUdqVVhWOXVwT3dwQmVxSEZ3NEU3WEZuRGRqcTZQOEdQRnNGNkQwc2I1dk96aXJPVmtxVjQ?oc=5",
+        "pubDate": "Mon, 27 Oct 2025 07:00:00 GMT",
+        "source": "White & Case LLP"
+      },
+      {
+        "title": "The Interconnection Queue Continues to Be a Barrier to American Economic Competitiveness - RMI",
+        "link": "https://news.google.com/rss/articles/CBMifEFVX3lxTFBxd3FMM1FXaV9FQm9IRnU5UDY5T1VnTy1rd3A1aWlzQzgwczhzRVdPRkYxbGlBajlvNUVPQWtWMVpOdnc1VUU1VVZjQ3JJa1NCdjVaSHUxQlNaOExfaG5xSDJJTnZ6LUtBMVBHSVZXcS1qaEFPTUM3alBRcVU?oc=5",
+        "pubDate": "Tue, 17 Mar 2026 07:00:00 GMT",
+        "source": "RMI"
+      },
+      {
+        "title": "Akin, an Elite Global Law Firm - Akin",
+        "link": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxQOEhfZmxYQWkwdDJGeVBQN2hkQVJhNU03SE5iVUtwQW5EUFNMcWh0WXRqY1F4dDdWWkdOMEgtR3M5czBpc1VscUYzZTdKYnQ3Q0UzQVdmRU1hZU5IdXBHazNFbXBGUnpqYlRwaGZCTFBhLXlkalZaOHRNQ0hlbDctSDZiQXB3ZVJDZlBOLXIzZTdnSFg5WTREU29zVlF6SjRKR3pPY2lXRk5BNTlEZ2gzVTBmaXVXY1lpNzBobkE0U1dCMDQ?oc=5",
+        "pubDate": "Mon, 27 Oct 2025 07:00:00 GMT",
+        "source": "Akin"
+      }
+    ],
+    "liquid_cooling": [
+      {
+        "title": "Will Ecolab’s $4.75B CoolIT Systems Bet Define the Future of GPU Liquid Cooling? - The Futurum Group",
+        "link": "https://news.google.com/rss/articles/CBMisgFBVV95cUxOUjdJUTBFU2hEbnNOaW9JLTdNSnlyXzRybXVLUWwtdG1YS25XYUNVakp3NjAxTjNiekhWNVlTcVpIeWJTWkloRENYZURESkNQekNNWVVsanlrVm1KN3BTTDJ0VFlIV3hmbmx2YTNiczUtdVZBdlMza19hMnYzcldWcFFkOGhEWHIxbGNqX090bkFDUjdwLW9qM3lEM0Z1U2F0dlNWNzNIdWlEdE45SWJLVERB?oc=5",
+        "pubDate": "Wed, 01 Apr 2026 14:46:24 GMT",
+        "source": "The Futurum Group"
+      },
+      {
+        "title": "Prediction: Liquid Cooling Will Be the Next Supercycle Within the AI Supercycle. 1 Growth Stock to Own. - The Motley Fool",
+        "link": "https://news.google.com/rss/articles/CBMilAFBVV95cUxQelI4cDVKQzVCQ3dEelRwcllRelRucDFOZ0V2NHUtMjFnd2E3UWFMRnVUajFTSmxVanpLcTQ2d0hyaUxZc19hOUV1N0JFNjl2MTBmVDBVNDBlSW1SWjY4WTJXVlZFM3AzN1BoRmgwN1JMTFdpTFBSeW9CTGtpVFBCenBBaTU1VmhwXzJ6UDk4M0RQajZJ?oc=5",
+        "pubDate": "Wed, 01 Apr 2026 21:28:00 GMT",
+        "source": "The Motley Fool"
+      },
+      {
+        "title": "Ecolab to Acquire CoolIT Systems, a Global Leader in Advanced Liquid Cooling for Next-Gen AI Data Centers - Ecolab",
+        "link": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxPSTZKQktoNURaOHltVUtfVjhibV9oMDgxUmEzNzNNbTNwRmtCWWRlRDVYVzAzaUhIR1hXMGlyOGt4S1NOMnhIbUgzU2E1WFJRMktPRGFEcWNtLWw5Y25vNDdFeUJHbks3TTBRajctM2UwZUhjSUVsMXVZemN3SU1iR3UyQ0h6NWxkV1FDTzFVRTNaS0xpbVFZX3NJU09UOTItX3hhWVBlVG5jbGxtM1lmaGllTmdCdFo3SVJPUjYzczJPQ3FwUUt2NFpmQTVBT0JK?oc=5",
+        "pubDate": "Fri, 20 Mar 2026 07:00:00 GMT",
+        "source": "Ecolab"
+      },
+      {
+        "title": "Top 10: Liquid Cooling Companies - Data Centre Magazine",
+        "link": "https://news.google.com/rss/articles/CBMid0FVX3lxTE9BTzREaUk5SWh4QjBVQ2lzMVE4azRKTlFTQnFfNnExejdwZ0l3TE1LNERzUGJEQTB0SEZRaVdlNnVhODVnZVFRVjI4THV4SFRvVk0wenZTdnVwdlNKclBWSExrc2NzdkhZU1ZFY0JLd1g3T3RLVktn?oc=5",
+        "pubDate": "Wed, 01 Apr 2026 12:49:37 GMT",
+        "source": "Data Centre Magazine"
+      },
+      {
+        "title": "KKR Impact Fund Earns 15x Investment on Sale of Data Center Cooling Provider CoolIT to Ecolab - ESG Today",
+        "link": "https://news.google.com/rss/articles/CBMixAFBVV95cUxPbG8yenBsUXRzdDk3UmkxSEhDNzd0YzQxTEkxdmU5SnJ5bDhYenQyQVV4TWJJaUZNQ3lrNF9sNFF3aWlOUGVnWWFEU3Bqckp6aVROTFYwR0xfdWJraXFkUWdxYnZ5LW10eUcyb0hxX3VhWTV5NlFHYTZ1VUZoLTg5NFJiUm5kUXBTMUNmcDVHTm4zaER4cGxzcU9DeHJwWVFBMkJYOTZmTGkzQ3E0MHBlMzNLZ3g5VTNKUUlGaG5VcFVpdWJT?oc=5",
+        "pubDate": "Thu, 26 Mar 2026 07:00:00 GMT",
+        "source": "ESG Today"
+      }
+    ]
+  },
+  "supercycle": {
+    "COPX": {
+      "ticker": "COPX",
+      "price": 76.86,
+      "change_3m": "+0.27%",
+      "change_ytd": "+5.20%",
+      "change_1m": "-12.82%"
+    },
+    "URA": {
+      "ticker": "URA",
+      "price": 48.9,
+      "change_3m": "+0.56%",
+      "change_ytd": "+6.17%",
+      "change_1m": "-7.33%"
+    },
+    "REMX": {
+      "ticker": "REMX",
+      "price": 88.9,
+      "change_3m": "+11.53%",
+      "change_ytd": "+15.79%",
+      "change_1m": "-9.16%"
+    },
+    "FIW": {
+      "ticker": "FIW",
+      "price": 103.68,
+      "change_3m": "-6.24%",
+      "change_ytd": "-5.30%",
+      "change_1m": "-7.95%"
+    },
+    "XLU": {
+      "ticker": "XLU",
+      "price": 46.34,
+      "change_3m": "+8.52%",
+      "change_ytd": "+7.32%",
+      "change_1m": "-1.97%"
+    },
+    "supercycle_score": "2/5 ETFs up >5% in 3mo",
+    "status": "stable"
+  },
+  "alerts": []
+}

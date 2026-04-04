@@ -1,0 +1,237 @@
+{
+  "date": "2026-04-04",
+  "fetched_at": "2026-04-04T00:49:41.495324+00:00",
+  "quarter": "Q2-2026",
+  "sa_lp_13f": {
+    "cik": "0002045724",
+    "filings_found": [
+      {
+        "form": "13F-HR",
+        "date": "2026-02-11",
+        "accession": "0002045724-26-000002",
+        "description": "",
+        "method": "cik_lookup"
+      },
+      {
+        "form": "13F-HR",
+        "date": "2025-11-14",
+        "accession": "0002045724-25-000008",
+        "description": "",
+        "method": "cik_lookup"
+      },
+      {
+        "form": "SCHEDULE 13D/A",
+        "date": "2025-10-14",
+        "accession": "0000935836-25-000638",
+        "description": "",
+        "method": "cik_lookup"
+      },
+      {
+        "form": "SCHEDULE 13D",
+        "date": "2025-08-19",
+        "accession": "0000935836-25-000543",
+        "description": "",
+        "method": "cik_lookup"
+      },
+      {
+        "form": "13F-HR",
+        "date": "2025-08-14",
+        "accession": "0002045724-25-000006",
+        "description": "",
+        "method": "cik_lookup"
+      },
+      {
+        "form": "13F-HR",
+        "date": "2025-05-14",
+        "accession": "0002045724-25-000002",
+        "description": "",
+        "method": "cik_lookup"
+      },
+      {
+        "form": "13F-HR",
+        "date": "2025-02-12",
+        "accession": "0000935836-25-000120",
+        "description": "",
+        "method": "cik_lookup"
+      }
+    ],
+    "source": "SEC EDGAR",
+    "entity_name": "Situational Awareness LP",
+    "entity_type": "other",
+    "latest_filing_date": "2026-02-11",
+    "latest_filing_type": "13F-HR"
+  },
+  "corz_13d": {
+    "filings_found": []
+  },
+  "hyperscaler_fundamentals": {
+    "GOOGL": {
+      "ticker": "GOOGL",
+      "error": "HTTP 401",
+      "capex": {
+        "error": "HTTP 401"
+      }
+    },
+    "AMZN": {
+      "ticker": "AMZN",
+      "error": "HTTP 401",
+      "capex": {
+        "error": "HTTP 401"
+      }
+    },
+    "MSFT": {
+      "ticker": "MSFT",
+      "error": "HTTP 401",
+      "capex": {
+        "error": "HTTP 401"
+      }
+    },
+    "META": {
+      "ticker": "META",
+      "error": "HTTP 401",
+      "capex": {
+        "error": "HTTP 401"
+      }
+    },
+    "NVDA": {
+      "ticker": "NVDA",
+      "error": "HTTP 401",
+      "capex": {
+        "error": "HTTP 401"
+      }
+    }
+  },
+  "holdings_fundamentals": {
+    "BE": {
+      "ticker": "BE",
+      "error": "HTTP 401"
+    },
+    "CRWV": {
+      "ticker": "CRWV",
+      "error": "HTTP 401"
+    },
+    "CORZ": {
+      "ticker": "CORZ",
+      "error": "HTTP 401"
+    },
+    "LITE": {
+      "ticker": "LITE",
+      "error": "HTTP 401"
+    },
+    "APLD": {
+      "ticker": "APLD",
+      "error": "HTTP 401"
+    },
+    "TSEM": {
+      "ticker": "TSEM",
+      "error": "HTTP 401"
+    },
+    "VST": {
+      "ticker": "VST",
+      "error": "HTTP 401"
+    },
+    "EQT": {
+      "ticker": "EQT",
+      "error": "HTTP 401"
+    }
+  },
+  "portfolio_performance": {
+    "total_tickers": 103,
+    "successful": 102,
+    "errors": 1,
+    "positive": 57,
+    "negative": 45,
+    "avg_return": "+3.70%",
+    "top_gainers": [
+      {
+        "ticker": "LITE",
+        "return_3m": "+131.59%"
+      },
+      {
+        "ticker": "TSEM",
+        "return_3m": "+65.81%"
+      },
+      {
+        "ticker": "MOD",
+        "return_3m": "+56.17%"
+      },
+      {
+        "ticker": "VRT",
+        "return_3m": "+50.21%"
+      },
+      {
+        "ticker": "LBRT",
+        "return_3m": "+49.15%"
+      },
+      {
+        "ticker": "KAP.L",
+        "return_3m": "+44.95%"
+      },
+      {
+        "ticker": "DELL",
+        "return_3m": "+40.61%"
+      },
+      {
+        "ticker": "COHR",
+        "return_3m": "+38.53%"
+      },
+      {
+        "ticker": "005930.KS",
+        "return_3m": "+34.83%"
+      },
+      {
+        "ticker": "NOKIA.HE",
+        "return_3m": "+33.06%"
+      }
+    ],
+    "top_losers": [
+      {
+        "ticker": "OKLO",
+        "return_3m": "-46.13%"
+      },
+      {
+        "ticker": "SMR",
+        "return_3m": "-45.95%"
+      },
+      {
+        "ticker": "GLXY",
+        "return_3m": "-32.93%"
+      },
+      {
+        "ticker": "0981.HK",
+        "return_3m": "-32.09%"
+      },
+      {
+        "ticker": "BITF",
+        "return_3m": "-31.25%"
+      },
+      {
+        "ticker": "CIFR",
+        "return_3m": "-29.41%"
+      },
+      {
+        "ticker": "SAP",
+        "return_3m": "-28.56%"
+      },
+      {
+        "ticker": "CLSK",
+        "return_3m": "-28.54%"
+      },
+      {
+        "ticker": "IREN",
+        "return_3m": "-27.92%"
+      },
+      {
+        "ticker": "BIDU",
+        "return_3m": "-25.87%"
+      }
+    ]
+  },
+  "alerts": [
+    {
+      "type": "sa_lp_13f_available",
+      "latest_date": "2026-02-11",
+      "note": "New SA LP 13F filing detected — review positions"
+    }
+  ]
+}
