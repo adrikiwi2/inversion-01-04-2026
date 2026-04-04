@@ -32,21 +32,79 @@ TIMEOUT = 15
 # TICKERS
 # ============================================================
 
+# ── Portfolio SA LP (19 posiciones 13F Q4 2025) ──
 CORE_SA_LP = [
     "CRWV", "BE", "TSEM", "LITE", "COHR", "INTC", "APLD",
     "CORZ", "RIOT", "HUT", "BTDR", "CLSK", "IREN", "BITF",
-    "VST", "EQT", "LBRT", "GLXY", "GDX"
+    "VST", "EQT", "LBRT", "GLXY", "GDX",
 ]
 
-WATCHLIST = [
-    "NVDA", "EQIX", "ETN", "VRT", "CEG", "OKLO", "SMR", "CCJ", "FCX", "ANET"
+# ── Magnificent Seven ──
+MAG7 = ["AAPL", "GOOGL", "AMZN", "MSFT", "META", "NVDA", "TSLA"]
+
+# ── Semiconductores & Fabricación ──
+SEMIS = [
+    "AMD", "AVGO", "AMAT", "MU", "TXN", "TSM", "ASML", "SMCI",
+    "000660.KS", "005930.KS",  # SK Hynix, Samsung
 ]
 
+# ── Óptica & Networking ──
+OPTICA_NET = [
+    "CSCO", "ANET", "ERIC-B.ST", "NOKIA.HE", "INTL.L",
+]
+
+# ── Data Center Infrastructure & REITs ──
+DC_INFRA = [
+    "EQIX", "DLR", "AMT", "ETN", "VRT", "DELL", "HPE", "MOD",
+    "ABB.ST", "NEX.PA", "PRY.MI", "SU.PA",
+]
+
+# ── Energía & Nuclear ──
+ENERGIA = [
+    "CEG", "OKLO", "SMR", "NEE", "CCJ", "NXE",
+    "ELE.MC", "IBE.MC", "ACS.MC", "KAP.L",
+]
+
+# ── Minería BTC / Reconversión IA ──
+BTC_MINERS = ["CIFR", "WULF"]
+
+# ── Commodities & Materias Primas ──
+COMMODITIES_STOCKS = [
+    "FCX", "ANTO.L", "ALB", "MP",
+]
+
+# ── Software / AI / Cloud ──
+SOFTWARE_AI = [
+    "SAP", "BIDU", "0981.HK",  # Alibaba SMIC
+    "000977.SZ",                 # SMIC-A
+]
+
+# ── Servidores / ODMs (Asia) ──
+ODMS_ASIA = [
+    "2317.TW", "2382.TW", "2395.TW",  # Hon Hai, Quanta, Advantech
+]
+
+# ── Oil & Frac (energía fósil para transición) ──
+FRAC = ["LBRT"]  # ya en CORE
+
+# ── ETFs Sectoriales (27) ──
 ETFS = [
-    "SMH", "COPX", "URA", "GRID", "SRVR"
+    "SMH", "SMH.L", "SOXX", "COPX", "URA", "URNM", "NLR",
+    "GRID", "SRVR", "XLU", "MAGS", "KSTR", "CQQQ", "EWT",
+    "KALL", "AAXJ", "EXV3.DE", "FIW", "REMX", "AINF.L", "AIPO",
+    "VPN", "CHAT", "CNDX.L", "KLWD.L", "MTRS.ST",
 ]
 
-ALL_TICKERS = CORE_SA_LP + WATCHLIST + ETFS
+# ── Trust ──
+TRUSTS = ["U-UN.TO"]  # Sprott Physical Uranium Trust (Yahoo symbol)
+
+# ── Consolidar sin duplicados ──
+_ALL_RAW = (
+    CORE_SA_LP + MAG7 + SEMIS + OPTICA_NET + DC_INFRA + ENERGIA +
+    BTC_MINERS + COMMODITIES_STOCKS + SOFTWARE_AI + ODMS_ASIA +
+    ETFS + TRUSTS
+)
+ALL_TICKERS = list(dict.fromkeys(_ALL_RAW))  # preserva orden, elimina dupes
 
 
 # ============================================================
@@ -298,7 +356,7 @@ def main():
     }
 
     # 1. Prices
-    print("  Fetching prices (34 tickers)...")
+    print(f"  Fetching prices ({len(ALL_TICKERS)} tickers)...")
     all_prices = fetch_all_prices()
     for p in all_prices:
         ticker = p.get("ticker", "unknown")
