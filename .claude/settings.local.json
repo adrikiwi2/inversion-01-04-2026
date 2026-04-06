@@ -5,7 +5,23 @@
       "WebFetch(domain:situational-awareness.ai)",
       "WebFetch(domain:www.sec.gov)",
       "WebFetch(domain:fintel.io)",
-      "WebFetch(domain:whalewisdom.com)"
+      "WebFetch(domain:whalewisdom.com)",
+      "Read(//d/pps/webs/.claude/skills/**)",
+      "Read(//d/pps/webs/.agents/skills/**)",
+      "WebFetch(domain:adrikiwi2.github.io)",
+      "Bash(python:*)",
+      "Bash(start \"\" \"SituationalAwareness/intelligence/roadmap.html\")",
+      "Bash(codex --help)",
+      "Bash(where codex:*)",
+      "Bash(start \"\" \"SituationalAwareness/intelligence/dashboard.html\")",
+      "Bash(curl:*)",
+      "Bash(start:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(ls D:/pps/inversion-01-04-2026/SituationalAwareness/intelligence/fetcher/data/*.json)"
     ]
   }
 }

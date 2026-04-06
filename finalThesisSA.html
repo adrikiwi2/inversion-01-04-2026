@@ -1,0 +1,2093 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tesis SA LP — Átomos sobre Bits</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+   ═══════════════════════════════════════════ */
+:root{
+  --void:#050508;--surface:#0C0C10;--card:#111116;--raised:#18181E;
+  --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.10);
+  --t1:#E8E8ED;--t2:#8B8B96;--t3:#55555F;
+  --blue:#3B82F6;--blue-d:#1E40AF;--amber:#F59E0B;--emerald:#10B981;
+  --rose:#F43F5E;--violet:#8B5CF6;--cyan:#06B6D4;--orange:#F97316;
+  --sans:'Outfit',sans-serif;--mono:'Fira Code',monospace;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+/* Light theme */
+html.light{
+  --void:#F5F5F7;--surface:#EBEBEF;--card:#FFFFFF;--raised:#F0F0F4;
+  --border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.12);
+  --t1:#1A1A1E;--t2:#5A5A64;--t3:#8A8A94;
+  --blue:#2563EB;--blue-d:#1E40AF;--amber:#D97706;--emerald:#059669;
+  --rose:#E11D48;--violet:#7C3AED;--cyan:#0891B2;--orange:#EA580C;
+}
+html.light .ambient{background:
+  radial-gradient(ellipse 800px 600px at 15% 8%,rgba(37,99,235,.05),transparent),
+  radial-gradient(ellipse 600px 500px at 85% 70%,rgba(124,58,237,.03),transparent),
+  radial-gradient(ellipse 400px 300px at 50% 90%,rgba(217,119,6,.02),transparent)}
+html.light ::selection{background:var(--blue);color:#fff}
+html.light .toc a.active{color:var(--blue)}
+html.light .topnav{background:rgba(245,245,247,.92)}
+html.light .back{background:rgba(245,245,247,.9)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--sans);background:var(--void);color:var(--t1);line-height:1.6;overflow-x:hidden}
+::selection{background:var(--blue);color:#fff}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+.ambient{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 800px 600px at 15% 8%,rgba(30,64,175,.07),transparent),
+  radial-gradient(ellipse 600px 500px at 85% 70%,rgba(139,92,246,.04),transparent),
+  radial-gradient(ellipse 400px 300px at 50% 90%,rgba(245,158,11,.03),transparent)}
+
+.wrap{max-width:960px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+section{padding:80px 0}
+@media(max-width:768px){section{padding:48px 0}.wrap{padding:0 16px}}
+
+/* ═══════════════════════════════════════════
+   SCROLL REVEAL
+   ═══════════════════════════════════════════ */
+.rv{opacity:0;transform:translateY(20px);transition:opacity .65s var(--ease),transform .65s var(--ease)}
+.rv.vis{opacity:1;transform:translateY(0)}
+.rv-d1{transition-delay:60ms}.rv-d2{transition-delay:120ms}.rv-d3{transition-delay:180ms}.rv-d4{transition-delay:240ms}
+
+/* ═══════════════════════════════════════════
+   TYPOGRAPHY
+   ═══════════════════════════════════════════ */
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);padding:6px 14px;border:1px solid var(--border);border-radius:999px;margin-bottom:20px}
+.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--emerald);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-size:clamp(2.2rem,5vw,3.5rem);font-weight:800;letter-spacing:-.04em;line-height:1.08}
+h1 .acc{color:var(--blue)}
+h2{font-size:clamp(1.5rem,3vw,2rem);font-weight:700;letter-spacing:-.02em;line-height:1.15;margin-bottom:12px}
+h3{font-size:1.05rem;font-weight:600;margin-bottom:8px}
+.sub{font-size:clamp(.9rem,1.6vw,1.05rem);color:var(--t2);max-width:64ch;line-height:1.7}
+.mono{font-family:var(--mono);font-size:.85em}
+blockquote{border-left:3px solid var(--blue);padding:16px 20px;margin:20px 0;background:rgba(59,130,246,.04);border-radius:0 8px 8px 0;color:var(--t2);font-style:italic;line-height:1.7}
+blockquote strong{color:var(--t1);font-style:normal}
+
+/* ═══════════════════════════════════════════
+   NAV — SIDEBAR TOC
+   ═══════════════════════════════════════════ */
+.toc{position:fixed;top:50%;left:24px;transform:translateY(-50%);z-index:100;display:flex;flex-direction:column;gap:2px}
+.toc a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:6px 12px;border-radius:8px;transition:all .2s;color:var(--t3);font-size:.75rem;font-weight:500;white-space:nowrap}
+.toc a:hover,.toc a.active{color:var(--t1);background:rgba(255,255,255,.05)}
+.toc a.active{border-left:2px solid var(--blue);color:var(--blue)}
+.toc .num{font-family:var(--mono);font-size:.65rem;width:18px;height:18px;display:flex;align-items:center;justify-content:center;border-radius:4px;background:var(--surface);border:1px solid var(--border)}
+@media(max-width:1200px){.toc{display:none}}
+
+/* Mobile top nav */
+.topnav{display:none;position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(5,5,8,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:8px 16px;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
+.topnav a{display:inline-block;text-decoration:none;font-size:.7rem;font-weight:500;color:var(--t3);padding:4px 10px;border-radius:6px;transition:all .2s}
+.topnav a:hover,.topnav a.active{color:var(--t1);background:rgba(255,255,255,.06)}
+@media(max-width:1200px){.topnav{display:block}section:first-of-type{padding-top:100px}}
+
+/* ═══════════════════════════════════════════
+   CARDS
+   ═══════════════════════════════════════════ */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-top:16px;transition:border-color .3s}
+.card:hover{border-color:var(--border2)}
+.card-sm{padding:16px;border-radius:10px}
+
+/* ═══════════════════════════════════════════
+   TABLES
+   ═══════════════════════════════════════════ */
+.tbl{width:100%;border-collapse:collapse;margin-top:16px;font-size:.85rem}
+.tbl th{text-align:left;font-weight:600;color:var(--t3);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:10px 12px;border-bottom:1px solid var(--border)}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--t2);vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+.tbl .ticker{font-family:var(--mono);font-weight:600;color:var(--t1);font-size:.8rem}
+.tbl .up{color:var(--emerald)}.tbl .down{color:var(--rose)}
+.tbl .tag{display:inline-block;font-size:.65rem;font-weight:600;padding:2px 8px;border-radius:999px;font-family:var(--mono);letter-spacing:.04em}
+.tag-energy{background:rgba(245,158,11,.1);color:var(--amber)}
+.tag-semis{background:rgba(139,92,246,.1);color:var(--violet)}
+.tag-dc{background:rgba(59,130,246,.1);color:var(--blue)}
+.tag-mining{background:rgba(16,185,129,.1);color:var(--emerald)}
+.tag-matpri{background:rgba(249,115,22,.1);color:var(--orange)}
+.tag-optica{background:rgba(6,182,212,.1);color:var(--cyan)}
+.tag-global{background:rgba(244,63,94,.1);color:var(--rose)}
+
+/* ═══════════════════════════════════════════
+   PYRAMID
+   ═══════════════════════════════════════════ */
+.pyramid{display:flex;flex-direction:column;align-items:center;gap:4px;margin:32px 0}
+.pyr-row{display:flex;align-items:center;gap:12px;padding:14px 20px;border-radius:10px;transition:transform .2s}
+.pyr-row:hover{transform:scale(1.02)}
+.pyr-label{font-weight:600;font-size:.85rem;min-width:160px;text-align:right}
+.pyr-bar{height:8px;border-radius:4px;transition:width .8s var(--ease)}
+.pyr-val{font-family:var(--mono);font-size:.75rem;color:var(--t2);min-width:80px}
+.pyr-tickers{font-family:var(--mono);font-size:.7rem;color:var(--t3)}
+
+/* ═══════════════════════════════════════════
+   ASCII / CODE BLOCKS
+   ═══════════════════════════════════════════ */
+.ascii{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin:20px 0;font-family:var(--mono);font-size:.72rem;line-height:1.8;color:var(--t2);overflow-x:auto;white-space:pre}
+.ascii .hl{color:var(--blue);font-weight:600}
+.ascii .val{color:var(--emerald)}
+.ascii .warn{color:var(--amber)}
+.ascii .dim{color:var(--t3)}
+
+/* ═══════════════════════════════════════════
+   GEO MAP (CSS grid)
+   ═══════════════════════════════════════════ */
+.geo{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}
+@media(max-width:640px){.geo{grid-template-columns:1fr}}
+.geo-col{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.geo-col h4{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.geo-col .flag{font-size:1.2rem}
+.geo-item{padding:8px 0;border-bottom:1px solid var(--border);font-size:.82rem}
+.geo-item:last-child{border-bottom:none}
+.geo-item .name{font-weight:600;color:var(--t1)}
+.geo-item .role{color:var(--t3);font-size:.75rem}
+
+/* ═══════════════════════════════════════════
+   METRICS ROW
+   ═══════════════════════════════════════════ */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--border);border-radius:12px;overflow:hidden;margin:24px 0}
+.metric{background:var(--surface);padding:20px;text-align:center}
+.metric .val{font-family:var(--mono);font-size:1.5rem;font-weight:700;line-height:1}
+.metric .label{font-size:.7rem;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-top:6px}
+
+/* ═══════════════════════════════════════════
+   DIVIDER
+   ═══════════════════════════════════════════ */
+.divider{height:1px;background:var(--border);margin:48px 0}
+
+/* ═══════════════════════════════════════════
+   PHASE HEADER
+   ═══════════════════════════════════════════ */
+.phase-num{font-family:var(--mono);font-size:.7rem;font-weight:600;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.phase-sub{color:var(--t2);font-size:.9rem;margin-top:4px;max-width:60ch}
+
+/* ═══════════════════════════════════════════
+   BACK LINK
+   ═══════════════════════════════════════════ */
+.back{position:fixed;top:16px;right:24px;z-index:100;font-size:.75rem;color:var(--t3);text-decoration:none;padding:6px 14px;background:rgba(12,12,16,.85);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:999px;transition:all .2s}
+.back:hover{color:var(--t1);border-color:var(--border2)}
+
+/* Theme toggle */
+.theme-toggle{position:fixed;top:16px;right:calc(24px + 160px + 12px);z-index:100;width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:rgba(12,12,16,.85);backdrop-filter:blur(20px);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s var(--ease);color:var(--t3);font-size:16px;padding:0;line-height:1}
+.theme-toggle:hover{color:var(--t1);border-color:var(--border2);transform:scale(1.1)}
+html.light .theme-toggle{background:rgba(245,245,247,.9)}
+@media(max-width:768px){.theme-toggle{top:auto;bottom:16px;right:16px;width:40px;height:40px;font-size:18px;box-shadow:0 2px 8px rgba(0,0,0,.15)}}
+</style>
+</head>
+<body>
+<div class="ambient"></div>
+
+<!-- Back link -->
+<a href="SituationalAwareness/intelligence/index.html" class="back">&larr; Intelligence Engine</a>
+
+<!-- Theme toggle -->
+<button class="theme-toggle" id="themeToggle" title="Cambiar tema">&#9788;</button>
+
+<!-- Side TOC -->
+<nav class="toc" id="toc">
+  <a href="#hero"><span class="num">0</span> Inicio</a>
+  <a href="#f1"><span class="num">1</span> Tesis</a>
+  <a href="#f2"><span class="num">2</span> Rotacion</a>
+  <a href="#f3"><span class="num">3</span> Rendimiento</a>
+  <a href="#f4"><span class="num">4</span> Consolidacion</a>
+  <a href="#f5"><span class="num">5</span> Soberania</a>
+  <a href="#f5b"><span class="num">5b</span> Mat. Primas</a>
+  <a href="#f6"><span class="num">6</span> Global</a>
+  <a href="#f7"><span class="num">7</span> Sintesis</a>
+  <a href="#activos"><span class="num">A</span> Activos</a>
+  <a href="#perfiles"><span class="num">P</span> Perfiles</a>
+  <a href="#chatgpt-perfiles"><span class="num">C</span> ChatGPT</a>
+</nav>
+
+<!-- Mobile top nav -->
+<nav class="topnav">
+  <a href="#hero">Inicio</a>
+  <a href="#f1">F1</a>
+  <a href="#f2">F2</a>
+  <a href="#f3">F3</a>
+  <a href="#f4">F4</a>
+  <a href="#f5">F5</a>
+  <a href="#f5b">F5b</a>
+  <a href="#f6">F6</a>
+  <a href="#f7">F7</a>
+  <a href="#activos">Activos</a>
+  <a href="#perfiles">Perfiles</a>
+  <a href="#chatgpt-perfiles">ChatGPT</a>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     HERO
+     ═══════════════════════════════════════════ -->
+<section id="hero" style="min-height:100dvh;display:flex;align-items:center">
+<div class="wrap">
+  <div class="rv">
+    <div class="eyebrow"><span class="dot"></span> Situational Awareness LP &mdash; Tesis de Inversion</div>
+  </div>
+  <h1 class="rv rv-d1"><span class="acc">Atomos</span> sobre Bits</h1>
+  <p class="sub rv rv-d2" style="margin-top:20px">
+    El valor de la IA no esta en los algoritmos. Esta en quien posee los <strong>megavatios</strong>,
+    los <strong>metros cuadrados con conexion electrica</strong> y el <strong>uranio</strong> para alimentarlos.
+    Esta pagina documenta el razonamiento completo detras de la seleccion de activos.
+  </p>
+
+  <div class="metrics rv rv-d3">
+    <div class="metric"><div class="val" style="color:var(--blue)">$5.5B</div><div class="label">AUM SA LP Q4 2025</div></div>
+    <div class="metric"><div class="val" style="color:var(--emerald)">22x</div><div class="label">Crecimiento 12m</div></div>
+    <div class="metric"><div class="val" style="color:var(--amber)">19</div><div class="label">Posiciones 13F</div></div>
+    <div class="metric"><div class="val" style="color:var(--violet)">7</div><div class="label">Fases de analisis</div></div>
+  </div>
+
+  <!-- INDEX -->
+  <div class="card rv rv-d4" style="margin-top:32px">
+    <h3 style="margin-bottom:16px">Indice de Fases</h3>
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:.88rem">
+      <a href="#f1" style="color:var(--t2);text-decoration:none;padding:8px 12px;border-radius:8px;background:var(--surface);transition:all .2s;display:flex;gap:10px;align-items:baseline" onmouseover="this.style.background='rgba(59,130,246,.06)'" onmouseout="this.style.background='var(--surface)'">
+        <span class="mono" style="color:var(--blue);min-width:32px">F1</span>
+        <span><strong>Desglose de la tesis "atomos sobre bits"</strong><br><small style="color:var(--t3)">Sintesis de la tesis de Aschenbrenner, cambio de paradigma software &rarr; infraestructura</small></span>
+      </a>
+      <a href="#f2" style="color:var(--t2);text-decoration:none;padding:8px 12px;border-radius:8px;background:var(--surface);transition:all .2s;display:flex;gap:10px;align-items:baseline" onmouseover="this.style.background='rgba(59,130,246,.06)'" onmouseout="this.style.background='var(--surface)'">
+        <span class="mono" style="color:var(--blue);min-width:32px">F2</span>
+        <span><strong>Analisis de cartera y rotacion de activos</strong><br><small style="color:var(--t3)">Examen de registros 13F, identificacion de rotacion estrategica</small></span>
+      </a>
+      <a href="#f3" style="color:var(--t2);text-decoration:none;padding:8px 12px;border-radius:8px;background:var(--surface);transition:all .2s;display:flex;gap:10px;align-items:baseline" onmouseover="this.style.background='rgba(59,130,246,.06)'" onmouseout="this.style.background='var(--surface)'">
+        <span class="mono" style="color:var(--blue);min-width:32px">F3</span>
+        <span><strong>Evaluacion de rendimiento y expansion global</strong><br><small style="color:var(--t3)">Validacion de rentabilidad, extrapolacion a Europa y Asia</small></span>
+      </a>
+      <a href="#f4" style="color:var(--t2);text-decoration:none;padding:8px 12px;border-radius:8px;background:var(--surface);transition:all .2s;display:flex;gap:10px;align-items:baseline" onmouseover="this.style.background='rgba(59,130,246,.06)'" onmouseout="this.style.background='var(--surface)'">
+        <span class="mono" style="color:var(--blue);min-width:32px">F4</span>
+        <span><strong>Consolidacion de infraestructura fisica sobre software</strong><br><small style="color:var(--t3)">Contrastacion de datos, rendimientos &gt;500%, mineria digital &rarr; HPC</small></span>
+      </a>
+      <a href="#f5" style="color:var(--t2);text-decoration:none;padding:8px 12px;border-radius:8px;background:var(--surface);transition:all .2s;display:flex;gap:10px;align-items:baseline" onmouseover="this.style.background='rgba(59,130,246,.06)'" onmouseout="this.style.background='var(--surface)'">
+        <span class="mono" style="color:var(--blue);min-width:32px">F5</span>
+        <span><strong>Validacion de soberania energetica y tecnologica</strong><br><small style="color:var(--t3)">Resolucion de contradicciones, "economia de guerra computacional"</small></span>
+      </a>
+      <a href="#f6" style="color:var(--t2);text-decoration:none;padding:8px 12px;border-radius:8px;background:var(--surface);transition:all .2s;display:flex;gap:10px;align-items:baseline" onmouseover="this.style.background='rgba(59,130,246,.06)'" onmouseout="this.style.background='var(--surface)'">
+        <span class="mono" style="color:var(--blue);min-width:32px">F6</span>
+        <span><strong>Estrategia de diversificacion internacional</strong><br><small style="color:var(--t3)">Campeones europeos y asiaticos, vehiculos de inversion globales</small></span>
+      </a>
+      <a href="#f7" style="color:var(--t2);text-decoration:none;padding:8px 12px;border-radius:8px;background:var(--surface);transition:all .2s;display:flex;gap:10px;align-items:baseline" onmouseover="this.style.background='rgba(59,130,246,.06)'" onmouseout="this.style.background='var(--surface)'">
+        <span class="mono" style="color:var(--blue);min-width:32px">F7</span>
+        <span><strong>Sintesis final y conclusiones del razonamiento</strong><br><small style="color:var(--t3)">Consolidacion de hallazgos, rendimiento vs. rotacion, proximos pasos</small></span>
+      </a>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     FASE 1 — DESGLOSE DE LA TESIS
+     ═══════════════════════════════════════════ -->
+<section id="f1">
+<div class="wrap">
+  <div class="rv"><span class="phase-num">Fase 1</span></div>
+  <h2 class="rv rv-d1">Desglose de la tesis <span style="color:var(--blue)">"atomos sobre bits"</span></h2>
+  <p class="phase-sub rv rv-d2">Sintesis de la tesis de Aschenbrenner: el paradigma ha cambiado de software a infraestructura fisica.</p>
+
+  <blockquote class="rv rv-d3">
+    La inversion en IA ya no es sobre quien tiene el mejor algoritmo. Es sobre quien tiene los megavatios,
+    los metros cuadrados con conexion electrica y el uranio para alimentarlos.
+    <strong>El mercado de 2026 no premia quien disena el mejor chip, sino quien puede encenderlo.</strong>
+  </blockquote>
+
+  <div class="card rv">
+    <h3>La tesis en tres puntos</h3>
+    <div style="display:flex;flex-direction:column;gap:16px;margin-top:12px">
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <span style="color:var(--amber);font-size:1.2rem;line-height:1.4">1</span>
+        <div><strong>Los cuellos de botella se han desplazado.</strong><br><span style="color:var(--t2);font-size:.9rem">En 2023-2024 era "quien tiene GPUs?". En 2025-2026 es "quien tiene los megavatios para encenderlas?"</span></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <span style="color:var(--amber);font-size:1.2rem;line-height:1.4">2</span>
+        <div><strong>La infraestructura fisica es irreplicable a corto plazo.</strong><br><span style="color:var(--t2);font-size:.9rem">Un datacenter nuevo tarda 3-5 anos. Una planta nuclear, 10-15. Un yacimiento de cobre, 7-10. Software se copia en segundos.</span></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <span style="color:var(--amber);font-size:1.2rem;line-height:1.4">3</span>
+        <div><strong>El valor migra hacia "propietarios de watts".</strong><br><span style="color:var(--t2);font-size:.9rem">Cuanto mas abajo en la piramide de la cadena de IA, mas escaso es el activo y mayor es el rendimiento.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pyramid -->
+  <div class="card rv" style="margin-top:16px">
+    <h3>Piramide de valor: escasez &rarr; rendimiento</h3>
+    <div class="pyramid">
+      <div class="pyr-row" style="width:40%;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.15)">
+        <span class="pyr-label" style="color:var(--violet)">Software / Apps</span>
+        <div class="pyr-bar" style="width:20%;background:var(--violet)"></div>
+        <span class="pyr-val">Moderado</span>
+      </div>
+      <div class="pyr-row" style="width:55%;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.15)">
+        <span class="pyr-label" style="color:var(--blue)">Chips / Diseno</span>
+        <div class="pyr-bar" style="width:40%;background:var(--blue)"></div>
+        <span class="pyr-val">Ya valorado</span>
+      </div>
+      <div class="pyr-row" style="width:75%;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.15)">
+        <span class="pyr-label" style="color:var(--emerald)">Infra / Energia</span>
+        <div class="pyr-bar" style="width:70%;background:var(--emerald)"></div>
+        <span class="pyr-val">BE +508%</span>
+      </div>
+      <div class="pyr-row" style="width:90%;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.15)">
+        <span class="pyr-label" style="color:var(--amber)">Materias Primas</span>
+        <div class="pyr-bar" style="width:90%;background:var(--amber)"></div>
+        <span class="pyr-val">URA +111%</span>
+      </div>
+    </div>
+    <p style="text-align:center;color:var(--t3);font-size:.75rem;margin-top:8px">&uarr; Mas replicable &nbsp;&nbsp;|&nbsp;&nbsp; Mas escaso &darr;</p>
+  </div>
+
+  <!-- Supply chain flowchart (CSS-only) -->
+  <div class="card rv" style="margin-top:16px">
+    <h3>Cadena de suministro: demanda &rarr; cuellos fisicos</h3>
+    <p style="color:var(--t3);font-size:.78rem;margin-bottom:16px">Flujo de arriba a abajo: la demanda de IA genera necesidad en cada nodo inferior. Los cuellos de botella estan abajo.</p>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:0">
+
+      <!-- Node A: Demanda -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 24px;text-align:center;max-width:360px;width:100%">
+        <div style="font-weight:700;font-size:.85rem;color:var(--t1)">Demanda de IA</div>
+        <div style="font-size:.75rem;color:var(--t3)">Modelos y apps</div>
+      </div>
+
+      <!-- Arrow -->
+      <div style="width:2px;height:20px;background:var(--border)"></div>
+      <div style="color:var(--t3);font-size:.7rem">&darr;</div>
+      <div style="width:2px;height:8px;background:var(--border)"></div>
+
+      <!-- Node B: Plataformas -->
+      <div style="background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.2);border-radius:10px;padding:12px 20px;text-align:center;max-width:420px;width:100%">
+        <div style="font-weight:700;font-size:.85rem;color:var(--violet)">Plataformas y software en nube</div>
+        <div style="display:flex;gap:6px;justify-content:center;margin-top:8px;flex-wrap:wrap">
+          <span class="tag" style="background:rgba(139,92,246,.12);color:var(--violet)">CNDX.L</span>
+          <span class="tag" style="background:rgba(139,92,246,.12);color:var(--violet)">KLWD.L</span>
+          <span class="tag" style="background:rgba(139,92,246,.12);color:var(--violet)">INTL.L</span>
+        </div>
+      </div>
+
+      <!-- Fork arrows -->
+      <div style="width:2px;height:12px;background:var(--border)"></div>
+      <div style="display:flex;gap:40px;align-items:flex-start;width:100%;max-width:500px;justify-content:center">
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div style="color:var(--t3);font-size:.65rem">&darr;</div>
+          <div style="width:2px;height:8px;background:var(--border)"></div>
+          <!-- Node C: Computo -->
+          <div style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:12px 18px;text-align:center;min-width:180px">
+            <div style="font-weight:700;font-size:.82rem;color:var(--blue)">Capacidad de computo</div>
+            <div style="font-size:.72rem;color:var(--t3)">Chips / servidores</div>
+            <div style="margin-top:6px"><span class="tag" style="background:rgba(59,130,246,.12);color:var(--blue)">SMH.L</span></div>
+          </div>
+          <div style="width:2px;height:12px;background:var(--border)"></div>
+          <div style="color:var(--t3);font-size:.65rem">&darr;</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div style="color:var(--t3);font-size:.65rem">&darr;</div>
+          <div style="width:2px;height:8px;background:var(--border)"></div>
+          <!-- Node D: Data Centers -->
+          <div style="background:rgba(6,182,212,.06);border:1px solid rgba(6,182,212,.2);border-radius:10px;padding:12px 18px;text-align:center;min-width:200px">
+            <div style="font-weight:700;font-size:.82rem;color:var(--cyan)">Centros de datos</div>
+            <div style="font-size:.72rem;color:var(--t3)">Espacio + interconexion</div>
+            <div style="margin-top:6px"><span class="tag" style="background:rgba(6,182,212,.12);color:var(--cyan)">EQIX</span></div>
+          </div>
+          <div style="width:2px;height:12px;background:var(--border)"></div>
+          <div style="color:var(--t3);font-size:.65rem">&darr;</div>
+        </div>
+      </div>
+
+      <!-- Converge to Potencia -->
+      <div style="width:2px;height:8px;background:var(--border)"></div>
+      <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:12px 24px;text-align:center;max-width:400px;width:100%">
+        <div style="font-weight:700;font-size:.85rem;color:var(--amber)">Potencia electrica y electrificacion</div>
+        <div style="font-size:.72rem;color:var(--t3)">El cuello de botella #1 en 2025-2026</div>
+        <div style="margin-top:6px"><span class="tag" style="background:rgba(245,158,11,.12);color:var(--amber)">ETN</span></div>
+      </div>
+
+      <!-- Satellite branch -->
+      <div style="display:flex;align-items:center;gap:12px;margin-top:16px">
+        <div style="width:40px;height:2px;background:var(--border)"></div>
+        <div style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:10px 18px;text-align:center">
+          <div style="font-weight:700;font-size:.78rem;color:var(--emerald)">Satelite especulativo</div>
+          <div style="font-size:.7rem;color:var(--t3)">Mineria / hosting reutilizable</div>
+          <div style="margin-top:6px"><span class="tag" style="background:rgba(16,185,129,.12);color:var(--emerald)">CORZ</span></div>
+        </div>
+        <div style="width:40px;height:2px;background:var(--border)"></div>
+        <div style="color:var(--t3);font-size:.65rem;white-space:nowrap">&rarr; alimenta Centros de datos</div>
+      </div>
+
+    </div>
+
+    <p style="color:var(--t3);font-size:.75rem;margin-top:16px;text-align:center">
+      SA LP se posiciona en los <strong style="color:var(--t2)">nodos inferiores</strong> (potencia, centros de datos, hosting reutilizable) &mdash; exactamente donde estan los cuellos de botella fisicos.
+    </p>
+  </div>
+</div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- ═══════════════════════════════════════════
+     FASE 2 — ROTACIÓN DE ACTIVOS
+     ═══════════════════════════════════════════ -->
+<section id="f2">
+<div class="wrap">
+  <div class="rv"><span class="phase-num">Fase 2</span></div>
+  <h2 class="rv rv-d1">Analisis de cartera y <span style="color:var(--rose)">rotacion</span> de activos</h2>
+  <p class="phase-sub rv rv-d2">Examen de registros 13F Q4 2025. Rotacion estrategica: liquidacion de chips, compra de energia.</p>
+
+  <blockquote class="rv rv-d3">
+    La cartera 13F sugiere una tesis de <strong>"segunda derivada"</strong> sobre el boom de computo/IA:
+    no solo apostar por el software, sino por los <strong>activos fisicos que limitan el despliegue</strong>,
+    usando en parte opciones para amplificar la exposicion.
+    No es una cartera "comprar y mantener" &mdash; es una cartera de <strong>convexidad direccional</strong>.
+  </blockquote>
+
+  <!-- AUM evolution -->
+  <div class="card rv">
+    <h3>Evolucion del valor reportado en 13F</h3>
+    <div style="background:var(--surface);border-radius:8px;padding:16px 12px 8px;margin:16px 0 8px">
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:end;height:130px">
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+          <span class="mono" style="font-size:.7rem;color:var(--t2);margin-bottom:6px">$255M</span>
+          <div style="width:80%;max-width:60px;background:var(--blue);border-radius:4px 4px 0 0;height:8px"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+          <span class="mono" style="font-size:.7rem;color:var(--t2);margin-bottom:6px">$1.0B</span>
+          <div style="width:80%;max-width:60px;background:var(--blue);border-radius:4px 4px 0 0;height:24px"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+          <span class="mono" style="font-size:.7rem;color:var(--t2);margin-bottom:6px">$2.1B</span>
+          <div style="width:80%;max-width:60px;background:var(--blue);border-radius:4px 4px 0 0;height:48px"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+          <span class="mono" style="font-size:.7rem;color:var(--t2);margin-bottom:6px">$4.1B</span>
+          <div style="width:80%;max-width:60px;background:var(--blue);border-radius:4px 4px 0 0;height:82px"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+          <span class="mono" style="font-size:.7rem;color:var(--emerald);font-weight:600;margin-bottom:6px">$5.5B</span>
+          <div style="width:80%;max-width:60px;background:var(--emerald);border-radius:4px 4px 0 0;height:110px"></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:6px;text-align:center">
+        <span style="font-size:.7rem;color:var(--t3)">Q4-24</span>
+        <span style="font-size:.7rem;color:var(--t3)">Q1-25</span>
+        <span style="font-size:.7rem;color:var(--t3)">Q2-25</span>
+        <span style="font-size:.7rem;color:var(--t3)">Q3-25</span>
+        <span style="font-size:.7rem;color:var(--t3)">Q4-25</span>
+      </div>
+    </div>
+    <p style="color:var(--t3);font-size:.78rem">Crecimiento <strong style="color:var(--emerald)">22x en 12 meses</strong> ($254.8M &rarr; $5,516M). No solo apreciacion &mdash; refleja entradas masivas de capital al fondo.</p>
+  </div>
+
+  <!-- Convexity + CALLs -->
+  <div class="card rv" style="margin-top:16px">
+    <h3 style="color:var(--violet)">Estrategia de convexidad: opciones CALL</h3>
+    <p style="color:var(--t2);font-size:.88rem;margin-top:8px">
+      El 13F no solo muestra acciones &mdash; incluye <strong>posiciones en opciones CALL</strong> sobre CRWV e INTC.
+      Las CALL dan derecho a comprar a un precio fijado: si el activo sube, la ganancia es asimetrica.
+    </p>
+    <table class="tbl" style="margin-top:12px">
+      <thead><tr><th>Subyacente</th><th>Tipo</th><th>Implicacion</th></tr></thead>
+      <tbody>
+        <tr><td class="ticker">CRWV</td><td><span class="tag" style="background:rgba(139,92,246,.1);color:var(--violet)">CALL</span></td><td>Apalancamiento direccional sobre cloud GPU</td></tr>
+        <tr><td class="ticker">INTC</td><td><span class="tag" style="background:rgba(139,92,246,.1);color:var(--violet)">CALL</span></td><td>Apuesta apalancada sobre fabricacion US de semis</td></tr>
+      </tbody>
+    </table>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;font-size:.82rem;color:var(--t2)">
+      <div style="padding:8px 12px;background:var(--surface);border-radius:6px"><strong style="color:var(--violet)">Busqueda de convexidad</strong> &mdash; no es value, es apuesta asimetrica</div>
+      <div style="padding:8px 12px;background:var(--surface);border-radius:6px"><strong style="color:var(--violet)">Confianza en timing</strong> &mdash; las opciones tienen vencimiento, hay ventana temporal implicita</div>
+      <div style="padding:8px 12px;background:var(--surface);border-radius:6px"><strong style="color:var(--violet)">Gestion activa del apalancamiento</strong> &mdash; modula exposicion sin comprar todo en acciones</div>
+    </div>
+  </div>
+
+  <!-- 13D CORZ -->
+  <div class="card rv" style="margin-top:16px">
+    <h3 style="color:var(--emerald)">Posicion activista: Schedule 13D en CORZ</h3>
+    <p style="color:var(--t2);font-size:.88rem;margin-top:8px">
+      SA LP presento <strong>Schedule 13D/A</strong> (no 13G) sobre Core Scientific &mdash; esto indica <strong>intencion activa</strong>:
+      busca influir en la direccion estrategica de la empresa.
+    </p>
+    <div class="metrics" style="margin-top:12px;margin-bottom:0">
+      <div class="metric"><div class="val" style="color:var(--t2);font-size:1rem">17.68M</div><div class="label">Acciones previas</div></div>
+      <div class="metric"><div class="val" style="color:var(--emerald);font-size:1rem">28.76M</div><div class="label">Acciones actuales</div></div>
+      <div class="metric"><div class="val" style="color:var(--amber);font-size:1rem">+62.6%</div><div class="label">Variacion</div></div>
+      <div class="metric"><div class="val" style="color:var(--rose);font-size:1rem">&gt;5%</div><div class="label">Participacion</div></div>
+    </div>
+    <p style="color:var(--t3);font-size:.8rem;margin-top:8px">CORZ es el "nodo" donde convergen capacidad electrica (MW conectados) + sitio fisico (permisos y terrenos) + computo/hosting (infra existente).</p>
+  </div>
+
+  <!-- What they sold -->
+  <div class="card rv">
+    <h3 style="color:var(--rose)">Lo que liquido o redujo</h3>
+    <table class="tbl">
+      <thead><tr><th>Posicion</th><th>Motivo de salida</th></tr></thead>
+      <tbody>
+        <tr><td class="ticker">NVDA</td><td>Lider indiscutible en GPUs &mdash; pero <strong>ya valorada</strong>. Alpha agotado.</td></tr>
+        <tr><td class="ticker">AVGO</td><td>ASICs y networking &mdash; mercado ya puso precio al boom.</td></tr>
+        <tr><td class="ticker">TSM</td><td>Fundicion donde se fabrican los chips &mdash; riesgo geopolitico Taiwan.</td></tr>
+      </tbody>
+    </table>
+    <p style="color:var(--t3);font-size:.82rem;margin-top:12px">
+      Esto es contraintuitivo: si crees en la IA, por que vendes NVIDIA?
+    </p>
+  </div>
+
+  <!-- Reasoning -->
+  <div class="card rv" style="margin-top:16px">
+    <h3>Razonamiento de la rotacion</h3>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px;font-size:.9rem">
+      <div style="padding:12px 16px;background:var(--surface);border-radius:8px">
+        <strong style="color:var(--amber)">1. NVIDIA ya estaba valorada.</strong>
+        <span style="color:var(--t2)"> El mercado ya habia puesto precio al boom de los chips. El alpha se habia agotado.</span>
+      </div>
+      <div style="padding:12px 16px;background:var(--surface);border-radius:8px">
+        <strong style="color:var(--amber)">2. Los cuellos de botella se desplazaron.</strong>
+        <span style="color:var(--t2)"> De "quien tiene GPUs" a "quien tiene los megavatios para encender las GPUs".</span>
+      </div>
+      <div style="padding:12px 16px;background:var(--surface);border-radius:8px">
+        <strong style="color:var(--amber)">3. Arbitraje de infraestructura.</strong>
+        <span style="color:var(--t2)"> Comprar Bloom Energy a $10 con potencial de $60 vs. NVIDIA a $800 con potencial de $1,000.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- What they bought -->
+  <div class="card rv" style="margin-top:16px">
+    <h3 style="color:var(--emerald)">Las apuestas masivas (lo que compro)</h3>
+    <table class="tbl">
+      <thead><tr><th>Posicion</th><th>Tipo</th><th>~Tamano</th><th>Tesis subyacente</th></tr></thead>
+      <tbody>
+        <tr><td class="ticker">CRWV</td><td><span class="tag tag-dc">DC / GPU Cloud</span></td><td style="font-family:var(--mono);color:var(--emerald)">$1.2B</td><td>"Los megavatios son mas valiosos que los algoritmos"</td></tr>
+        <tr><td class="ticker">BE</td><td><span class="tag tag-energy">Energia</span></td><td style="font-family:var(--mono);color:var(--emerald)">$911M</td><td>"Energia independiente de la red = ventaja competitiva"</td></tr>
+        <tr><td class="ticker">INTC</td><td><span class="tag tag-semis">Fab domestica</span></td><td style="font-family:var(--mono);color:var(--emerald)">$749M</td><td>"Soberania de fabricacion frente a Taiwan"</td></tr>
+        <tr><td class="ticker">CORZ</td><td><span class="tag tag-mining">BTC &rarr; HPC</span></td><td style="font-family:var(--mono);color:var(--emerald)">$418M</td><td>"Megavatios baratos ya construidos"</td></tr>
+        <tr><td class="ticker">IREN</td><td><span class="tag tag-mining">BTC &rarr; HPC</span></td><td style="font-family:var(--mono);color:var(--emerald)">$329M</td><td>"Mismo arbitraje de infraestructura"</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <blockquote class="rv" style="margin-top:24px;border-left-color:var(--emerald)">
+    La rotacion NVIDIA &rarr; Bloom Energy / Core Scientific es la prueba mas clara de la tesis: el fondo vendio <strong>"el cerebro"</strong>
+    para comprar <strong>"el corazon y los pulmones"</strong> de la IA.
+  </blockquote>
+
+  <!-- ── FICHAS DETALLADAS DE ACTIVOS CORE ── -->
+  <div style="margin-top:32px">
+    <h3 class="rv" style="margin-bottom:16px">Fichas de los 5 activos core</h3>
+
+    <!-- BE -->
+    <div class="card rv" style="margin-top:12px">
+      <h3><span class="ticker" style="color:var(--amber)">BE</span> &mdash; Bloom Energy <span class="tag tag-energy">Energia in-situ</span></h3>
+      <div style="margin-top:10px;font-size:.88rem;color:var(--t2)">
+        <p>Genera electricidad <strong>directamente en el sitio</strong> (on-site) usando celdas de combustible. Convierte gas/hidrogeno en electricidad de forma continua.</p>
+        <ul style="margin:8px 0 0 20px;line-height:1.8">
+          <li>Ingresos FY 2025: <strong style="color:var(--t1)">$2.02B</strong> (+37% YoY)</li>
+          <li>Backlog: <strong style="color:var(--t1)">~$6.0B</strong> (2.5x respecto al ano anterior)</li>
+          <li>Rendimiento 12m: <strong style="color:var(--emerald)">+508%</strong></li>
+        </ul>
+      </div>
+      <table class="tbl" style="margin-top:10px">
+        <thead><tr><th>Ventaja</th><th>Detalle</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--t1)">Soberania energetica</td><td>Permite a un datacenter operar independientemente de la red publica</td></tr>
+          <tr><td style="color:var(--t1)">Velocidad</td><td>Instalacion en meses vs. 5+ anos de permisos de conexion a la red</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CRWV -->
+    <div class="card rv" style="margin-top:12px">
+      <h3><span class="ticker" style="color:var(--blue)">CRWV</span> &mdash; CoreWeave <span class="tag tag-dc">GPU Cloud / Neocloud</span></h3>
+      <div style="margin-top:10px;font-size:.88rem;color:var(--t2)">
+        <p>Un <strong>"neocloud"</strong> especializado en IA: construye data centers llenos de chips NVIDIA y alquila esa potencia para entrenar modelos. Modelo: <strong>"AI factory as a service"</strong>.</p>
+        <ul style="margin:8px 0 0 20px;line-height:1.8">
+          <li>Financiamiento total 2025: <strong style="color:var(--t1)">~$28B</strong> en deuda y capital</li>
+          <li>Linea de credito Q1-2026: <strong style="color:var(--t1)">$8.5B</strong> calificada A3 por Moody's</li>
+          <li>Capacidad: 850MW &rarr; proyeccion <strong style="color:var(--t1)">1.7GW</strong></li>
+          <li>Clientes: <strong style="color:var(--t1)">OpenAI, Meta, Microsoft</strong></li>
+        </ul>
+      </div>
+      <table class="tbl" style="margin-top:10px">
+        <thead><tr><th>Hito</th><th>Significado</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--t1)">Prestamo A3 Moody's</td><td>Primera vez en la historia que GPUs son colateral con grado de inversion</td></tr>
+          <tr><td style="color:var(--t1)">Posicion CALL en 13F</td><td>SA LP busca convexidad &mdash; exposicion apalancada, no lineal</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- INTC -->
+    <div class="card rv" style="margin-top:12px">
+      <h3><span class="ticker" style="color:var(--violet)">INTC</span> &mdash; Intel <span class="tag tag-semis">Fab domestica</span></h3>
+      <div style="margin-top:10px;font-size:.88rem;color:var(--t2)">
+        <p>Tres pilares: <strong>chips IA propios</strong> (Gaudi 3, inferencia barata), <strong>Foundry</strong> (nodo 18A, competir con TSMC, "la fabrica de chips de Occidente") y <strong>AI PCs</strong> (Core Ultra, Xeon).</p>
+        <ul style="margin:8px 0 0 20px;line-height:1.8">
+          <li>NVIDIA invierte <strong style="color:var(--t1)">~$5B en Intel</strong> + colaboracion en chips</li>
+          <li>Apple usaria Intel Foundry (2025)</li>
+          <li>Dell AI Factory con Gaudi 3 (infra IA empresarial)</li>
+          <li>Gobierno EE.UU. <strong style="color:var(--t1)">~10% stake</strong> para soberania tecnologica</li>
+          <li>Rendimiento Q1 2026: <strong style="color:var(--emerald)">+10% YTD</strong> (+9.8% el 1 de abril)</li>
+        </ul>
+      </div>
+      <div style="margin-top:10px;padding:10px 14px;background:rgba(245,158,11,.06);border-radius:8px;border-left:3px solid var(--amber);font-size:.82rem">
+        <strong style="color:var(--amber)">Nota:</strong>
+        <span style="color:var(--t2)">Intel esta en fase de <strong>turnaround</strong>, no de liderazgo. Gaudi tiene adopcion limitada. Foundry aun pierde dinero. Pero tiene activos unicos: fabs + escala + apoyo estatal. Posicion CALL en 13F = apuesta a la "resurreccion".</span>
+      </div>
+    </div>
+
+    <!-- LITE -->
+    <div class="card rv" style="margin-top:12px">
+      <h3><span class="ticker" style="color:var(--cyan)">LITE</span> &mdash; Lumentum <span class="tag tag-optica">Optica / Conectividad</span></h3>
+      <div style="margin-top:10px;font-size:.88rem;color:var(--t2)">
+        <p>El proveedor de <strong>"tuberias de datos" de la IA</strong> (en version luz). Silicio fotonico &mdash; comunicacion con luz en vez de electricidad = ahorro masivo de energia.</p>
+        <ul style="margin:8px 0 0 20px;line-height:1.8">
+          <li>NVIDIA invierte <strong style="color:var(--t1)">~$2B</strong> + acuerdos de compra multianuales</li>
+          <li>Contratos crecientes en <strong style="color:var(--t1)">OCS</strong> (Optical Circuit Switch) y <strong style="color:var(--t1)">CPO</strong> (Co-packaged Optics)</li>
+          <li><strong style="color:var(--t1)">60%</strong> del negocio ya ligado a cloud/IA</li>
+        </ul>
+      </div>
+      <table class="tbl" style="margin-top:10px">
+        <thead><tr><th>Cuello botella</th><th>Por que importa</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--t1)">Conectividad intra-cluster</td><td>A medida que clusters crecen a miles de GPUs, la comunicacion entre ellas es el nuevo limitante</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- APLD -->
+    <div class="card rv" style="margin-top:12px">
+      <h3><span class="ticker" style="color:var(--blue)">APLD</span> &mdash; Applied Digital <span class="tag tag-dc">HPC Infra</span></h3>
+      <div style="margin-top:10px;font-size:.88rem;color:var(--t2)">
+        <p>El <strong>"promotor inmobiliario de la IA"</strong>: construye campus de data centers gigantes (cientos de MW / GW) y los alquila. Antes cripto, ahora <strong>infraestructura pura de IA</strong>. No vende IA ni chips &mdash; vende espacio electrificado para que ocurra la IA.</p>
+        <ul style="margin:8px 0 0 20px;line-height:1.8">
+          <li>Acuerdo masivo con CoreWeave: hasta <strong style="color:var(--t1)">$11B en ingresos a 15 anos</strong></li>
+          <li>Contrato adicional con hyperscaler: <strong style="color:var(--t1)">~$5B</strong> arrendamiento largo plazo</li>
+          <li>Cartera total contratada: <strong style="color:var(--t1)">~$16B asegurados</strong></li>
+          <li>Ingresos <strong style="color:var(--emerald)">+250% YoY</strong></li>
+          <li>Expansion: Polaris Forge, varios campus, objetivo <strong style="color:var(--t1)">multi-gigavatios</strong></li>
+        </ul>
+      </div>
+      <div style="margin-top:10px;padding:10px 14px;background:rgba(245,158,11,.06);border-radius:8px;border-left:3px solid var(--amber);font-size:.82rem">
+        <strong style="color:var(--amber)">Riesgos:</strong>
+        <span style="color:var(--t2)">Aun no muy rentable. Mucho CAPEX. Dependencia de pocos clientes (CoreWeave sobre todo).</span>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- ═══════════════════════════════════════════
+     FASE 3 — RENDIMIENTO Y EXPANSIÓN GLOBAL
+     ═══════════════════════════════════════════ -->
+<section id="f3">
+<div class="wrap">
+  <div class="rv"><span class="phase-num">Fase 3</span></div>
+  <h2 class="rv rv-d1">Evaluacion de <span style="color:var(--emerald)">rendimiento</span> y expansion global</h2>
+  <p class="phase-sub rv rv-d2">Los activos de infraestructura fisica han superado al software por margenes de 3x a 10x durante 2025.</p>
+
+  <!-- Q1 2026 Macro context -->
+  <div class="card rv">
+    <h3 style="color:var(--rose)">Contexto macro Q1 2026 &mdash; la tesis resiste</h3>
+    <p style="color:var(--t2);font-size:.88rem;margin-top:8px">El inicio de 2026 ha estado dominado por un entorno macroeconomico hostil:</p>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px">
+      <div style="padding:10px 14px;background:var(--surface);border-radius:8px;font-size:.82rem;border-left:3px solid var(--rose)">
+        <strong style="color:var(--rose)">Geopolitica</strong><br><span style="color:var(--t2)">Tensiones Medio Oriente, ataques a Iran, cierre parcial Estrecho de Ormuz</span>
+      </div>
+      <div style="padding:10px 14px;background:var(--surface);border-radius:8px;font-size:.82rem;border-left:3px solid var(--rose)">
+        <strong style="color:var(--rose)">Energia</strong><br><span style="color:var(--t2)">Precios petroleo y gas disparados</span>
+      </div>
+      <div style="padding:10px 14px;background:var(--surface);border-radius:8px;font-size:.82rem;border-left:3px solid var(--rose)">
+        <strong style="color:var(--rose)">Estanflacion</strong><br><span style="color:var(--t2)">Temores reavivados, tasas que no terminan de bajar</span>
+      </div>
+      <div style="padding:10px 14px;background:var(--surface);border-radius:8px;font-size:.82rem;border-left:3px solid var(--emerald)">
+        <strong style="color:var(--emerald)">Sin embargo...</strong><br><span style="color:var(--t2)">Infra IA mantiene rendimientos positivos: ASML +16%, TSMC +12%, INTC +10%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ganadores Q1 -->
+  <div class="card rv" style="margin-top:16px">
+    <h3>Ganadores Q1 2026</h3>
+    <table class="tbl">
+      <thead><tr><th>Activo</th><th>Rdto YTD</th><th>Catalizador</th></tr></thead>
+      <tbody>
+        <tr><td class="ticker">ASML</td><td class="up" style="font-family:var(--mono)">+16%</td><td>Pedidos record EUV por fabricantes coreanos</td></tr>
+        <tr><td class="ticker">TSM</td><td class="up" style="font-family:var(--mono)">+12%</td><td>CAGR ingresos revisado al alza: del 20% al 25%</td></tr>
+        <tr><td class="ticker">INTC</td><td class="up" style="font-family:var(--mono)">+10%</td><td>Avances 18A + Core Ultra para PCs IA. Alternativa domestica</td></tr>
+        <tr><td class="ticker">URA</td><td class="up" style="font-family:var(--mono)">Positivo</td><td>Uranio alcanzo $85/lb</td></tr>
+        <tr><td class="ticker">COPX</td><td class="up" style="font-family:var(--mono)">Positivo</td><td>Cobre $6.06/lb a inicios de marzo</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:12px;padding:10px 14px;background:rgba(245,158,11,.06);border-radius:8px;border-left:3px solid var(--amber);font-size:.82rem">
+      <strong style="color:var(--amber)">Volatilidad en BE:</strong>
+      <span style="color:var(--t2)">Caidas del 10% en marzo tras resultados record, por preocupaciones sobre velocidad de despliegue del backlog de $6B. Software tradicional sufriendo bajo entorno de tasas altas.</span>
+    </div>
+  </div>
+
+  <!-- Performance table -->
+  <div class="card rv" style="margin-top:16px">
+    <h3>Rendimientos verificados (12 meses a marzo 2026)</h3>
+    <table class="tbl">
+      <thead><tr><th>Activo</th><th>Rendimiento</th><th>Categoria</th></tr></thead>
+      <tbody>
+        <tr><td class="ticker">BE</td><td class="up" style="font-family:var(--mono);font-weight:700;font-size:1rem">+508%</td><td><span class="tag tag-energy">Energia / Celdas combustible</span></td></tr>
+        <tr><td class="ticker">000660.KS</td><td class="up" style="font-family:var(--mono)">+145%</td><td><span class="tag tag-semis">Memoria HBM (SK Hynix)</span></td></tr>
+        <tr><td class="ticker">URA</td><td class="up" style="font-family:var(--mono)">+111%</td><td><span class="tag tag-matpri">Materia prima / Uranio</span></td></tr>
+        <tr><td class="ticker">COPX</td><td class="up" style="font-family:var(--mono)">+96%</td><td><span class="tag tag-matpri">Materia prima / Cobre</span></td></tr>
+        <tr><td class="ticker">TSM</td><td class="up" style="font-family:var(--mono)">+55% + 12% YTD</td><td><span class="tag tag-semis">Fabricacion chips (Asia)</span></td></tr>
+        <tr><td class="ticker">AINF.L</td><td class="up" style="font-family:var(--mono)">+45%</td><td><span class="tag tag-dc">ETF infraestructura IA</span></td></tr>
+        <tr><td class="ticker">VPN</td><td class="up" style="font-family:var(--mono)">+28%</td><td><span class="tag tag-dc">REITs digitales</span></td></tr>
+      </tbody>
+    </table>
+    <p style="color:var(--t3);font-size:.8rem;margin-top:12px">Los rendimientos mas altos estan en la <strong style="color:var(--amber)">base de la piramide</strong> (energia, materias primas), no en la cima (software).</p>
+  </div>
+
+  <!-- ChatGPT Model Portfolio -->
+  <div class="card rv" style="margin-top:16px">
+    <h3>Cartera modelo por nodo de cadena de suministro</h3>
+    <p style="color:var(--t3);font-size:.78rem;margin-bottom:8px">Fuente: ChatGPT Research. Rentabilidades de Digrin (precio ajustado mensual).</p>
+    <table class="tbl">
+      <thead><tr><th>Ticker</th><th>Nodo</th><th>2025</th><th>Q1-26</th><th>MCap</th></tr></thead>
+      <tbody>
+        <tr><td class="ticker">SMH.L</td><td>Semiconductores</td><td class="up" style="font-family:var(--mono)">+49.2%</td><td class="up" style="font-family:var(--mono)">+3.2%</td><td class="mono" style="color:var(--t3)">$4.6B</td></tr>
+        <tr><td class="ticker">CNDX.L</td><td>Hiperscalers + software</td><td class="up" style="font-family:var(--mono)">+19.8%</td><td class="down" style="font-family:var(--mono)">&minus;8.7%</td><td class="mono" style="color:var(--t3)">$21.3B</td></tr>
+        <tr><td class="ticker">INTL.L</td><td>IA mixto (sw/hw)</td><td class="up" style="font-family:var(--mono)">+14.5%</td><td class="down" style="font-family:var(--mono)">&minus;4.0%</td><td class="mono" style="color:var(--t3)">$767M</td></tr>
+        <tr><td class="ticker">KLWD.L</td><td>Cloud software</td><td class="down" style="font-family:var(--mono)">&minus;13.5%</td><td class="down" style="font-family:var(--mono);font-weight:700">&minus;22.4%</td><td class="mono" style="color:var(--t3)">$232M</td></tr>
+        <tr><td class="ticker">EQIX</td><td>Centros datos (colocation)</td><td class="down" style="font-family:var(--mono)">&minus;16.9%</td><td class="up" style="font-family:var(--mono);font-weight:700">+28.6%</td><td class="mono" style="color:var(--t3)">$95.5B</td></tr>
+        <tr><td class="ticker">ETN</td><td>Electrificacion / potencia</td><td class="down" style="font-family:var(--mono)">&minus;2.8%</td><td class="up" style="font-family:var(--mono)">+8.5%</td><td class="mono" style="color:var(--t3)">$136.6B</td></tr>
+        <tr><td class="ticker">CORZ</td><td>Mineria/hosting reutilizable</td><td class="up" style="font-family:var(--mono)">+3.6%</td><td class="down" style="font-family:var(--mono)">&minus;4.5%</td><td class="mono" style="color:var(--t3)">$4.7B</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:12px;padding:12px 16px;background:rgba(16,185,129,.06);border-radius:8px;border-left:3px solid var(--emerald);font-size:.82rem">
+      <strong style="color:var(--emerald)">Insight clave:</strong>
+      <span style="color:var(--t2)">La rotacion de 2025 a Q1-2026 confirma la tesis: <strong>EQIX +28.6% vs CNDX &minus;8.7%</strong>. El valor migra de "software/chips" hacia "infraestructura fisica". KLWD.L (cloud software) se desploma &minus;22.4% mientras los data centers fisicos capturan la demanda.</span>
+    </div>
+    <p style="color:var(--t3);font-size:.75rem;margin-top:8px"><strong>Nota UCITS:</strong> ETFs con sufijo <strong>.L</strong> (LSE) son UCITS-compliant y accesibles para inversores europeos. EQIX, ETN y CORZ son acciones US que requieren acceso a mercados americanos.</p>
+  </div>
+
+  <!-- Global verticals -->
+  <div class="rv" style="margin-top:24px">
+    <h3>Verticales identificadas fuera de EE.UU.</h3>
+    <div class="geo">
+      <div class="geo-col">
+        <h4><span class="flag">&#127466;&#127482;</span> Europa</h4>
+        <div class="geo-item"><span class="name">ASML</span><br><span class="role">Litografia EUV &mdash; monopolio global</span></div>
+        <div class="geo-item"><span class="name">Schneider Electric</span><br><span class="role">Gestion energetica datacenters</span></div>
+        <div class="geo-item"><span class="name">Prysmian</span><br><span class="role">Cables alta tension</span></div>
+        <div class="geo-item"><span class="name">Rolls-Royce</span><br><span class="role">SMR nuclear</span></div>
+      </div>
+      <div class="geo-col">
+        <h4><span class="flag">&#127470;&#127462;</span> Asia</h4>
+        <div class="geo-item"><span class="name">TSMC</span><br><span class="role">Foundry 72% de vanguardia</span></div>
+        <div class="geo-item"><span class="name">SK Hynix</span><br><span class="role">88% mercado HBM</span></div>
+        <div class="geo-item"><span class="name">Samsung</span><br><span class="role">HBM4 + foundry</span></div>
+        <div class="geo-item"><span class="name">Advantech</span><br><span class="role">34% edge AI industrial</span></div>
+      </div>
+      <div class="geo-col">
+        <h4><span class="flag">&#127482;&#127480;</span> EE.UU.</h4>
+        <div class="geo-item"><span class="name">CoreWeave</span><br><span class="role">GPU cloud, $28B financiamiento</span></div>
+        <div class="geo-item"><span class="name">Bloom Energy</span><br><span class="role">Celdas combustible, backlog $6B</span></div>
+        <div class="geo-item"><span class="name">Intel</span><br><span class="role">Fab domestica 18A</span></div>
+        <div class="geo-item"><span class="name">Core Scientific</span><br><span class="role">BTC &rarr; HPC, contratos 12y</span></div>
+      </div>
+    </div>
+    <p style="color:var(--t3);font-size:.8rem;text-align:center">Europa controla los eslabones altos (litografia, gestion energetica). Asia la ejecucion (fabricacion, ensamblaje). EE.UU. el diseno y la demanda.</p>
+  </div>
+</div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- ═══════════════════════════════════════════
+     FASE 4 — CONSOLIDACIÓN INFRAESTRUCTURA
+     ═══════════════════════════════════════════ -->
+<section id="f4">
+<div class="wrap">
+  <div class="rv"><span class="phase-num">Fase 4</span></div>
+  <h2 class="rv rv-d1">Consolidacion de <span style="color:var(--amber)">infraestructura fisica</span></h2>
+  <p class="phase-sub rv rv-d2">Contrastacion de datos: rendimientos &gt;500%, mineria digital &rarr; HPC, prestamos respaldados por GPUs.</p>
+
+  <!-- Bloom Energy -->
+  <div class="card rv">
+    <h3><span class="ticker" style="color:var(--emerald)">BE</span> &mdash; Bloom Energy: de empresa nicho a infraestructura critica</h3>
+    <div class="metrics" style="margin-top:12px;margin-bottom:0">
+      <div class="metric"><div class="val" style="color:var(--emerald);font-size:1.2rem">$2.02B</div><div class="label">Ingresos FY25</div></div>
+      <div class="metric"><div class="val" style="color:var(--emerald);font-size:1.2rem">+37%</div><div class="label">YoY</div></div>
+      <div class="metric"><div class="val" style="color:var(--amber);font-size:1.2rem">$6.0B</div><div class="label">Backlog</div></div>
+      <div class="metric"><div class="val" style="color:var(--rose);font-size:1.2rem">+508%</div><div class="label">12m return</div></div>
+    </div>
+    <p style="color:var(--t2);font-size:.88rem;margin-top:12px">
+      Bloom Energy no es una "startup de energia limpia". Es un proveedor de <strong>soberania energetica</strong> para datacenters.
+      Su tecnologia de celdas de combustible permite operar <strong>independientemente de la red electrica publica</strong>.
+      En un mundo donde los permisos de conexion a la red tardan 5 anos, esto es una ventaja competitiva brutal.
+    </p>
+  </div>
+
+  <!-- CoreWeave -->
+  <div class="card rv">
+    <h3><span class="ticker" style="color:var(--blue)">CRWV</span> &mdash; CoreWeave: el prestamo que cambio las reglas</h3>
+    <div class="metrics" style="margin-top:12px;margin-bottom:0">
+      <div class="metric"><div class="val" style="color:var(--blue);font-size:1.2rem">$28B</div><div class="label">Financiamiento 2025</div></div>
+      <div class="metric"><div class="val" style="color:var(--amber);font-size:1.2rem">A3</div><div class="label">Rating Moody's</div></div>
+      <div class="metric"><div class="val" style="color:var(--violet);font-size:1.2rem">$8.5B</div><div class="label">Linea credito Q1-26</div></div>
+    </div>
+    <p style="color:var(--t2);font-size:.88rem;margin-top:12px">
+      <strong>Primera vez en la historia</strong> que un prestamo respaldado por GPUs recibe grado de inversion.
+      Las GPUs ahora son un <strong>activo colateral legitimo</strong>, comparable a bienes raices o aviones.
+    </p>
+  </div>
+
+  <!-- Reconversion -->
+  <div class="card rv">
+    <h3 style="color:var(--emerald)">La reconversion de mineros: "De hashrate a horsepower"</h3>
+    <p style="color:var(--t2);font-size:.88rem;margin-top:8px">
+      <strong>Core Scientific:</strong> contratos de 12 anos con CoreWeave + financiamiento de $1B (Morgan Stanley + JPMorgan).<br>
+      Un datacenter nuevo tarda 3-5 anos. Reconvertir una mina de Bitcoin tarda <strong>6-12 meses</strong>.
+    </p>
+    <p style="color:var(--t2);font-size:.88rem;margin-top:8px">
+      La capacidad de carga electrica de alta tension, antes dedicada a la mineria digital,
+      se ha convertido en el <strong>activo inmobiliario mas valioso</strong> del Q1 2026.
+    </p>
+  </div>
+
+  <!-- New metrics -->
+  <div class="card rv" style="margin-top:16px">
+    <h3>Las nuevas metricas de exito</h3>
+    <table class="tbl">
+      <thead><tr><th>Metrica tradicional</th><th>&rarr;</th><th>Nueva metrica infra IA</th></tr></thead>
+      <tbody>
+        <tr><td>Usuarios activos mensuales</td><td style="color:var(--t3)">&rarr;</td><td><strong>Megavatios instalados</strong></td></tr>
+        <tr><td>Margen de software</td><td style="color:var(--t3)">&rarr;</td><td><strong>Coste por kWh entregado</strong></td></tr>
+        <tr><td>ARR (ingresos recurrentes)</td><td style="color:var(--t3)">&rarr;</td><td><strong>MW contratados a largo plazo</strong></td></tr>
+        <tr><td>Tiempo desarrollo producto</td><td style="color:var(--t3)">&rarr;</td><td><strong>Tiempo de conexion a la red</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- ═══════════════════════════════════════════
+     FASE 5 — SOBERANÍA ENERGÉTICA
+     ═══════════════════════════════════════════ -->
+<section id="f5">
+<div class="wrap">
+  <div class="rv"><span class="phase-num">Fase 5</span></div>
+  <h2 class="rv rv-d1">Validacion de <span style="color:var(--rose)">soberania</span> energetica y tecnologica</h2>
+  <p class="phase-sub rv rv-d2">Resolucion de contradicciones, definicion de "economia de guerra computacional".</p>
+
+  <div class="card rv">
+    <h3>El concepto de "Economia de Guerra Computacional"</h3>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px;font-size:.9rem;color:var(--t2)">
+      <div style="padding:12px 16px;background:var(--surface);border-radius:8px">
+        <strong style="color:var(--amber)">Analogia historica:</strong> Asi como en la WWII se reconvirtieron fabricas de coches en fabricas de aviones,
+        en 2025-2026 se reconvierten minas de Bitcoin en datacenters de IA.
+      </div>
+      <div style="padding:12px 16px;background:var(--surface);border-radius:8px">
+        <strong style="color:var(--amber)">Escala:</strong> CoreWeave paso de 850MW a proyectar 1.7GW en un ano.
+        Equivale a encender una ciudad mediana solo para entrenar modelos de IA.
+      </div>
+      <div style="padding:12px 16px;background:var(--surface);border-radius:8px">
+        <strong style="color:var(--amber)">Intervencion estatal:</strong> Aschenbrenner predice que el gobierno de EE.UU. declarara
+        la infraestructura de IA como <strong style="color:var(--t1)">infraestructura de seguridad nacional</strong>.
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottleneck evolution -->
+  <div class="card rv" style="margin-top:16px">
+    <h3>Evolucion de cuellos de botella</h3>
+    <div class="ascii"><span class="dim">2023-2024:</span>  <span class="hl">Quien tiene las GPUs?</span>          <span class="dim">&rarr;</span> <span class="val">NVIDIA domino</span>
+<span class="dim">2025:     </span>  <span class="hl">Quien tiene la energia?</span>       <span class="dim">&rarr;</span> <span class="val">Bloom Energy, nuclear</span>
+<span class="dim">2026:     </span>  <span class="hl">Quien conecta y enfria todo?</span>  <span class="dim">&rarr;</span> <span class="val">Lumentum, Vertiv, Schneider</span>
+<span class="dim">2027+:    </span>  <span class="hl">Quien tiene uranio y cobre?</span>   <span class="dim">&rarr;</span> <span class="warn">Cameco, Freeport-McMoRan</span></div>
+  </div>
+
+  <!-- Sovereignty positions -->
+  <div class="card rv" style="margin-top:16px">
+    <h3>Posiciones de soberania del fondo</h3>
+    <table class="tbl">
+      <thead><tr><th>Dimension</th><th>Posicion del fondo</th><th>Razon</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--t1);font-weight:600">Fabricacion chips</td><td class="ticker">INTC</td><td>Intel (EE.UU.) sobre TSMC (Taiwan) &mdash; riesgo invasion china</td></tr>
+        <tr><td style="color:var(--t1);font-weight:600">Energia</td><td class="ticker">CEG, OKLO, SMR</td><td>Nuclear domestica sobre importacion de gas</td></tr>
+        <tr><td style="color:var(--t1);font-weight:600">Cloud</td><td class="ticker">CRWV</td><td>CoreWeave (privado) sobre AWS/Azure (hiperescaladores)</td></tr>
+        <tr><td style="color:var(--t1);font-weight:600">Conectividad</td><td class="ticker">LITE</td><td>Optica domestica &mdash; cuello botella secundario</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <blockquote class="rv" style="margin-top:24px;border-left-color:var(--rose)">
+    La "economia de guerra computacional" no es una metafora &mdash; es una descripcion literal.
+    La propiedad de infraestructura energetica, sistemas de refrigeracion liquida y conectividad optica
+    <strong>dicta la jerarquia del mercado</strong> por encima de la eficiencia de los algoritmos.
+    El fondo Situational Awareness no es un fondo tech &mdash; es un fondo de <strong>seguridad nacional disfrazado</strong>.
+  </blockquote>
+</div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- ═══════════════════════════════════════════
+     FASE 5b — MATERIAS PRIMAS: LA CAPA CERO
+     ═══════════════════════════════════════════ -->
+<section id="f5b">
+<div class="wrap">
+  <div class="rv"><span class="phase-num">Fase 5b</span></div>
+  <h2 class="rv rv-d1">Materias primas: la <span style="color:var(--orange)">"capa cero"</span></h2>
+  <p class="phase-sub rv rv-d2">Sin cobre para el cableado y uranio para la energia nuclear, el crecimiento de la infraestructura es fisicamente imposible.</p>
+
+  <!-- Cobre -->
+  <div class="card rv">
+    <h3><span style="color:var(--orange)">Cobre</span> &mdash; el metal de la electrificacion</h3>
+    <div class="metrics" style="margin-top:12px;margin-bottom:0">
+      <div class="metric"><div class="val" style="color:var(--orange);font-size:1.1rem">$6.06/lb</div><div class="label">Precio mar 2026</div></div>
+      <div class="metric"><div class="val" style="color:var(--orange);font-size:1.1rem">&gt;$13,900</div><div class="label">/ton LME (max hist.)</div></div>
+      <div class="metric"><div class="val" style="color:var(--emerald);font-size:1.1rem">+40%</div><div class="label">Ganancias 2025</div></div>
+      <div class="metric"><div class="val" style="color:var(--emerald);font-size:1.1rem">+95.8%</div><div class="label">COPX 12m</div></div>
+    </div>
+    <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;font-size:.88rem;color:var(--t2)">
+      <div style="padding:10px 14px;background:var(--surface);border-radius:8px;border-left:3px solid var(--orange)">
+        <strong style="color:var(--orange)">Punto de inflexion estructural:</strong>
+        2026 marca el punto donde la <strong style="color:var(--t1)">oferta minera no puede seguir el ritmo</strong> de la demanda de centros de datos + transicion energetica.
+      </div>
+      <div style="padding:10px 14px;background:var(--surface);border-radius:8px;border-left:3px solid var(--rose)">
+        <strong style="color:var(--rose)">Factores de escasez:</strong>
+        Interrupciones en minas clave &mdash; <strong>Grasberg</strong> (Indonesia) y <strong>Kamoa-Kakula</strong> (Congo) &mdash; han creado un suelo solido para los precios a largo plazo.
+      </div>
+    </div>
+  </div>
+
+  <!-- Uranio -->
+  <div class="card rv" style="margin-top:16px">
+    <h3><span style="color:var(--amber)">Uranio</span> &mdash; combustible para la IA continua</h3>
+    <div class="metrics" style="margin-top:12px;margin-bottom:0">
+      <div class="metric"><div class="val" style="color:var(--amber);font-size:1.1rem">$85/lb</div><div class="label">Precio ene 2026</div></div>
+      <div class="metric"><div class="val" style="color:var(--amber);font-size:1.1rem">17m</div><div class="label">Maximo (meses)</div></div>
+      <div class="metric"><div class="val" style="color:var(--emerald);font-size:1.1rem">+111.4%</div><div class="label">URA 12m</div></div>
+      <div class="metric"><div class="val" style="color:var(--rose);font-size:1.1rem">150K ton</div><div class="label">Demanda 2040</div></div>
+    </div>
+    <p style="color:var(--t2);font-size:.88rem;margin-top:12px">
+      La energia nuclear es la <strong>unica capaz de proporcionar energia libre de carbono de manera ininterrumpida</strong> &mdash;
+      requisito fundamental para clusters de IA que no pueden apagarse.
+      Inventarios en niveles historicamente bajos. Problemas operativos en <strong>Kazatomprom</strong> (principal productor mundial).
+    </p>
+  </div>
+
+  <blockquote class="rv" style="margin-top:24px;border-left-color:var(--orange)">
+    Sin cobre para el cableado y uranio para la energia nuclear, el crecimiento de la infraestructura es <strong>fisicamente imposible</strong>.
+    Las materias primas no son derivadas de la tesis &mdash; son su <strong>cimiento literal</strong>.
+  </blockquote>
+</div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- ═══════════════════════════════════════════
+     FASE 6 — DIVERSIFICACIÓN INTERNACIONAL
+     ═══════════════════════════════════════════ -->
+<section id="f6">
+<div class="wrap">
+  <div class="rv"><span class="phase-num">Fase 6</span></div>
+  <h2 class="rv rv-d1">Estrategia de <span style="color:var(--cyan)">diversificacion</span> internacional</h2>
+  <p class="phase-sub rv rv-d2">Campeones europeos y asiaticos. Monopolios irremplazables fuera de EE.UU.</p>
+
+  <!-- ASML -->
+  <div class="card rv">
+    <h3><span class="ticker" style="color:var(--violet)">ASML</span> &mdash; El monopolio que no se puede replicar</h3>
+    <div class="metrics" style="margin-top:12px;margin-bottom:0">
+      <div class="metric"><div class="val" style="color:var(--violet);font-size:1.1rem">&euro;32.7B</div><div class="label">Ventas 2025</div></div>
+      <div class="metric"><div class="val" style="color:var(--violet);font-size:1.1rem">52.8%</div><div class="label">Margen bruto</div></div>
+      <div class="metric"><div class="val" style="color:var(--emerald);font-size:1.1rem">+16%</div><div class="label">YTD 2026</div></div>
+      <div class="metric"><div class="val" style="color:var(--amber);font-size:1.1rem">&euro;8.2B</div><div class="label">Mant. base instalada</div></div>
+    </div>
+    <p style="color:var(--t2);font-size:.88rem;margin-top:12px">
+      <strong>Sin ASML, la fabricacion de chips avanzados se detiene. Literalmente.</strong>
+      No es una empresa de tecnologia &mdash; es una empresa de fisica aplicada. Sus maquinas usan luz ultravioleta extrema
+      para grabar circuitos en obleas a escala atomica. No hay alternativa en el planeta.
+    </p>
+  </div>
+
+  <!-- Schneider -->
+  <div class="card rv">
+    <h3><span class="ticker" style="color:var(--blue)">SU.PA</span> &mdash; Schneider Electric: el sistema nervioso electrico</h3>
+    <p style="color:var(--t2);font-size:.88rem;margin-top:8px">
+      Pedidos de datacenters = <strong>30%</strong> de su exposicion de mercado.
+      Migracion a arquitecturas <strong>800V DC</strong>, mas eficientes para racks de 100kW.
+      Schneider es al datacenter lo que el sistema nervioso es al cuerpo: distribuye la energia desde el poste de la calle hasta el chip.
+    </p>
+  </div>
+
+  <!-- Rolls-Royce -->
+  <div class="card rv">
+    <h3><span class="ticker" style="color:var(--rose)">RR.L</span> &mdash; Rolls-Royce: el reactor al lado del datacenter</h3>
+    <p style="color:var(--t2);font-size:.88rem;margin-top:8px">
+      Beneficio operativo 2025: <strong>&pound;3.5B</strong>. Seleccion de Anglesey (Gales) para primer SMR en UK.
+      Despliegue en <strong>3-5 anos</strong> vs. 15 anos de reactor convencional.
+      La version europea de Oklo, con decadas de experiencia en reactores nucleares de submarinos.
+    </p>
+  </div>
+
+  <!-- Asia -->
+  <div class="card rv">
+    <h3>Asia: el brazo ejecutor</h3>
+    <table class="tbl">
+      <thead><tr><th>Ticker</th><th>Empresa</th><th>Dato clave</th><th>Rol</th></tr></thead>
+      <tbody>
+        <tr><td class="ticker">TSM</td><td>TSMC</td><td style="font-family:var(--mono)">CAPEX $54B (2026)</td><td>72% del foundry de vanguardia</td></tr>
+        <tr><td class="ticker">000660.KS</td><td>SK Hynix</td><td class="up" style="font-family:var(--mono)">+145% 12m</td><td>Proveedor #1 HBM de NVIDIA, 88% cuota</td></tr>
+        <tr><td class="ticker">005930.KS</td><td>Samsung</td><td style="font-family:var(--mono)">$26B R&D</td><td>HBM4 + foundry alternativa</td></tr>
+        <tr><td class="ticker">2395.TW</td><td>Advantech</td><td style="font-family:var(--mono)">34% cuota</td><td>PCs industriales edge AI</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Geographic map (cards) -->
+  <div class="rv" style="margin-top:24px">
+    <h3 style="margin-bottom:16px">Mapa geografico de la cadena</h3>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+
+      <!-- Europa -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .3s" onmouseover="this.style.borderColor='rgba(139,92,246,.3)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="background:rgba(139,92,246,.08);padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
+          <span style="font-size:1.3rem">&#127466;&#127482;</span>
+          <div>
+            <div style="font-weight:700;font-size:.9rem;color:var(--violet)">Europa</div>
+            <div style="font-size:.7rem;color:var(--t3)">Eslabones altos</div>
+          </div>
+        </div>
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="ticker" style="min-width:56px;font-size:.75rem">ASML</span>
+            <span style="font-size:.8rem;color:var(--t2)">Litografia EUV</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="ticker" style="min-width:56px;font-size:.75rem">SU.PA</span>
+            <span style="font-size:.8rem;color:var(--t2)">Grid / potencia</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="ticker" style="min-width:56px;font-size:.75rem">RR.L</span>
+            <span style="font-size:.8rem;color:var(--t2)">Nuclear SMR</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="ticker" style="min-width:56px;font-size:.75rem">PRY.MI</span>
+            <span style="font-size:.8rem;color:var(--t2)">Cables AT</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Asia -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .3s" onmouseover="this.style.borderColor='rgba(6,182,212,.3)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="background:rgba(6,182,212,.08);padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
+          <span style="font-size:1.3rem">&#127470;&#127462;</span>
+          <div>
+            <div style="font-weight:700;font-size:.9rem;color:var(--cyan)">Asia</div>
+            <div style="font-size:.7rem;color:var(--t3)">Ejecucion masiva</div>
+          </div>
+        </div>
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="ticker" style="min-width:56px;font-size:.75rem">TSM</span>
+            <span style="font-size:.8rem;color:var(--t2)">Foundry 72%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="ticker" style="min-width:56px;font-size:.75rem">SK Hynix</span>
+            <span style="font-size:.8rem;color:var(--t2)">HBM 88%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="ticker" style="min-width:56px;font-size:.75rem">Samsung</span>
+            <span style="font-size:.8rem;color:var(--t2)">HBM4 + foundry</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="ticker" style="min-width:56px;font-size:.75rem">2395.TW</span>
+            <span style="font-size:.8rem;color:var(--t2)">Edge AI 34%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- EE.UU. -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .3s" onmouseover="this.style.borderColor='rgba(59,130,246,.3)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="background:rgba(59,130,246,.08);padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
+          <span style="font-size:1.3rem">&#127482;&#127480;</span>
+          <div>
+            <div style="font-weight:700;font-size:.9rem;color:var(--blue)">EE.UU.</div>
+            <div style="font-size:.7rem;color:var(--t3)">Diseno + Demanda</div>
+          </div>
+        </div>
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="ticker" style="min-width:56px;font-size:.75rem">CRWV</span>
+            <span style="font-size:.8rem;color:var(--t2)">GPU cloud</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="ticker" style="min-width:56px;font-size:.75rem">BE</span>
+            <span style="font-size:.8rem;color:var(--t2)">Energia in-situ</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="ticker" style="min-width:56px;font-size:.75rem">INTC</span>
+            <span style="font-size:.8rem;color:var(--t2)">Fab domestica</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="ticker" style="min-width:56px;font-size:.75rem">CORZ</span>
+            <span style="font-size:.8rem;color:var(--t2)">BTC &rarr; HPC</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <p style="color:var(--t3);font-size:.78rem;text-align:center;margin-top:12px">Europa controla los <strong style="color:var(--violet)">eslabones altos</strong> (litografia, gestion energetica). Asia la <strong style="color:var(--cyan)">ejecucion</strong> (fabricacion, ensamblaje). EE.UU. el <strong style="color:var(--blue)">diseno y la demanda</strong>.</p>
+  </div>
+
+  <blockquote class="rv">
+    La diversificacion global no es opcional &mdash; es <strong>estructuralmente necesaria</strong>.
+    Una cartera que solo apueste por EE.UU. captura la demanda pero se expone al riesgo de cadena de suministro.
+    Una cartera global captura <strong>todo el ciclo de valor</strong>.
+  </blockquote>
+</div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- ═══════════════════════════════════════════
+     FASE 7 — SÍNTESIS FINAL
+     ═══════════════════════════════════════════ -->
+<section id="f7">
+<div class="wrap">
+  <div class="rv"><span class="phase-num">Fase 7</span></div>
+  <h2 class="rv rv-d1">Sintesis final y <span style="color:var(--violet)">conclusiones</span></h2>
+  <p class="phase-sub rv rv-d2">Consolidacion de hallazgos. Mapa completo de la cadena de valor. Proximos pasos.</p>
+
+  <!-- ETFs -->
+  <div class="card rv">
+    <h3>Vehiculos que capturan la tesis completa</h3>
+    <table class="tbl">
+      <thead><tr><th>ETF</th><th>Ticker</th><th>Retorno</th><th>Que captura</th></tr></thead>
+      <tbody>
+        <tr><td>iShares AI Infrastructure UCITS</td><td class="ticker">AINF.L</td><td class="up" style="font-family:var(--mono)">+45.4%</td><td>Cadena completa infra IA</td></tr>
+        <tr><td>Global X Data Center REITs</td><td class="ticker">VPN</td><td class="up" style="font-family:var(--mono)">+28.4%</td><td>Inmobiliario digital (10.6% China)</td></tr>
+        <tr><td>Defiance AI & Power Infra</td><td class="ticker">AIPO</td><td style="font-family:var(--mono);color:var(--t3)">Nuevo mar-26</td><td>Energia para IA</td></tr>
+        <tr><td>Global X Copper Miners</td><td class="ticker">COPX</td><td class="up" style="font-family:var(--mono)">+95.8%</td><td>Materia prima: cobre</td></tr>
+        <tr><td>Global X Uranium</td><td class="ticker">URA</td><td class="up" style="font-family:var(--mono)">+111.4%</td><td>Materia prima: uranio</td></tr>
+        <tr><td>VanEck Semiconductor</td><td class="ticker">SMH</td><td style="font-family:var(--mono);color:var(--t2)">&mdash;</td><td>Chips y memoria</td></tr>
+      </tbody>
+    </table>
+    <p style="color:var(--t3);font-size:.8rem;margin-top:12px">AINF no tiene a NVIDIA como posicion principal &mdash; tiene a Cisco, AMD, Applied Materials, ASML, TSMC. Incluso los gestores de ETFs han rotado hacia infraestructura.</p>
+  </div>
+
+  <!-- ETF deep dive -->
+  <div class="card rv" style="margin-top:16px">
+    <h3>Composicion detallada de los ETFs clave</h3>
+
+    <!-- AINF -->
+    <div style="margin-top:16px">
+      <h3 style="font-size:.9rem"><span class="ticker" style="color:var(--blue)">AINF.L</span> &mdash; iShares AI Infrastructure UCITS (al 30/03/2026)</h3>
+      <table class="tbl" style="margin-top:8px">
+        <thead><tr><th>Tenencia</th><th>Sector</th><th>Peso</th></tr></thead>
+        <tbody>
+          <tr><td>Cisco Systems</td><td>Equipos de Red</td><td class="mono">4.84%</td></tr>
+          <tr><td>AMD</td><td>Semiconductores</td><td class="mono">4.81%</td></tr>
+          <tr><td>Applied Materials</td><td>Equipos Fabricacion</td><td class="mono">4.71%</td></tr>
+          <tr><td>Apple</td><td>Hardware / Edge AI</td><td class="mono">4.58%</td></tr>
+          <tr><td>ASML Holding</td><td>Litografia</td><td class="mono">4.57%</td></tr>
+          <tr><td>TSMC</td><td>Fabricacion Chips</td><td class="mono">4.55%</td></tr>
+          <tr><td>Intel Corp</td><td>Fabricacion y Diseno</td><td class="mono">4.49%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- VPN -->
+    <div style="margin-top:20px">
+      <h3 style="font-size:.9rem"><span class="ticker" style="color:var(--cyan)">VPN</span> &mdash; Global X Data Center REITs &mdash; Desglose geografico (al 28/02/2026)</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        <div style="flex:1;min-width:80px;padding:10px;background:var(--surface);border-radius:8px;text-align:center">
+          <div class="mono" style="font-size:1rem;font-weight:700;color:var(--blue)">73.2%</div><div style="font-size:.7rem;color:var(--t3)">EE.UU.</div>
+        </div>
+        <div style="flex:1;min-width:80px;padding:10px;background:var(--surface);border-radius:8px;text-align:center">
+          <div class="mono" style="font-size:1rem;font-weight:700;color:var(--rose)">10.6%</div><div style="font-size:.7rem;color:var(--t3)">China</div>
+        </div>
+        <div style="flex:1;min-width:80px;padding:10px;background:var(--surface);border-radius:8px;text-align:center">
+          <div class="mono" style="font-size:1rem;font-weight:700;color:var(--t2)">6.0%</div><div style="font-size:.7rem;color:var(--t3)">Australia</div>
+        </div>
+        <div style="flex:1;min-width:80px;padding:10px;background:var(--surface);border-radius:8px;text-align:center">
+          <div class="mono" style="font-size:1rem;font-weight:700;color:var(--t2)">4.4%</div><div style="font-size:.7rem;color:var(--t3)">Singapur</div>
+        </div>
+        <div style="flex:1;min-width:80px;padding:10px;background:var(--surface);border-radius:8px;text-align:center">
+          <div class="mono" style="font-size:1rem;font-weight:700;color:var(--t2)">2.8%</div><div style="font-size:.7rem;color:var(--t3)">Corea</div>
+        </div>
+        <div style="flex:1;min-width:80px;padding:10px;background:var(--surface);border-radius:8px;text-align:center">
+          <div class="mono" style="font-size:1rem;font-weight:700;color:var(--t2)">2.2%</div><div style="font-size:.7rem;color:var(--t3)">Taiwan</div>
+        </div>
+      </div>
+      <p style="color:var(--t3);font-size:.78rem;margin-top:8px">VPN es el <strong style="color:var(--t2)">unico vehiculo identificado con exposicion significativa a Asia</strong>, mitigando el riesgo de concentracion americana de SA LP.</p>
+    </div>
+
+    <!-- AIPO -->
+    <div style="margin-top:20px">
+      <h3 style="font-size:.9rem"><span class="ticker" style="color:var(--amber)">AIPO</span> &mdash; Defiance AI & Power Infrastructure (lanzamiento marzo 2026)</h3>
+      <p style="color:var(--t2);font-size:.85rem;margin-top:6px">
+        El <strong>mas alineado con la fase actual de la tesis: la energia</strong>. Indice objetivo: empresas de generacion electrica, construccion de redes y centros de datos.
+        Principales pesos: <strong>GE Vernova</strong> (8.57%) y <strong>Eaton Corp</strong> (8.46%) &mdash; empresas industriales pesadas, no software.
+      </p>
+    </div>
+  </div>
+
+  <!-- Recommendations -->
+  <div class="card rv" style="margin-top:16px">
+    <h3 style="color:var(--emerald)">Recomendaciones de cartera</h3>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px">
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;background:var(--surface);border-radius:8px;border-left:3px solid var(--amber)">
+        <span style="color:var(--amber);font-family:var(--mono);font-weight:700;font-size:.8rem;min-width:18px">1</span>
+        <div><strong>Mantener exposicion a energia de base.</strong><br><span style="color:var(--t2);font-size:.85rem">La crisis energetica no se resolvera a corto plazo. URA y BE siguen siendo fundamentales para alimentar el crecimiento proyectado de 1,000 TWh.</span></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;background:var(--surface);border-radius:8px;border-left:3px solid var(--cyan)">
+        <span style="color:var(--cyan);font-family:var(--mono);font-weight:700;font-size:.8rem;min-width:18px">2</span>
+        <div><strong>Rotacion hacia hardware de conectividad.</strong><br><span style="color:var(--t2);font-size:.85rem">A medida que los clusters de GPUs crecen, la interconectividad optica se vuelve critica. Lumentum y Cisco a valoraciones inferiores a NVIDIA. Perfil riesgo-recompensa atractivo para H2 2026.</span></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;background:var(--surface);border-radius:8px;border-left:3px solid var(--rose)">
+        <span style="color:var(--rose);font-family:var(--mono);font-weight:700;font-size:.8rem;min-width:18px">3</span>
+        <div><strong>Vigilar la soberania tecnologica.</strong><br><span style="color:var(--t2);font-size:.85rem">Tendencia "Buy Chinese" + diversificacion de Apple hacia India. La infra IA se fragmentara regionalmente. ETFs con exposicion asiatica equilibrada (VPN) son herramientas clave.</span></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;background:var(--surface);border-radius:8px;border-left:3px solid var(--emerald)">
+        <span style="color:var(--emerald);font-family:var(--mono);font-weight:700;font-size:.8rem;min-width:18px">4</span>
+        <div><strong>Aprovechar retrocesos tecnicos.</strong><br><span style="color:var(--t2);font-size:.85rem">Correccion Q1 2026 en nombres de alta beta como Core Scientific. Oportunidad de entrada en la transicion HPC con valoraciones que aun no reflejan el valor total de la tierra y energia asegurada.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Implementation layers -->
+  <div class="card rv" style="margin-top:16px">
+    <h3>Estructura en capas de implementacion</h3>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+      <div style="padding:14px 16px;background:var(--surface);border-radius:8px;border-left:4px solid var(--blue)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="tag" style="background:rgba(59,130,246,.15);color:var(--blue)">CAPA 1</span><strong>Exposicion base amplia (ETFs grandes)</strong></div>
+        <span style="color:var(--t2);font-size:.85rem">CNDX.L, SMH.L, INTL.L &mdash; Liquidez alta, diversificacion, beta IA generalizado.</span>
+      </div>
+      <div style="padding:14px 16px;background:var(--surface);border-radius:8px;border-left:4px solid var(--amber)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="tag" style="background:rgba(245,158,11,.15);color:var(--amber)">CAPA 2</span><strong>Satelites en nodos fisicos</strong></div>
+        <span style="color:var(--t2);font-size:.85rem">EQIX, ETN &mdash; Drivers parcialmente distintos al software (demanda electrica, espacio fisico). Descorrelacion parcial con correcciones "growth".</span>
+      </div>
+      <div style="padding:14px 16px;background:var(--surface);border-radius:8px;border-left:4px solid var(--rose)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="tag" style="background:rgba(244,63,94,.15);color:var(--rose)">CAPA 3</span><strong>Satelite especulativo</strong></div>
+        <span style="color:var(--t2);font-size:.85rem">CORZ &mdash; Alto riesgo, alta convexidad. Solo si se tolera volatilidad. SA LP usa derivados para modular esta exposicion.</span>
+      </div>
+    </div>
+    <p style="color:var(--t3);font-size:.78rem;margin-top:10px"><strong>Mitigacion:</strong> la cartera no debe ser "todo semis" o "todo cloud" sino incluir nodos con drivers parcialmente distintos (electrificacion vs software, colocation vs chips).</p>
+  </div>
+
+  <!-- Risks -->
+  <div class="card rv" style="margin-top:16px">
+    <h3 style="color:var(--rose)">Riesgos</h3>
+
+    <!-- CALL risks -->
+    <h3 style="font-size:.9rem;margin-top:16px">Riesgos de derivados (CALL)</h3>
+    <table class="tbl" style="margin-top:8px">
+      <thead><tr><th>Riesgo</th><th>Descripcion</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--t1);font-weight:600">Perdida de prima</td><td>Si la accion no sube lo suficiente, pierdes el 100% de la prima pagada</td></tr>
+        <tr><td style="color:var(--t1);font-weight:600">Decay temporal (theta)</td><td>Las opciones pierden valor cada dia que pasa</td></tr>
+        <tr><td style="color:var(--t1);font-weight:600">Sensibilidad vol (vega)</td><td>Un crash de volatilidad puede destruir valor incluso si la accion no baja</td></tr>
+        <tr><td style="color:var(--t1);font-weight:600">Riesgo de "roll"</td><td>Si la tesis necesita mas tiempo, hay que renovar opciones (coste adicional)</td></tr>
+      </tbody>
+    </table>
+    <p style="color:var(--t3);font-size:.78rem;margin-top:8px">Parte de la exposicion buscada no es lineal &mdash; es convexidad, no carry.</p>
+
+    <!-- Liquidity risks -->
+    <h3 style="font-size:.9rem;margin-top:20px">Riesgo de liquidez por instrumento</h3>
+    <table class="tbl" style="margin-top:8px">
+      <thead><tr><th>Instrumento</th><th>MCap</th><th>Riesgo</th></tr></thead>
+      <tbody>
+        <tr><td class="ticker">CNDX.L</td><td class="mono">~$21.3B</td><td><span style="color:var(--emerald)">Bajo</span> &mdash; alta liquidez</td></tr>
+        <tr><td class="ticker">ETN</td><td class="mono">~$136.6B</td><td><span style="color:var(--emerald)">Bajo</span> &mdash; muy liquido</td></tr>
+        <tr><td class="ticker">EQIX</td><td class="mono">~$95.5B</td><td><span style="color:var(--emerald)">Bajo</span></td></tr>
+        <tr><td class="ticker">SMH.L</td><td class="mono">~$4.6B</td><td><span style="color:var(--amber)">Medio</span></td></tr>
+        <tr><td class="ticker">CORZ</td><td class="mono">~$4.7B</td><td><span style="color:var(--amber)">Medio-alto</span> &mdash; spreads amplios</td></tr>
+        <tr><td class="ticker">INTL.L</td><td class="mono">~$767M</td><td><span style="color:var(--rose)">Alto</span> &mdash; menor liquidez</td></tr>
+        <tr><td class="ticker">KLWD.L</td><td class="mono">~$232M</td><td><span style="color:var(--rose);font-weight:700">Muy alto</span> &mdash; spreads amplios, riesgo de ejecucion</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px;padding:10px 14px;background:rgba(244,63,94,.06);border-radius:8px;border-left:3px solid var(--rose);font-size:.82rem">
+      <strong style="color:var(--rose)">KLWD.L es el eslabon mas debil en liquidez.</strong>
+      <span style="color:var(--t2)">Su capitalizacion es ~90x menor que CNDX.L, lo que implica spreads mas amplios y mayor riesgo de ejecucion.</span>
+    </div>
+
+    <!-- Concentration risk -->
+    <h3 style="font-size:.9rem;margin-top:20px">Riesgo de concentracion por factor</h3>
+    <p style="color:var(--t2);font-size:.85rem;margin-top:6px">
+      Muchos nombres de la cadena de IA tienden a moverse juntos en: <strong>shocks de tipos de interes</strong>,
+      <strong>correcciones "growth"</strong> y <strong>cambios de expectativas de capex de hiperscalers</strong>.
+    </p>
+  </div>
+
+  <!-- Supply chain map -->
+  <div class="card rv" style="margin-top:16px">
+    <h3>Mapa completo: cadena de suministro de la IA</h3>
+
+    <!-- Chain cards -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px;position:relative">
+
+      <!-- Materia Prima -->
+      <div style="background:var(--surface);border:1px solid rgba(249,115,22,.2);border-radius:12px;overflow:hidden">
+        <div style="background:rgba(249,115,22,.1);padding:10px 12px;border-bottom:1px solid rgba(249,115,22,.15);text-align:center">
+          <div style="font-weight:700;font-size:.8rem;color:var(--orange)">Materia Prima</div>
+        </div>
+        <div style="padding:10px 12px;display:flex;flex-direction:column;gap:6px;font-size:.78rem;color:var(--t2)">
+          <div>Cobre</div>
+          <div>Uranio</div>
+          <div>Tierras raras</div>
+        </div>
+        <div style="padding:8px 12px;border-top:1px solid var(--border);text-align:center">
+          <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap">
+            <span class="tag" style="background:rgba(249,115,22,.12);color:var(--orange)">URA</span>
+            <span class="tag" style="background:rgba(249,115,22,.12);color:var(--orange)">COPX</span>
+          </div>
+          <div class="mono" style="font-size:.75rem;color:var(--emerald);font-weight:600;margin-top:6px">+111%, +96%</div>
+        </div>
+      </div>
+
+      <!-- Arrow 1 -->
+
+      <!-- Infraestructura -->
+      <div style="background:var(--surface);border:1px solid rgba(59,130,246,.2);border-radius:12px;overflow:hidden">
+        <div style="background:rgba(59,130,246,.1);padding:10px 12px;border-bottom:1px solid rgba(59,130,246,.15);text-align:center">
+          <div style="font-weight:700;font-size:.8rem;color:var(--blue)">Infraestructura</div>
+        </div>
+        <div style="padding:10px 12px;display:flex;flex-direction:column;gap:6px;font-size:.78rem;color:var(--t2)">
+          <div>Cables / Grid</div>
+          <div>Refrigeracion</div>
+          <div>Nuclear / SMR</div>
+          <div>Datacenters</div>
+        </div>
+        <div style="padding:8px 12px;border-top:1px solid var(--border);text-align:center">
+          <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap">
+            <span class="tag" style="background:rgba(59,130,246,.12);color:var(--blue)">BE</span>
+            <span class="tag" style="background:rgba(59,130,246,.12);color:var(--blue)">EQIX</span>
+            <span class="tag" style="background:rgba(59,130,246,.12);color:var(--blue)">ETN</span>
+          </div>
+          <div class="mono" style="font-size:.75rem;color:var(--emerald);font-weight:600;margin-top:6px">+508% (BE)</div>
+        </div>
+      </div>
+
+      <!-- Computacion -->
+      <div style="background:var(--surface);border:1px solid rgba(139,92,246,.2);border-radius:12px;overflow:hidden">
+        <div style="background:rgba(139,92,246,.1);padding:10px 12px;border-bottom:1px solid rgba(139,92,246,.15);text-align:center">
+          <div style="font-weight:700;font-size:.8rem;color:var(--violet)">Computacion</div>
+        </div>
+        <div style="padding:10px 12px;display:flex;flex-direction:column;gap:6px;font-size:.78rem;color:var(--t2)">
+          <div>GPUs</div>
+          <div>Memoria HBM</div>
+          <div>Optica</div>
+        </div>
+        <div style="padding:8px 12px;border-top:1px solid var(--border);text-align:center">
+          <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap">
+            <span class="tag" style="background:rgba(139,92,246,.12);color:var(--violet)">SMH</span>
+            <span class="tag" style="background:rgba(139,92,246,.12);color:var(--violet)">AINF</span>
+          </div>
+          <div class="mono" style="font-size:.75rem;color:var(--emerald);font-weight:600;margin-top:6px">+45% (AINF)</div>
+        </div>
+      </div>
+
+      <!-- Aplicacion -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;opacity:.6">
+        <div style="background:rgba(255,255,255,.03);padding:10px 12px;border-bottom:1px solid var(--border);text-align:center">
+          <div style="font-weight:700;font-size:.8rem;color:var(--t3)">Aplicacion</div>
+        </div>
+        <div style="padding:10px 12px;display:flex;flex-direction:column;gap:6px;font-size:.78rem;color:var(--t3)">
+          <div>Modelos de IA</div>
+          <div>SaaS / Apps</div>
+          <div>&nbsp;</div>
+        </div>
+        <div style="padding:8px 12px;border-top:1px solid var(--border);text-align:center">
+          <div style="display:flex;gap:4px;justify-content:center">
+            <span class="tag" style="background:rgba(255,255,255,.05);color:var(--t3)">QQQ</span>
+          </div>
+          <div class="mono" style="font-size:.75rem;color:var(--t3);margin-top:6px">menor rdto</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrows between cards -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:-1px">
+      <div style="display:flex;justify-content:flex-end;padding-right:0"><div style="width:50%;height:2px;background:linear-gradient(to right,transparent,var(--orange))"></div></div>
+      <div style="display:flex"><div style="width:100%;height:2px;background:linear-gradient(to right,var(--orange),var(--blue))"></div></div>
+      <div style="display:flex"><div style="width:100%;height:2px;background:linear-gradient(to right,var(--blue),var(--violet))"></div></div>
+      <div style="display:flex;justify-content:flex-start"><div style="width:50%;height:2px;background:linear-gradient(to right,var(--violet),var(--t3))"></div></div>
+    </div>
+
+    <!-- Gradient legend -->
+    <div style="display:flex;justify-content:space-between;margin-top:12px;padding:12px 16px;background:var(--surface);border-radius:8px">
+      <div style="text-align:left">
+        <div style="font-size:.7rem;font-weight:600;color:var(--orange)">&larr; MAYOR RENDIMIENTO</div>
+        <div style="font-size:.65rem;color:var(--t3)">&larr; MAS ESCASO</div>
+      </div>
+      <div style="flex:1;margin:0 16px;display:flex;align-items:center">
+        <div style="width:100%;height:4px;border-radius:2px;background:linear-gradient(to right,var(--orange),var(--blue),var(--violet),var(--t3))"></div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:.7rem;font-weight:600;color:var(--t3)">MENOR RENDIMIENTO &rarr;</div>
+        <div style="font-size:.65rem;color:var(--t3)">MAS REPLICABLE &rarr;</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 conclusions -->
+  <div class="card rv" style="margin-top:16px">
+    <h3>Las 5 conclusiones principales</h3>
+    <div style="display:flex;flex-direction:column;gap:14px;margin-top:12px">
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;background:var(--surface);border-radius:8px;border-left:3px solid var(--amber)">
+        <span style="color:var(--amber);font-family:var(--mono);font-weight:700;font-size:.8rem;min-width:24px">01</span>
+        <div><strong>El paradigma ha cambiado: de bits a atomos.</strong><br><span style="color:var(--t2);font-size:.88rem">La inversion en IA ya no es sobre el mejor algoritmo. Es sobre quien tiene los megavatios.</span></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;background:var(--surface);border-radius:8px;border-left:3px solid var(--emerald)">
+        <span style="color:var(--emerald);font-family:var(--mono);font-weight:700;font-size:.8rem;min-width:24px">02</span>
+        <div><strong>Los rendimientos validan la tesis empiricamente.</strong><br><span style="color:var(--t2);font-size:.88rem">BE +508%, URA +111%, COPX +96% &mdash; infraestructura ha superado al software 3x-10x.</span></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;background:var(--surface);border-radius:8px;border-left:3px solid var(--blue)">
+        <span style="color:var(--blue);font-family:var(--mono);font-weight:700;font-size:.8rem;min-width:24px">03</span>
+        <div><strong>La reconversion mineria &rarr; IA es un arbitraje real.</strong><br><span style="color:var(--t2);font-size:.88rem">No es especulacion BTC. Es comprar acceso a la red electrica a precio descuento y revenderlo a precio de IA.</span></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;background:var(--surface);border-radius:8px;border-left:3px solid var(--cyan)">
+        <span style="color:var(--cyan);font-family:var(--mono);font-weight:700;font-size:.8rem;min-width:24px">04</span>
+        <div><strong>La diversificacion global es estructuralmente necesaria.</strong><br><span style="color:var(--t2);font-size:.88rem">Europa tiene monopolios (ASML). Asia tiene la ejecucion (TSMC, SK Hynix). Solo EE.UU. no captura la cadena.</span></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;background:var(--surface);border-radius:8px;border-left:3px solid var(--rose)">
+        <span style="color:var(--rose);font-family:var(--mono);font-weight:700;font-size:.8rem;min-width:24px">05</span>
+        <div><strong>La "economia de guerra computacional" esta en marcha.</strong><br><span style="color:var(--t2);font-size:.88rem">Prestamos grado inversion por GPUs, contratos 12 anos, intervencion estatal. No es burbuja &mdash; es industrializacion.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <blockquote class="rv" style="margin-top:24px;border-left-color:var(--amber)">
+    <strong>La inversion en IA ha entrado en su "fase de construccion".</strong>
+    Los proximos 24 meses seran definidos no por quien tiene el mejor modelo de lenguaje,
+    sino por quien tiene los transformadores electricos, los cables de cobre y las plantas nucleares para alimentar los modelos.
+    El mercado ha hablado: <strong>los atomos mandan sobre los bits</strong>.
+  </blockquote>
+</div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- ═══════════════════════════════════════════
+     ANEXO — ACTIVOS QUE IMPORTAN
+     ═══════════════════════════════════════════ -->
+<section id="activos">
+<div class="wrap">
+  <div class="rv"><span class="phase-num">Anexo</span></div>
+  <h2 class="rv rv-d1">Los activos que <span style="color:var(--emerald)">realmente importan</span></h2>
+  <p class="phase-sub rv rv-d2">Universo depurado: solo los tickers con alineacion directa a la tesis "atomos sobre bits". Origen trazable a investigacion ChatGPT y/o Gemini.</p>
+
+  <!-- TIER 1: Core 13F -->
+  <div class="card rv" style="margin-top:24px">
+    <h3 style="display:flex;align-items:center;gap:8px">
+      <span style="background:var(--rose);color:#fff;font-family:var(--mono);font-size:.65rem;padding:3px 8px;border-radius:4px">TIER 1</span>
+      Posiciones directas 13F &mdash; SA LP Q4 2025
+    </h3>
+    <p style="color:var(--t3);font-size:.8rem;margin-bottom:12px">Posiciones reales del fondo. Fuente: SEC EDGAR CIK 0002045724</p>
+    <table class="tbl">
+      <thead><tr><th>Ticker</th><th>Empresa</th><th>Categoria</th><th>Tesis</th><th>Fuente</th></tr></thead>
+      <tbody>
+        <tr><td class="ticker">CRWV</td><td>CoreWeave</td><td><span class="tag tag-dc">GPU Cloud</span></td><td>$28B financiamiento, A3 Moody's, MW &gt; algoritmos</td><td>ChatGPT + Gemini</td></tr>
+        <tr><td class="ticker">BE</td><td>Bloom Energy</td><td><span class="tag tag-energy">Energia</span></td><td>Backlog $6B, celdas combustible, soberania energetica</td><td>ChatGPT + Gemini</td></tr>
+        <tr><td class="ticker">INTC</td><td>Intel</td><td><span class="tag tag-semis">Fab domestica</span></td><td>Proceso 18A, soberania frente a Taiwan</td><td>ChatGPT + Gemini</td></tr>
+        <tr><td class="ticker">LITE</td><td>Lumentum</td><td><span class="tag tag-optica">Optica</span></td><td>Silicio fotonico, cuello botella conectividad</td><td>ChatGPT + Gemini</td></tr>
+        <tr><td class="ticker">COHR</td><td>Coherent Corp</td><td><span class="tag tag-optica">Optica</span></td><td>Transceivers opticos, complemento LITE</td><td>13F directo</td></tr>
+        <tr><td class="ticker">APLD</td><td>Applied Digital</td><td><span class="tag tag-dc">HPC Infra</span></td><td>Datacenters HPC, reconversion</td><td>ChatGPT + Gemini</td></tr>
+        <tr><td class="ticker">CORZ</td><td>Core Scientific</td><td><span class="tag tag-mining">BTC &rarr; HPC</span></td><td>Contratos 12y CoreWeave, $1B financiamiento</td><td>ChatGPT + Gemini</td></tr>
+        <tr><td class="ticker">IREN</td><td>IREN Energy</td><td><span class="tag tag-mining">BTC &rarr; HPC</span></td><td>Reconversion mineria, MW conectados baratos</td><td>Gemini</td></tr>
+        <tr><td class="ticker">RIOT</td><td>Riot Platforms</td><td><span class="tag tag-mining">BTC &rarr; HPC</span></td><td>Reconversion mineria digital</td><td>Gemini</td></tr>
+        <tr><td class="ticker">CIFR</td><td>Cipher Mining</td><td><span class="tag tag-mining">BTC &rarr; HPC</span></td><td>Reconversion mineria digital</td><td>Gemini</td></tr>
+        <tr><td class="ticker">TSEM</td><td>Tower Semiconductor</td><td><span class="tag tag-semis">Foundry</span></td><td>Foundry especializada (analog, RF)</td><td>13F directo</td></tr>
+        <tr><td class="ticker">CEG</td><td>Constellation Energy</td><td><span class="tag tag-energy">Nuclear</span></td><td>Operador plantas nucleares, acuerdos directos IA</td><td>Gemini</td></tr>
+        <tr><td class="ticker">EQT</td><td>EQT Corporation</td><td><span class="tag tag-energy">Gas Natural</span></td><td>Mayor productor gas natural EE.UU.</td><td>13F directo</td></tr>
+        <tr><td class="ticker">LBRT</td><td>Liberty Energy</td><td><span class="tag tag-energy">Servicios energia</span></td><td>Transicion servicios energeticos</td><td>Gemini</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TIER 2: Critical supply chain -->
+  <div class="card rv" style="margin-top:16px">
+    <h3 style="display:flex;align-items:center;gap:8px">
+      <span style="background:var(--amber);color:#000;font-family:var(--mono);font-size:.65rem;padding:3px 8px;border-radius:4px">TIER 2</span>
+      Cadena de suministro critica &mdash; monopolios y cuellos de botella
+    </h3>
+    <p style="color:var(--t3);font-size:.8rem;margin-bottom:12px">Empresas irremplazables validadas en la investigacion. Sin ellas, la cadena se rompe.</p>
+    <table class="tbl">
+      <thead><tr><th>Ticker</th><th>Empresa</th><th>Categoria</th><th>Tesis</th><th>Fuente</th></tr></thead>
+      <tbody>
+        <tr><td class="ticker">ASML</td><td>ASML Holding</td><td><span class="tag tag-semis">Litografia</span></td><td>Monopolio EUV, ventas &euro;32.7B, High-NA 2nm</td><td>Gemini</td></tr>
+        <tr><td class="ticker">TSM</td><td>TSMC</td><td><span class="tag tag-semis">Foundry</span></td><td>72% foundry vanguardia, CAPEX $54B</td><td>Gemini</td></tr>
+        <tr><td class="ticker">000660.KS</td><td>SK Hynix</td><td><span class="tag tag-semis">Memoria HBM</span></td><td>88% mercado HBM, proveedor #1 NVIDIA</td><td>Gemini</td></tr>
+        <tr><td class="ticker">005930.KS</td><td>Samsung Elec.</td><td><span class="tag tag-semis">Memoria HBM</span></td><td>HBM4, $26B R&D, foundry alternativa</td><td>Gemini</td></tr>
+        <tr><td class="ticker">SU.PA</td><td>Schneider Electric</td><td><span class="tag tag-dc">Grid / Potencia</span></td><td>30% mercado DC, 800V DC, sistema nervioso</td><td>Gemini</td></tr>
+        <tr><td class="ticker">EQIX</td><td>Equinix</td><td><span class="tag tag-dc">Colocation</span></td><td>Mayor REIT de datacenters del mundo</td><td>ChatGPT</td></tr>
+        <tr><td class="ticker">ETN</td><td>Eaton Corp</td><td><span class="tag tag-dc">Electrificacion</span></td><td>Gestion potencia DC, transformadores</td><td>ChatGPT</td></tr>
+        <tr><td class="ticker">VRT</td><td>Vertiv</td><td><span class="tag tag-dc">Cooling</span></td><td>Refrigeracion liquida, racks 100kW</td><td>Investigacion</td></tr>
+        <tr><td class="ticker">PRY.MI</td><td>Prysmian</td><td><span class="tag tag-dc">Cables</span></td><td>Cables alta tension, cableado DC</td><td>Gemini</td></tr>
+        <tr><td class="ticker">CCJ</td><td>Cameco</td><td><span class="tag tag-matpri">Uranio</span></td><td>Extraccion/refinado uranio, ingresos $2.1B</td><td>Gemini</td></tr>
+        <tr><td class="ticker">NXE</td><td>NexGen Energy</td><td><span class="tag tag-matpri">Uranio</span></td><td>Uranio $85/lb, inventarios minimos</td><td>Gemini</td></tr>
+        <tr><td class="ticker">OKLO</td><td>Oklo Inc</td><td><span class="tag tag-energy">Nuclear SMR</span></td><td>Micro-reactores, version US de RR SMR</td><td>Investigacion</td></tr>
+        <tr><td class="ticker">SMR</td><td>NuScale Power</td><td><span class="tag tag-energy">Nuclear SMR</span></td><td>SMR certificado NRC, modular</td><td>Gemini</td></tr>
+        <tr><td class="ticker">RR.L</td><td>Rolls-Royce</td><td><span class="tag tag-energy">Nuclear SMR</span></td><td>SMR UK, Anglesey, experiencia naval</td><td>Gemini</td></tr>
+        <tr><td class="ticker">2395.TW</td><td>Advantech</td><td><span class="tag tag-dc">Edge AI</span></td><td>34% cuota PCs industriales edge IA</td><td>Gemini</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TIER 3: ETFs -->
+  <div class="card rv" style="margin-top:16px">
+    <h3 style="display:flex;align-items:center;gap:8px">
+      <span style="background:var(--blue);color:#fff;font-family:var(--mono);font-size:.65rem;padding:3px 8px;border-radius:4px">TIER 3</span>
+      Vehiculos de inversion &mdash; ETFs tematicos alineados
+    </h3>
+    <p style="color:var(--t3);font-size:.8rem;margin-bottom:12px">ETFs que capturan la tesis sin stock-picking. Validados en la investigacion.</p>
+    <table class="tbl">
+      <thead><tr><th>Ticker</th><th>ETF</th><th>Retorno</th><th>Que captura</th><th>Fuente</th></tr></thead>
+      <tbody>
+        <tr><td class="ticker">AINF.L</td><td>iShares AI Infrastructure UCITS</td><td class="up" style="font-family:var(--mono)">+45.4%</td><td>Cadena completa infra IA</td><td>Gemini</td></tr>
+        <tr><td class="ticker">VPN</td><td>Global X DC REITs & Digital Infra</td><td class="up" style="font-family:var(--mono)">+28.4%</td><td>Inmobiliario digital global</td><td>Gemini</td></tr>
+        <tr><td class="ticker">AIPO</td><td>Defiance AI & Power Infrastructure</td><td style="font-family:var(--mono);color:var(--t3)">Nuevo</td><td>Energia para IA</td><td>Gemini</td></tr>
+        <tr><td class="ticker">URA</td><td>Global X Uranium</td><td class="up" style="font-family:var(--mono)">+111.4%</td><td>Uranio &mdash; "capa cero"</td><td>Gemini</td></tr>
+        <tr><td class="ticker">COPX</td><td>Global X Copper Miners</td><td class="up" style="font-family:var(--mono)">+95.8%</td><td>Cobre &mdash; "capa cero"</td><td>Gemini</td></tr>
+        <tr><td class="ticker">SMH</td><td>VanEck Semiconductor</td><td style="font-family:var(--mono);color:var(--t2)">&mdash;</td><td>Chips y memoria</td><td>ChatGPT</td></tr>
+        <tr><td class="ticker">SMH.L</td><td>VanEck Semiconductor UCITS</td><td style="font-family:var(--mono);color:var(--t2)">&mdash;</td><td>Chips UCITS europeo</td><td>ChatGPT</td></tr>
+        <tr><td class="ticker">CNDX.L</td><td>iShares NASDAQ 100 UCITS</td><td style="font-family:var(--mono);color:var(--t2)">&mdash;</td><td>Hiperscalers + software</td><td>ChatGPT</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Summary stats -->
+  <div class="metrics rv" style="margin-top:32px">
+    <div class="metric"><div class="val" style="color:var(--rose)">14</div><div class="label">Tier 1 &mdash; 13F</div></div>
+    <div class="metric"><div class="val" style="color:var(--amber)">15</div><div class="label">Tier 2 &mdash; Supply chain</div></div>
+    <div class="metric"><div class="val" style="color:var(--blue)">8</div><div class="label">Tier 3 &mdash; ETFs</div></div>
+    <div class="metric"><div class="val" style="color:var(--emerald)">37</div><div class="label">Total depurado</div></div>
+  </div>
+
+  <p style="color:var(--t3);font-size:.82rem;text-align:center;margin-top:8px">
+    De 104 tickers originales a <strong style="color:var(--t1)">37 con trazabilidad directa</strong> a la tesis y a las fuentes de investigacion.
+  </p>
+
+  <!-- What was removed -->
+  <details style="margin-top:24px">
+    <summary style="cursor:pointer;color:var(--t3);font-size:.85rem;padding:12px 0;border-top:1px solid var(--border)">
+      Ver los 67 tickers excluidos y por que &darr;
+    </summary>
+    <div class="card card-sm" style="margin-top:8px;font-size:.82rem;color:var(--t3)">
+      <p><strong style="color:var(--t2)">MAG7</strong> (AAPL, GOOGL, AMZN, MSFT, META, NVDA, TSLA) &mdash; Demandantes de infra, no proveedores. Ya valorados.</p>
+      <p style="margin-top:8px"><strong style="color:var(--t2)">Software/China</strong> (SAP, BIDU, 0981.HK, 000977.SZ) &mdash; Aplicaciones, no infraestructura fisica. Riesgo geopolitico.</p>
+      <p style="margin-top:8px"><strong style="color:var(--t2)">ETFs genericos</strong> (XLU, KALL, FIW, AAXJ, EWT, CQQQ, KSTR, MAGS, GRID, SRVR, EXV3.DE, MTRS.ST, CHAT, URNM, NLR, SOXX, REMX, KLWD.L, INTL.L) &mdash; Diversificacion defensiva, hedging, geografia pura. Sin alineacion directa con tesis.</p>
+      <p style="margin-top:8px"><strong style="color:var(--t2)">Networking generico</strong> (CSCO, ANET, ERIC-B.ST, NOKIA.HE) &mdash; Cuello botella secundario, no critico.</p>
+      <p style="margin-top:8px"><strong style="color:var(--t2)">DC Infra generico</strong> (DLR, AMT, DELL, HPE, MOD, ABB.ST, NEX.PA) &mdash; Solapamiento con Tier 2. Menos diferenciados.</p>
+      <p style="margin-top:8px"><strong style="color:var(--t2)">Semis genericos</strong> (AMD, AVGO, AMAT, MU, TXN, SMCI) &mdash; Ya capturados via ETFs (SMH, AINF).</p>
+      <p style="margin-top:8px"><strong style="color:var(--t2)">Commodities stocks</strong> (FCX, ANTO.L, ALB, MP) &mdash; Ya capturados via ETFs (COPX, URA).</p>
+      <p style="margin-top:8px"><strong style="color:var(--t2)">Energia generica</strong> (NEE) &mdash; Renovables generico, no nuclear/soberania.</p>
+      <p style="margin-top:8px"><strong style="color:var(--t2)">Otros 13F</strong> (HUT, BTDR, CLSK, BITF, WULF, VST, GLXY, GDX) &mdash; Microcaps especulativos, oro como hedge, no alineados.</p>
+      <p style="margin-top:8px"><strong style="color:var(--t2)">ODMs Asia</strong> (2317.TW, 2382.TW) &mdash; Ensamblaje generico, no cuello de botella.</p>
+      <p style="margin-top:8px"><strong style="color:var(--t2)">Trust</strong> (U-UN.TO) &mdash; Sprott Uranium Trust, ya cubierto via URA.</p>
+    </div>
+  </details>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     PERFILES DE INVERSIÓN
+     ═══════════════════════════════════════════ -->
+<section id="perfiles">
+<div class="wrap">
+  <div class="rv"><span class="phase-num">Asignacion</span></div>
+  <h2 class="rv rv-d1">Perfiles de <span style="color:var(--blue)">inversion</span> por tolerancia al riesgo</h2>
+  <p class="phase-sub rv rv-d2">Tres carteras modelo que implementan la tesis "atomos sobre bits" a distintos niveles de agresividad. Combinan los 37 activos validados organizados en buckets tematicos.</p>
+
+  <div style="margin-top:8px;padding:10px 14px;background:rgba(245,158,11,.06);border-radius:8px;border-left:3px solid var(--amber);font-size:.82rem" class="rv rv-d3">
+    <strong style="color:var(--amber)">Disclaimer:</strong>
+    <span style="color:var(--t2)">Estas asignaciones ilustran estructura por buckets, no una recomendacion personalizada. La propia cartera 13F de SA LP es mas agresiva que cualquiera de estos perfiles: usa opciones CALL y tiene concentracion &gt;85% en top 10. Estos perfiles son una version diluida y diversificada de la misma tesis, adaptada para un inversor minorista.</span>
+  </div>
+
+  <!-- ── CONSERVADOR ── -->
+  <div class="card rv" style="margin-top:24px">
+    <h3 style="display:flex;align-items:center;gap:10px">
+      <span style="background:var(--emerald);color:#000;font-family:var(--mono);font-size:.65rem;padding:4px 10px;border-radius:4px;font-weight:700">CONSERVADOR</span>
+      Menos volatilidad, maxima liquidez
+    </h3>
+    <p style="color:var(--t3);font-size:.8rem;margin-top:4px">Sin derivados ni satelites especulativos. Enfoque en ETFs liquidos + nodos fisicos consolidados. Accesible 100% desde Europa via UCITS + acciones US grandes.</p>
+
+    <!-- Visual bar -->
+    <div style="display:flex;height:32px;border-radius:8px;overflow:hidden;margin:16px 0 12px;font-size:.65rem;font-weight:600;text-align:center;line-height:32px">
+      <div style="width:25%;background:var(--blue);color:#fff" title="ETFs base">ETFs base 25%</div>
+      <div style="width:25%;background:var(--violet);color:#fff" title="Semis/Litografia">Semis 25%</div>
+      <div style="width:20%;background:var(--amber);color:#000" title="Energia/Nuclear">Energia 20%</div>
+      <div style="width:15%;background:var(--cyan);color:#000" title="DC/Grid">DC/Grid 15%</div>
+      <div style="width:10%;background:var(--orange);color:#000" title="Mat. Primas">Mat.Prima 10%</div>
+      <div style="width:5%;background:var(--t3);color:#fff" title="Reconversion">Rec 5%</div>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>Bucket</th><th>Peso</th><th>Instrumentos</th><th>Racional</th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--blue);font-weight:600">ETFs base</td>
+          <td class="mono" style="font-weight:700">25%</td>
+          <td><span class="ticker">CNDX.L</span> 15% &nbsp; <span class="ticker">AINF.L</span> 10%</td>
+          <td>Diversificacion amplia. CNDX cubre hiperscalers, AINF la cadena infra completa</td>
+        </tr>
+        <tr>
+          <td style="color:var(--violet);font-weight:600">Semiconductores</td>
+          <td class="mono" style="font-weight:700">25%</td>
+          <td><span class="ticker">SMH.L</span> 10% &nbsp; <span class="ticker">ASML</span> 8% &nbsp; <span class="ticker">TSM</span> 7%</td>
+          <td>El metacuello: litografia (monopolio) + foundry (irremplazable). UCITS + ADR</td>
+        </tr>
+        <tr>
+          <td style="color:var(--amber);font-weight:600">Energia / Nuclear</td>
+          <td class="mono" style="font-weight:700">20%</td>
+          <td><span class="ticker">EQIX</span> 8% &nbsp; <span class="ticker">ETN</span> 7% &nbsp; <span class="ticker">CEG</span> 5%</td>
+          <td>Nodos fisicos consolidados: colocation + electrificacion + nuclear domestica</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cyan);font-weight:600">DC / Grid</td>
+          <td class="mono" style="font-weight:700">15%</td>
+          <td><span class="ticker">SU.PA</span> 5% &nbsp; <span class="ticker">VPN</span> 5% &nbsp; <span class="ticker">PRY.MI</span> 5%</td>
+          <td>Schneider (grid) + diversificacion geografica Asia (VPN) + cables (Prysmian)</td>
+        </tr>
+        <tr>
+          <td style="color:var(--orange);font-weight:600">Materias primas</td>
+          <td class="mono" style="font-weight:700">10%</td>
+          <td><span class="ticker">URA</span> 5% &nbsp; <span class="ticker">COPX</span> 5%</td>
+          <td>"Capa cero": uranio + cobre via ETFs tematicos. Sin stock-picking de miners</td>
+        </tr>
+        <tr>
+          <td style="color:var(--t3);font-weight:600">Reconversion IA</td>
+          <td class="mono" style="font-weight:700">5%</td>
+          <td><span class="ticker">CORZ</span> 5%</td>
+          <td>Exposicion minima al arbitraje BTC&rarr;HPC. Solo acciones, sin derivados</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="color:var(--t3);font-size:.78rem;margin-top:8px"><strong>Volatilidad esperada:</strong> media-baja. ~60% en ETFs UCITS liquidos. Sin opciones CALL. Sin microcaps.</p>
+  </div>
+
+  <!-- ── EQUILIBRADO ── -->
+  <div class="card rv" style="margin-top:16px">
+    <h3 style="display:flex;align-items:center;gap:10px">
+      <span style="background:var(--blue);color:#fff;font-family:var(--mono);font-size:.65rem;padding:4px 10px;border-radius:4px;font-weight:700">EQUILIBRADO</span>
+      Balance entre beta IA y cuellos fisicos
+    </h3>
+    <p style="color:var(--t3);font-size:.8rem;margin-top:4px">Incorpora acciones directas de Tier 1 y Tier 2 + ETFs. Exposicion controlada a reconversion. Diversificacion global explicita.</p>
+
+    <!-- Visual bar -->
+    <div style="display:flex;height:32px;border-radius:8px;overflow:hidden;margin:16px 0 12px;font-size:.65rem;font-weight:600;text-align:center;line-height:32px">
+      <div style="width:20%;background:var(--blue);color:#fff">ETFs 20%</div>
+      <div style="width:20%;background:var(--violet);color:#fff">Semis 20%</div>
+      <div style="width:20%;background:var(--amber);color:#000">Energia 20%</div>
+      <div style="width:15%;background:var(--cyan);color:#000">DC/Grid 15%</div>
+      <div style="width:10%;background:var(--orange);color:#000">Mat.Pr. 10%</div>
+      <div style="width:10%;background:var(--emerald);color:#000">Reconv. 10%</div>
+      <div style="width:5%;background:var(--rose);color:#fff">Opt 5%</div>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>Bucket</th><th>Peso</th><th>Instrumentos</th><th>Racional</th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--blue);font-weight:600">ETFs base</td>
+          <td class="mono" style="font-weight:700">20%</td>
+          <td><span class="ticker">CNDX.L</span> 8% &nbsp; <span class="ticker">AINF.L</span> 7% &nbsp; <span class="ticker">SMH.L</span> 5%</td>
+          <td>Beta IA diversificado + cadena infra + semis</td>
+        </tr>
+        <tr>
+          <td style="color:var(--violet);font-weight:600">Semiconductores</td>
+          <td class="mono" style="font-weight:700">20%</td>
+          <td><span class="ticker">ASML</span> 7% &nbsp; <span class="ticker">TSM</span> 5% &nbsp; <span class="ticker">000660.KS</span> 4% &nbsp; <span class="ticker">INTC</span> 4%</td>
+          <td>Litografia + foundry + memoria HBM + fab domestica</td>
+        </tr>
+        <tr>
+          <td style="color:var(--amber);font-weight:600">Energia / Nuclear</td>
+          <td class="mono" style="font-weight:700">20%</td>
+          <td><span class="ticker">BE</span> 6% &nbsp; <span class="ticker">CEG</span> 5% &nbsp; <span class="ticker">ETN</span> 5% &nbsp; <span class="ticker">OKLO</span> 2% &nbsp; <span class="ticker">RR.L</span> 2%</td>
+          <td>Celdas combustible + nuclear US + electrificacion + SMR global</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cyan);font-weight:600">DC / Grid / Optica</td>
+          <td class="mono" style="font-weight:700">15%</td>
+          <td><span class="ticker">EQIX</span> 4% &nbsp; <span class="ticker">SU.PA</span> 3% &nbsp; <span class="ticker">LITE</span> 3% &nbsp; <span class="ticker">VPN</span> 3% &nbsp; <span class="ticker">VRT</span> 2%</td>
+          <td>Colocation + grid + optica (cuello 2026) + diversificacion geo + cooling</td>
+        </tr>
+        <tr>
+          <td style="color:var(--orange);font-weight:600">Materias primas</td>
+          <td class="mono" style="font-weight:700">10%</td>
+          <td><span class="ticker">URA</span> 4% &nbsp; <span class="ticker">COPX</span> 3% &nbsp; <span class="ticker">CCJ</span> 3%</td>
+          <td>ETFs + stock-picking en uranio (Cameco como nombre de calidad)</td>
+        </tr>
+        <tr>
+          <td style="color:var(--emerald);font-weight:600">Reconversion IA</td>
+          <td class="mono" style="font-weight:700">10%</td>
+          <td><span class="ticker">CORZ</span> 4% &nbsp; <span class="ticker">APLD</span> 3% &nbsp; <span class="ticker">CRWV</span> 3%</td>
+          <td>Los 3 nodos de reconversion: Core Scientific + Applied Digital + CoreWeave</td>
+        </tr>
+        <tr>
+          <td style="color:var(--rose);font-weight:600">Optica (CALL)</td>
+          <td class="mono" style="font-weight:700">5%</td>
+          <td><span class="ticker">INTC</span> CALL 3% &nbsp; <span class="ticker">CRWV</span> CALL 2%</td>
+          <td>Replicar la convexidad del 13F con presupuesto limitado a 5% max</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="color:var(--t3);font-size:.78rem;margin-top:8px"><strong>Volatilidad esperada:</strong> media. ~35% ETFs, ~60% acciones directas, ~5% opciones. Diversificacion geografica US/EU/Asia.</p>
+  </div>
+
+  <!-- ── AGRESIVO ── -->
+  <div class="card rv" style="margin-top:16px">
+    <h3 style="display:flex;align-items:center;gap:10px">
+      <span style="background:var(--rose);color:#fff;font-family:var(--mono);font-size:.65rem;padding:4px 10px;border-radius:4px;font-weight:700">AGRESIVO</span>
+      Maxima convexidad, replica la filosofia SA LP
+    </h3>
+    <p style="color:var(--t3);font-size:.8rem;margin-top:4px">Concentrado en Tier 1 (posiciones 13F) con opciones CALL. Maxima exposicion a cuellos de botella fisicos. Alto riesgo.</p>
+
+    <!-- Visual bar -->
+    <div style="display:flex;height:32px;border-radius:8px;overflow:hidden;margin:16px 0 12px;font-size:.65rem;font-weight:600;text-align:center;line-height:32px">
+      <div style="width:10%;background:var(--blue);color:#fff">ETF 10%</div>
+      <div style="width:15%;background:var(--violet);color:#fff">Semis 15%</div>
+      <div style="width:25%;background:var(--amber);color:#000">Energia 25%</div>
+      <div style="width:10%;background:var(--cyan);color:#000">DC 10%</div>
+      <div style="width:10%;background:var(--orange);color:#000">Mat.Pr 10%</div>
+      <div style="width:15%;background:var(--emerald);color:#000">Reconv. 15%</div>
+      <div style="width:15%;background:var(--rose);color:#fff">CALL 15%</div>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>Bucket</th><th>Peso</th><th>Instrumentos</th><th>Racional</th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--blue);font-weight:600">ETFs (solo ancla)</td>
+          <td class="mono" style="font-weight:700">10%</td>
+          <td><span class="ticker">AINF.L</span> 5% &nbsp; <span class="ticker">URA</span> 3% &nbsp; <span class="ticker">COPX</span> 2%</td>
+          <td>Minimo diversificado: infra IA + materias primas via ETF</td>
+        </tr>
+        <tr>
+          <td style="color:var(--violet);font-weight:600">Semiconductores</td>
+          <td class="mono" style="font-weight:700">15%</td>
+          <td><span class="ticker">ASML</span> 5% &nbsp; <span class="ticker">000660.KS</span> 4% &nbsp; <span class="ticker">TSM</span> 3% &nbsp; <span class="ticker">INTC</span> 3%</td>
+          <td>Monopolios irremplazables + fab domestica. Sin ETF generico</td>
+        </tr>
+        <tr>
+          <td style="color:var(--amber);font-weight:600">Energia / Nuclear</td>
+          <td class="mono" style="font-weight:700">25%</td>
+          <td><span class="ticker">BE</span> 10% &nbsp; <span class="ticker">CEG</span> 5% &nbsp; <span class="ticker">OKLO</span> 4% &nbsp; <span class="ticker">SMR</span> 3% &nbsp; <span class="ticker">RR.L</span> 3%</td>
+          <td>Concentracion maxima en el cuello #1: energia. Bloom como posicion top. Nuclear US + UK</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cyan);font-weight:600">DC / Optica</td>
+          <td class="mono" style="font-weight:700">10%</td>
+          <td><span class="ticker">LITE</span> 4% &nbsp; <span class="ticker">COHR</span> 2% &nbsp; <span class="ticker">EQIX</span> 2% &nbsp; <span class="ticker">SU.PA</span> 2%</td>
+          <td>Optica como cuello botella 2026. Colocation + grid minimo</td>
+        </tr>
+        <tr>
+          <td style="color:var(--orange);font-weight:600">Materias primas</td>
+          <td class="mono" style="font-weight:700">10%</td>
+          <td><span class="ticker">CCJ</span> 4% &nbsp; <span class="ticker">NXE</span> 3% &nbsp; <span class="ticker">COPX</span> 3%</td>
+          <td>Stock-picking directo en uranio (Cameco, NexGen) + cobre miners</td>
+        </tr>
+        <tr>
+          <td style="color:var(--emerald);font-weight:600">Reconversion IA</td>
+          <td class="mono" style="font-weight:700">15%</td>
+          <td><span class="ticker">CORZ</span> 5% &nbsp; <span class="ticker">CRWV</span> 4% &nbsp; <span class="ticker">APLD</span> 3% &nbsp; <span class="ticker">IREN</span> 3%</td>
+          <td>4 nombres de reconversion. Arbitraje MW baratos &rarr; hosting IA</td>
+        </tr>
+        <tr>
+          <td style="color:var(--rose);font-weight:600">Opciones CALL</td>
+          <td class="mono" style="font-weight:700">15%</td>
+          <td><span class="ticker">CRWV</span> CALL 5% &nbsp; <span class="ticker">INTC</span> CALL 4% &nbsp; <span class="ticker">CORZ</span> CALL 3% &nbsp; <span class="ticker">BE</span> CALL 3%</td>
+          <td>Convexidad pura. Replica la filosofia SA LP. Si acierta el timing &rarr; upside asimetrico. Si falla &rarr; perdida de primas</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="color:var(--t3);font-size:.78rem;margin-top:8px"><strong>Volatilidad esperada:</strong> alta. ~10% ETFs, ~75% acciones directas concentradas, ~15% opciones. Correlacion alta entre posiciones. Solo para quien tolera drawdowns de -30% a -50%.</p>
+  </div>
+
+  <!-- ── COMPARATIVA VISUAL ── -->
+  <div class="card rv" style="margin-top:24px">
+    <h3>Comparativa de buckets por perfil</h3>
+    <table class="tbl" style="margin-top:12px">
+      <thead><tr><th>Bucket</th><th style="text-align:center"><span style="color:var(--emerald)">Conservador</span></th><th style="text-align:center"><span style="color:var(--blue)">Equilibrado</span></th><th style="text-align:center"><span style="color:var(--rose)">Agresivo</span></th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--t1)">ETFs base</td><td style="text-align:center" class="mono">25%</td><td style="text-align:center" class="mono">20%</td><td style="text-align:center" class="mono">10%</td></tr>
+        <tr><td style="color:var(--t1)">Semiconductores</td><td style="text-align:center" class="mono">25%</td><td style="text-align:center" class="mono">20%</td><td style="text-align:center" class="mono">15%</td></tr>
+        <tr><td style="color:var(--t1)">Energia / Nuclear</td><td style="text-align:center" class="mono">20%</td><td style="text-align:center" class="mono">20%</td><td style="text-align:center;font-weight:700" class="mono">25%</td></tr>
+        <tr><td style="color:var(--t1)">DC / Grid / Optica</td><td style="text-align:center" class="mono">15%</td><td style="text-align:center" class="mono">15%</td><td style="text-align:center" class="mono">10%</td></tr>
+        <tr><td style="color:var(--t1)">Materias primas</td><td style="text-align:center" class="mono">10%</td><td style="text-align:center" class="mono">10%</td><td style="text-align:center" class="mono">10%</td></tr>
+        <tr><td style="color:var(--t1)">Reconversion IA</td><td style="text-align:center" class="mono">5%</td><td style="text-align:center" class="mono">10%</td><td style="text-align:center;font-weight:700" class="mono">15%</td></tr>
+        <tr><td style="color:var(--rose)">Opciones CALL</td><td style="text-align:center" class="mono">&mdash;</td><td style="text-align:center" class="mono">5%</td><td style="text-align:center;font-weight:700;color:var(--rose)" class="mono">15%</td></tr>
+        <tr style="border-top:2px solid var(--border)"><td style="color:var(--t1);font-weight:700">Num. posiciones</td><td style="text-align:center" class="mono">~12</td><td style="text-align:center" class="mono">~22</td><td style="text-align:center" class="mono">~25</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Key differences -->
+  <div class="card rv" style="margin-top:16px">
+    <h3>Diferencias clave entre perfiles</h3>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px">
+      <div style="padding:14px;background:var(--surface);border-radius:8px;border-top:3px solid var(--emerald)">
+        <div style="font-weight:700;font-size:.85rem;color:var(--emerald);margin-bottom:8px">Conservador</div>
+        <ul style="list-style:none;font-size:.8rem;color:var(--t2);display:flex;flex-direction:column;gap:6px">
+          <li>Sin opciones CALL</li>
+          <li>~60% en ETFs UCITS</li>
+          <li>Solo 1 reconversion (CORZ 5%)</li>
+          <li>Sin microcaps</li>
+          <li>100% accesible Europa</li>
+        </ul>
+      </div>
+      <div style="padding:14px;background:var(--surface);border-radius:8px;border-top:3px solid var(--blue)">
+        <div style="font-weight:700;font-size:.85rem;color:var(--blue);margin-bottom:8px">Equilibrado</div>
+        <ul style="list-style:none;font-size:.8rem;color:var(--t2);display:flex;flex-direction:column;gap:6px">
+          <li>5% opciones CALL</li>
+          <li>~35% ETFs + 60% acciones</li>
+          <li>3 reconversiones (CORZ, APLD, CRWV)</li>
+          <li>Stock-picking en uranio (CCJ)</li>
+          <li>Diversificacion US/EU/Asia</li>
+        </ul>
+      </div>
+      <div style="padding:14px;background:var(--surface);border-radius:8px;border-top:3px solid var(--rose)">
+        <div style="font-weight:700;font-size:.85rem;color:var(--rose);margin-bottom:8px">Agresivo</div>
+        <ul style="list-style:none;font-size:.8rem;color:var(--t2);display:flex;flex-direction:column;gap:6px">
+          <li>15% opciones CALL</li>
+          <li>Solo 10% ETFs</li>
+          <li>4 reconversiones + CALL CORZ</li>
+          <li>BE como posicion top (10%+3% CALL)</li>
+          <li>Drawdowns -30% a -50% posibles</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <blockquote class="rv" style="margin-top:24px">
+    <strong>La tesis es la misma en los tres perfiles.</strong> Lo que cambia es la intensidad de la exposicion y el uso de apalancamiento.
+    El conservador captura la tendencia via ETFs. El equilibrado anade stock-picking en cuellos de botella.
+    El agresivo replica la filosofia SA LP con opciones CALL para <strong>convexidad asimetrica</strong>.
+  </blockquote>
+</div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- ═══════════════════════════════════════════
+     CHATGPT PROFILES — SOLO 7 INSTRUMENTOS
+     ═══════════════════════════════════════════ -->
+<section id="chatgpt-perfiles">
+<div class="wrap">
+  <div class="rv"><span class="phase-num">ChatGPT Research</span></div>
+  <h2 class="rv rv-d1">Perfiles ChatGPT: <span style="color:var(--violet)">7 instrumentos</span></h2>
+  <p class="phase-sub rv rv-d2">Asignacion propuesta por ChatGPT usando solo los 7 instrumentos de la cartera modelo UCITS + acciones US. Version simplificada, enfocada en beta IA (ETFs) y cuellos fisicos (centros de datos + potencia).</p>
+
+  <div style="margin-top:8px;padding:10px 14px;background:rgba(139,92,246,.06);border-radius:8px;border-left:3px solid var(--violet);font-size:.82rem" class="rv rv-d3">
+    <strong style="color:var(--violet)">Fuente:</strong>
+    <span style="color:var(--t2)">ChatGPT Research &mdash; <code>chatgpt/05-asignacion-perfiles.md</code>. Los porcentajes suman 100% en cada perfil. Estas asignaciones ilustran estructura por buckets, no una recomendacion personalizada.</span>
+  </div>
+
+  <!-- ── CONSERVADOR ── -->
+  <div class="card rv" style="margin-top:24px">
+    <h3 style="display:flex;align-items:center;gap:10px">
+      <span style="background:var(--emerald);color:#000;font-family:var(--mono);font-size:.65rem;padding:4px 10px;border-radius:4px;font-weight:700">CONSERVADOR</span>
+      Menos volatilidad, mas liquidez
+    </h3>
+
+    <!-- Visual bar -->
+    <div style="display:flex;height:28px;border-radius:8px;overflow:hidden;margin:14px 0 10px;font-size:.6rem;font-weight:600;text-align:center;line-height:28px">
+      <div style="width:35%;background:var(--blue);color:#fff">CNDX 35%</div>
+      <div style="width:25%;background:var(--violet);color:#fff">SMH 25%</div>
+      <div style="width:20%;background:var(--amber);color:#000">ETN 20%</div>
+      <div style="width:15%;background:var(--cyan);color:#000">EQIX 15%</div>
+      <div style="width:5%;background:var(--t3);color:#fff">INTL 5%</div>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>Ticker</th><th>Nodo</th><th>Peso</th></tr></thead>
+      <tbody>
+        <tr><td class="ticker">CNDX.L</td><td>Hiperscalers + software</td><td class="mono" style="font-weight:700">35%</td></tr>
+        <tr><td class="ticker">SMH.L</td><td>Semiconductores</td><td class="mono" style="font-weight:700">25%</td></tr>
+        <tr><td class="ticker">ETN</td><td>Electrificacion / potencia</td><td class="mono" style="font-weight:700">20%</td></tr>
+        <tr><td class="ticker">EQIX</td><td>Centros de datos</td><td class="mono" style="font-weight:700">15%</td></tr>
+        <tr><td class="ticker">INTL.L</td><td>IA tematico</td><td class="mono" style="font-weight:700">5%</td></tr>
+        <tr><td class="ticker" style="color:var(--t3)">KLWD.L</td><td style="color:var(--t3)">Cloud software</td><td class="mono" style="color:var(--t3)">0%</td></tr>
+        <tr><td class="ticker" style="color:var(--t3)">CORZ</td><td style="color:var(--t3)">Satelite especulativo</td><td class="mono" style="color:var(--t3)">0%</td></tr>
+      </tbody>
+    </table>
+    <p style="color:var(--t3);font-size:.78rem;margin-top:8px"><strong>Caracteristicas:</strong> maxima liquidez, sin exposicion especulativa, ~60% en ETFs UCITS.</p>
+    <div style="margin-top:8px;padding:8px 12px;background:rgba(245,158,11,.06);border-radius:6px;border-left:3px solid var(--amber);font-size:.78rem">
+      <strong style="color:var(--amber)">Nota:</strong>
+      <span style="color:var(--t2)">CORZ en 0% es discutible: SA LP tiene &gt;5% via 13D activista. Considerar al menos 3-5% si se quiere exposicion al arbitraje BTC&rarr;HPC.</span>
+    </div>
+  </div>
+
+  <!-- ── EQUILIBRADO ── -->
+  <div class="card rv" style="margin-top:16px">
+    <h3 style="display:flex;align-items:center;gap:10px">
+      <span style="background:var(--blue);color:#fff;font-family:var(--mono);font-size:.65rem;padding:4px 10px;border-radius:4px;font-weight:700">EQUILIBRADO</span>
+      Diversificacion tematica + nodos fisicos
+    </h3>
+
+    <!-- Visual bar -->
+    <div style="display:flex;height:28px;border-radius:8px;overflow:hidden;margin:14px 0 10px;font-size:.6rem;font-weight:600;text-align:center;line-height:28px">
+      <div style="width:30%;background:var(--blue);color:#fff">CNDX 30%</div>
+      <div style="width:25%;background:var(--violet);color:#fff">SMH 25%</div>
+      <div style="width:15%;background:var(--amber);color:#000">ETN 15%</div>
+      <div style="width:10%;background:var(--cyan);color:#000">EQIX 10%</div>
+      <div style="width:10%;background:var(--t2);color:#fff">INTL 10%</div>
+      <div style="width:5%;background:var(--rose);color:#fff">K 5%</div>
+      <div style="width:5%;background:var(--emerald);color:#000">C 5%</div>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>Ticker</th><th>Nodo</th><th>Peso</th></tr></thead>
+      <tbody>
+        <tr><td class="ticker">CNDX.L</td><td>Hiperscalers + software</td><td class="mono" style="font-weight:700">30%</td></tr>
+        <tr><td class="ticker">SMH.L</td><td>Semiconductores</td><td class="mono" style="font-weight:700">25%</td></tr>
+        <tr><td class="ticker">ETN</td><td>Electrificacion / potencia</td><td class="mono" style="font-weight:700">15%</td></tr>
+        <tr><td class="ticker">EQIX</td><td>Centros de datos</td><td class="mono" style="font-weight:700">10%</td></tr>
+        <tr><td class="ticker">INTL.L</td><td>IA tematico</td><td class="mono" style="font-weight:700">10%</td></tr>
+        <tr><td class="ticker">KLWD.L</td><td>Cloud software</td><td class="mono" style="font-weight:700">5%</td></tr>
+        <tr><td class="ticker">CORZ</td><td>Satelite especulativo</td><td class="mono" style="font-weight:700">5%</td></tr>
+      </tbody>
+    </table>
+    <p style="color:var(--t3);font-size:.78rem;margin-top:8px"><strong>Caracteristicas:</strong> balance entre beta IA y nodos fisicos, exposicion controlada al satelite especulativo.</p>
+  </div>
+
+  <!-- ── AGRESIVO ── -->
+  <div class="card rv" style="margin-top:16px">
+    <h3 style="display:flex;align-items:center;gap:10px">
+      <span style="background:var(--rose);color:#fff;font-family:var(--mono);font-size:.65rem;padding:4px 10px;border-radius:4px;font-weight:700">AGRESIVO</span>
+      Mas beta tematica y satelite especulativo
+    </h3>
+
+    <!-- Visual bar -->
+    <div style="display:flex;height:28px;border-radius:8px;overflow:hidden;margin:14px 0 10px;font-size:.6rem;font-weight:600;text-align:center;line-height:28px">
+      <div style="width:25%;background:var(--violet);color:#fff">SMH 25%</div>
+      <div style="width:20%;background:var(--blue);color:#fff">CNDX 20%</div>
+      <div style="width:15%;background:var(--amber);color:#000">ETN 15%</div>
+      <div style="width:15%;background:var(--t2);color:#fff">INTL 15%</div>
+      <div style="width:10%;background:var(--rose);color:#fff">KLWD 10%</div>
+      <div style="width:10%;background:var(--emerald);color:#000">CORZ 10%</div>
+      <div style="width:5%;background:var(--cyan);color:#000">EQ 5%</div>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>Ticker</th><th>Nodo</th><th>Peso</th></tr></thead>
+      <tbody>
+        <tr><td class="ticker">SMH.L</td><td>Semiconductores</td><td class="mono" style="font-weight:700">25%</td></tr>
+        <tr><td class="ticker">CNDX.L</td><td>Hiperscalers + software</td><td class="mono" style="font-weight:700">20%</td></tr>
+        <tr><td class="ticker">ETN</td><td>Electrificacion / potencia</td><td class="mono" style="font-weight:700">15%</td></tr>
+        <tr><td class="ticker">INTL.L</td><td>IA tematico</td><td class="mono" style="font-weight:700">15%</td></tr>
+        <tr><td class="ticker">KLWD.L</td><td>Cloud software</td><td class="mono" style="font-weight:700">10%</td></tr>
+        <tr><td class="ticker">CORZ</td><td>Satelite especulativo</td><td class="mono" style="font-weight:700">10%</td></tr>
+        <tr><td class="ticker">EQIX</td><td>Centros de datos</td><td class="mono" style="font-weight:700">5%</td></tr>
+      </tbody>
+    </table>
+    <p style="color:var(--t3);font-size:.78rem;margin-top:8px"><strong>Caracteristicas:</strong> maxima exposicion tematica, mayor volatilidad, 10% en el satelite especulativo (CORZ).</p>
+  </div>
+
+  <!-- ── COMPARATIVA ── -->
+  <div class="card rv" style="margin-top:24px">
+    <h3>Comparativa por perfil</h3>
+    <table class="tbl" style="margin-top:12px">
+      <thead><tr><th>Ticker</th><th>Nodo</th><th style="text-align:center"><span style="color:var(--emerald)">Conserv.</span></th><th style="text-align:center"><span style="color:var(--blue)">Equilib.</span></th><th style="text-align:center"><span style="color:var(--rose)">Agresivo</span></th></tr></thead>
+      <tbody>
+        <tr><td class="ticker">CNDX.L</td><td>Hiperscalers</td><td style="text-align:center" class="mono">35%</td><td style="text-align:center" class="mono">30%</td><td style="text-align:center" class="mono">20%</td></tr>
+        <tr><td class="ticker">SMH.L</td><td>Semiconductores</td><td style="text-align:center" class="mono">25%</td><td style="text-align:center" class="mono">25%</td><td style="text-align:center;font-weight:700" class="mono">25%</td></tr>
+        <tr><td class="ticker">ETN</td><td>Electrificacion</td><td style="text-align:center" class="mono">20%</td><td style="text-align:center" class="mono">15%</td><td style="text-align:center" class="mono">15%</td></tr>
+        <tr><td class="ticker">EQIX</td><td>Centros datos</td><td style="text-align:center" class="mono">15%</td><td style="text-align:center" class="mono">10%</td><td style="text-align:center" class="mono">5%</td></tr>
+        <tr><td class="ticker">INTL.L</td><td>IA tematico</td><td style="text-align:center" class="mono">5%</td><td style="text-align:center" class="mono">10%</td><td style="text-align:center" class="mono">15%</td></tr>
+        <tr><td class="ticker">KLWD.L</td><td>Cloud software</td><td style="text-align:center;color:var(--t3)" class="mono">&mdash;</td><td style="text-align:center" class="mono">5%</td><td style="text-align:center" class="mono">10%</td></tr>
+        <tr><td class="ticker">CORZ</td><td>Especulativo</td><td style="text-align:center;color:var(--t3)" class="mono">&mdash;</td><td style="text-align:center" class="mono">5%</td><td style="text-align:center;font-weight:700" class="mono">10%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Differences vs our profiles -->
+  <div class="card rv" style="margin-top:16px">
+    <h3>Diferencias con los perfiles ampliados (seccion anterior)</h3>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;font-size:.85rem;color:var(--t2)">
+      <div style="padding:10px 14px;background:var(--surface);border-radius:8px;border-left:3px solid var(--blue)">
+        <strong style="color:var(--blue)">Universo:</strong> ChatGPT usa <strong>solo 7 instrumentos</strong> (5 ETFs UCITS + 2 acciones US). Los perfiles ampliados usan <strong>hasta 25 posiciones</strong> de los 37 tickers validados (Tier 1, 2 y 3).
+      </div>
+      <div style="padding:10px 14px;background:var(--surface);border-radius:8px;border-left:3px solid var(--amber)">
+        <strong style="color:var(--amber)">Energia:</strong> ChatGPT no incluye BE, CEG, OKLO ni nuclear. Los perfiles ampliados dedican <strong>20-25%</strong> a energia/nuclear &mdash; el cuello de botella #1 de la tesis.
+      </div>
+      <div style="padding:10px 14px;background:var(--surface);border-radius:8px;border-left:3px solid var(--orange)">
+        <strong style="color:var(--orange)">Materias primas:</strong> ChatGPT no incluye URA, COPX ni CCJ. Los perfiles ampliados dedican <strong>10%</strong> a la "capa cero" (uranio + cobre).
+      </div>
+      <div style="padding:10px 14px;background:var(--surface);border-radius:8px;border-left:3px solid var(--violet)">
+        <strong style="color:var(--violet)">Convexidad:</strong> ChatGPT no usa opciones CALL. El perfil agresivo ampliado dedica <strong>15%</strong> a CALL replicando la estrategia SA LP.
+      </div>
+      <div style="padding:10px 14px;background:var(--surface);border-radius:8px;border-left:3px solid var(--cyan)">
+        <strong style="color:var(--cyan)">Geografia:</strong> ChatGPT es mayormente UCITS europeo. Los perfiles ampliados incluyen ASML, TSM, SK Hynix, Schneider, Rolls-Royce, Prysmian &mdash; diversificacion global explicita.
+      </div>
+    </div>
+  </div>
+
+  <blockquote class="rv" style="margin-top:24px;border-left-color:var(--violet)">
+    Los perfiles ChatGPT son un <strong>punto de partida excelente</strong> para quien quiere exposicion simple y liquida a la tesis IA con pocos instrumentos.
+    Los perfiles ampliados son para quien quiere replicar con mas precision la logica SA LP: <strong>concentracion en cuellos fisicos, materias primas y convexidad via opciones</strong>.
+    <br><br>
+    <strong>La propia cartera 13F de SA LP es mas agresiva que cualquiera de estos perfiles:</strong> usa opciones CALL y tiene concentracion &gt;85% en 10 posiciones.
+    Todos estos perfiles son una version diluida y diversificada de la misma tesis, adaptada para un inversor minorista.
+  </blockquote>
+</div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- Footer -->
+<footer style="padding:48px 0;border-top:1px solid var(--border)">
+<div class="wrap" style="text-align:center">
+  <p style="color:var(--t3);font-size:.75rem">
+    Situational Awareness LP &mdash; Tesis de Inversion &mdash; Analisis abril 2026<br>
+    Fuentes: SEC EDGAR 13F, ChatGPT Research (7 docs), Gemini Research (7 docs)<br>
+    <a href="SituationalAwareness/intelligence/index.html" style="color:var(--blue);text-decoration:none">Intelligence Engine</a> &nbsp;|&nbsp;
+    <a href="SituationalAwareness/intelligence/dashboard.html" style="color:var(--blue);text-decoration:none">Dashboard</a> &nbsp;|&nbsp;
+    <a href="SituationalAwareness/intelligence/pipeline.html" style="color:var(--blue);text-decoration:none">Pipeline Trace</a>
+  </p>
+</div>
+</footer>
+
+<!-- ═══════════════════════════════════════════
+     SCRIPTS
+     ═══════════════════════════════════════════ -->
+<script>
+// Theme toggle
+const toggle = document.getElementById('themeToggle');
+const saved = localStorage.getItem('thesis-theme');
+if (saved === 'light') document.documentElement.classList.add('light');
+function updateIcon() {
+  toggle.innerHTML = document.documentElement.classList.contains('light') ? '&#9790;' : '&#9788;';
+}
+updateIcon();
+toggle.addEventListener('click', () => {
+  document.documentElement.classList.toggle('light');
+  localStorage.setItem('thesis-theme', document.documentElement.classList.contains('light') ? 'light' : 'dark');
+  updateIcon();
+});
+
+// Scroll reveal
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); obs.unobserve(e.target); }});
+}, { threshold: 0.1 });
+document.querySelectorAll('.rv').forEach(el => obs.observe(el));
+
+// Active TOC
+const sections = document.querySelectorAll('section[id]');
+const tocLinks = document.querySelectorAll('.toc a, .topnav a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 200) current = s.id;
+  });
+  tocLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+{
+  "date": "2026-04-06",
+  "fetched_at": "2026-04-06T01:38:09.481977+00:00",
+  "prices": {
+    "CRWV": {
+      "ticker": "CRWV",
+      "price": 82.24,
+      "currency": "USD",
+      "change_1d": "+4.84%",
+      "change_1w": "+9.93%",
+      "market_close_utc": "2026-04-02T20:00:02+00:00",
+      "market_open": false,
+      "post_market": {
+        "price": 82.0,
+        "change": -0.24,
+        "change_pct": "-0.29%",
+        "time_utc": "2026-04-02T23:59:54+00:00"
+      }
+    }
+  },
+  "commodities": {
+    "copper": {
+      "copper_usd_lb": 5.62,
+      "copper_usd_ton": 12389.96,
+      "change_1d": "+1.09%",
+      "source": "Yahoo Finance HG=F"
+    },
+    "gold": {
+      "gold_spot_usd": 4663.2,
+      "change_1d": "+0.25%",
+      "source": "Yahoo Finance GC=F"
+    },
+    "natgas": {
+      "henry_hub_usd_mmbtu": 2.84,
+      "change_1d": "+1.57%",
+      "source": "Yahoo Finance NG=F"
+    },
+    "uranium_proxy": {
+      "ura_etf": {
+        "ticker": "URA",
+        "price": 48.9,
+        "currency": "USD",
+        "change_1d": "-0.73%",
+        "change_1w": "+4.87%",
+        "market_close_utc": "2026-04-02T20:00:00+00:00",
+        "market_open": false,
+        "post_market": {
+          "price": 48.97,
+          "change": 0.07,
+          "change_pct": "+0.14%",
+          "time_utc": "2026-04-02T23:59:32+00:00"
+        }
+      },
+      "sprott_uranium_trust": {
+        "ticker": "SRUUF",
+        "price": 20.31,
+        "currency": "USD",
+        "change_1d": "+0.44%",
+        "change_1w": "+5.62%",
+        "market_close_utc": "2026-04-02T20:00:00+00:00",
+        "market_open": false
+      },
+      "note": "Para spot real de uranio consultar numerco.com manualmente"
+    }
+  },
+  "crypto": {},
+  "macro": {},
+  "sec_filings": [],
+  "news": {},
+  "alerts": [],
+  "_meta": {
+    "fetcher": "fetch_daily.py",
+    "mode": "filter",
+    "tickers_requested": 1,
+    "sources": [
+      "Yahoo Finance v8 (prices)",
+      "Yahoo Finance v8 (commodities: HG=F, GC=F, NG=F, URA, SRUUF)"
+    ]
+  }
+}

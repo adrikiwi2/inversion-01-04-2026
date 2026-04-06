@@ -8,6 +8,7 @@ Requisitos: pip install requests beautifulsoup4
 APIs gratuitas usadas: Yahoo Finance v8, CoinGecko, Blockchain.com, FRED, CNN F&G
 """
 
+import argparse
 import json
 import os
 import sys
@@ -114,7 +115,7 @@ ALL_TICKERS = list(dict.fromkeys(_ALL_RAW))  # preserva orden, elimina dupes
 def fetch_yahoo_quote(ticker: str) -> dict | None:
     """Yahoo Finance v8 chart endpoint — no auth needed."""
     url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
-    params = {"range": "5d", "interval": "1d", "includePrePost": "false"}
+    params = {"range": "5d", "interval": "1d", "includePrePost": "true"}
     try:
         r = requests.get(url, params=params, headers=UA, timeout=TIMEOUT)
         if r.status_code != 200:
@@ -126,6 +127,15 @@ def fetch_yahoo_quote(ticker: str) -> dict | None:
         meta = result[0].get("meta", {})
         closes = result[0].get("indicators", {}).get("quote", [{}])[0].get("close", [])
         closes = [c for c in closes if c is not None]
+
+        # Market status from regularMarketTime
+        market_ts = meta.get("regularMarketTime", 0)
+        market_close_utc = datetime.fromtimestamp(market_ts, tz=timezone.utc).isoformat() if market_ts else None
+        now_utc = datetime.now(timezone.utc)
+        # Market is open if regularMarketTime is within last 8 hours (covers a full session)
+        seconds_since_close = (now_utc - datetime.fromtimestamp(market_ts, tz=timezone.utc)).total_seconds() if market_ts else 999999
+        market_open = seconds_since_close < 8 * 3600
+
         if len(closes) < 2:
             return {
                 "ticker": ticker,
@@ -133,25 +143,74 @@ def fetch_yahoo_quote(ticker: str) -> dict | None:
                 "currency": meta.get("currency"),
                 "change_1d": None,
                 "change_1w": None,
+                "market_close_utc": market_close_utc,
+                "market_open": market_open,
             }
         price = closes[-1]
         prev = closes[-2]
         first = closes[0]
-        return {
+
+        quote = {
             "ticker": ticker,
             "price": round(price, 2),
             "currency": meta.get("currency", "USD"),
             "change_1d": f"{((price - prev) / prev) * 100:+.2f}%",
             "change_1w": f"{((price - first) / first) * 100:+.2f}%",
+            "market_close_utc": market_close_utc,
+            "market_open": market_open,
         }
+
+        # Post-market data (separate 1m call only if market is closed and has AH data)
+        if not market_open and meta.get("hasPrePostMarketData"):
+            quote["post_market"] = _fetch_post_market(ticker)
+
+        return quote
     except Exception as e:
         return {"ticker": ticker, "error": str(e)}
 
 
-def fetch_all_prices() -> list[dict]:
-    """Fetch prices for all tickers with rate limiting."""
+def _fetch_post_market(ticker: str) -> dict | None:
+    """Fetch last after-hours price from 1m data."""
+    try:
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
+        params = {"range": "1d", "interval": "1m", "includePrePost": "true"}
+        r = requests.get(url, params=params, headers=UA, timeout=TIMEOUT)
+        if r.status_code != 200:
+            return None
+        result = r.json().get("chart", {}).get("result", [])
+        if not result:
+            return None
+        meta = result[0].get("meta", {})
+        timestamps = result[0].get("timestamp", [])
+        closes = result[0]["indicators"]["quote"][0].get("close", [])
+        regular_price = meta.get("regularMarketPrice")
+        # Last valid close in the extended data
+        last_price = None
+        last_time = None
+        for ts, c in zip(reversed(timestamps), reversed(closes)):
+            if c is not None:
+                last_price = round(c, 2)
+                last_time = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
+                break
+        if last_price and regular_price:
+            change = last_price - regular_price
+            change_pct = (change / regular_price) * 100
+            return {
+                "price": last_price,
+                "change": round(change, 2),
+                "change_pct": f"{change_pct:+.2f}%",
+                "time_utc": last_time,
+            }
+    except:
+        pass
+    return None
+
+
+def fetch_all_prices(tickers: list[str] | None = None) -> list[dict]:
+    """Fetch prices for given tickers (default: ALL_TICKERS) with rate limiting."""
+    tickers = tickers or ALL_TICKERS
     results = []
-    for i, ticker in enumerate(ALL_TICKERS):
+    for i, ticker in enumerate(tickers):
         result = fetch_yahoo_quote(ticker)
         results.append(result)
         if i % 5 == 4:
@@ -340,8 +399,29 @@ def fetch_google_news_rss(query: str, max_items: int = 5) -> list[dict]:
 # MAIN
 # ============================================================
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Daily Fetcher — Intelligence Engine")
+    parser.add_argument(
+        "--ticker", "-t", nargs="+",
+        help="Fetch only these tickers (e.g. --ticker CRWV BE). Skips commodities/crypto/macro/news."
+    )
+    parser.add_argument(
+        "--commodities", "-c", action="store_true",
+        help="Include commodities (copper, gold, natgas, uranium) even in --ticker mode."
+    )
+    return parser.parse_args()
+
+
 def main():
-    print(f"[{TODAY}] Fetching daily intelligence data...")
+    args = parse_args()
+    ticker_filter = [t.upper() for t in args.ticker] if args.ticker else None
+    quick_mode = ticker_filter is not None
+
+    label = f"{len(ticker_filter)} ticker(s)" if quick_mode else "full run"
+    print(f"[{TODAY}] Fetching daily intelligence data ({label})...")
+
+    # Track which sources are actually used
+    sources_used = ["Yahoo Finance v8 (prices)"]
 
     bundle = {
         "date": TODAY,
@@ -356,8 +436,9 @@ def main():
     }
 
     # 1. Prices
-    print(f"  Fetching prices ({len(ALL_TICKERS)} tickers)...")
-    all_prices = fetch_all_prices()
+    tickers = ticker_filter or ALL_TICKERS
+    print(f"  Fetching prices ({len(tickers)} tickers)...")
+    all_prices = fetch_all_prices(tickers)
     for p in all_prices:
         ticker = p.get("ticker", "unknown")
         bundle["prices"][ticker] = p
@@ -375,41 +456,57 @@ def main():
             pass
 
     # 2. Commodities
-    print("  Fetching commodities...")
-    bundle["commodities"]["copper"] = fetch_copper()
-    time.sleep(1)
-    bundle["commodities"]["gold"] = fetch_gold_kitco()
-    time.sleep(1)
-    bundle["commodities"]["natgas"] = fetch_natgas()
-    time.sleep(1)
-    bundle["commodities"]["uranium_proxy"] = fetch_uranium_yahoo()
+    if not quick_mode or args.commodities:
+        print("  Fetching commodities...")
+        bundle["commodities"]["copper"] = fetch_copper()
+        time.sleep(1)
+        bundle["commodities"]["gold"] = fetch_gold_kitco()
+        time.sleep(1)
+        bundle["commodities"]["natgas"] = fetch_natgas()
+        time.sleep(1)
+        bundle["commodities"]["uranium_proxy"] = fetch_uranium_yahoo()
+        sources_used.append("Yahoo Finance v8 (commodities: HG=F, GC=F, NG=F, URA, SRUUF)")
 
-    # 3. Crypto
-    print("  Fetching BTC + hashrate...")
-    bundle["crypto"]["btc"] = fetch_btc()
-    bundle["crypto"]["hashrate"] = fetch_hashrate()
+    if not quick_mode:
+        # 3. Crypto
+        print("  Fetching BTC + hashrate...")
+        bundle["crypto"]["btc"] = fetch_btc()
+        bundle["crypto"]["hashrate"] = fetch_hashrate()
+        sources_used.append("CoinGecko API (BTC price)")
+        sources_used.append("Blockchain.com API (hashrate)")
 
-    # 4. Macro
-    print("  Fetching Fear & Greed...")
-    bundle["macro"]["fear_greed"] = fetch_fear_greed()
+        # 4. Macro
+        print("  Fetching Fear & Greed...")
+        bundle["macro"]["fear_greed"] = fetch_fear_greed()
+        sources_used.append("CNN Fear & Greed Index")
 
-    # 5. SEC filings
-    print("  Checking SEC EDGAR...")
-    bundle["sec_filings"] = fetch_sec_edgar_rss()
+        # 5. SEC filings
+        print("  Checking SEC EDGAR...")
+        bundle["sec_filings"] = fetch_sec_edgar_rss()
+        sources_used.append("SEC EDGAR EFTS (filings search)")
 
-    # 6. News (keyword-based RSS)
-    print("  Fetching news RSS...")
-    news_queries = {
-        "power_crunch": '"data center" AND ("power crunch" OR "energy shortage" OR "grid capacity")',
-        "nuclear_smr": '"NRC" AND ("SMR" OR "Oklo" OR "NuScale" OR "nuclear")',
-        "btc_reconversion": '"Core Scientific" OR "CoreWeave" AND ("AI" OR "GPU" OR "data center")',
-        "taiwan_china": '"Taiwan" AND ("China" OR "military" OR "blockade" OR "TSMC")',
-        "uranium": '"uranium price" OR "uranium spot" OR "Kazatomprom"',
-        "export_controls": '"export controls" AND ("semiconductor" OR "chips" OR "ASML")',
+        # 6. News (keyword-based RSS)
+        print("  Fetching news RSS...")
+        news_queries = {
+            "power_crunch": '"data center" AND ("power crunch" OR "energy shortage" OR "grid capacity")',
+            "nuclear_smr": '"NRC" AND ("SMR" OR "Oklo" OR "NuScale" OR "nuclear")',
+            "btc_reconversion": '"Core Scientific" OR "CoreWeave" AND ("AI" OR "GPU" OR "data center")',
+            "taiwan_china": '"Taiwan" AND ("China" OR "military" OR "blockade" OR "TSMC")',
+            "uranium": '"uranium price" OR "uranium spot" OR "Kazatomprom"',
+            "export_controls": '"export controls" AND ("semiconductor" OR "chips" OR "ASML")',
+        }
+        for key, query in news_queries.items():
+            bundle["news"][key] = fetch_google_news_rss(query, max_items=3)
+            time.sleep(0.5)
+        sources_used.append("Google News RSS (6 queries)")
+
+    # Meta
+    bundle["_meta"] = {
+        "fetcher": "fetch_daily.py",
+        "mode": "filter" if quick_mode else "full",
+        "tickers_requested": len(tickers),
+        "sources": sources_used,
     }
-    for key, query in news_queries.items():
-        bundle["news"][key] = fetch_google_news_rss(query, max_items=3)
-        time.sleep(0.5)
 
     # Save
     output_file = DATA_DIR / f"daily_{TODAY}.json"

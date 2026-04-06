@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Status — Intelligence Engine</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #e0e0e0;
+    --muted: #888;
+    --accent: #4fc3f7;
+    --green: #66bb6a;
+    --red: #ef5350;
+    --gold: #ffd54f;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    background: var(--bg);
+    color: var(--text);
+    padding: 2rem;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  header { border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 2rem; }
+  header h1 { font-size: 1.6rem; font-weight: 600; color: var(--accent); }
+  .meta { font-size: .9rem; color: var(--muted); margin-top: .5rem; display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; align-items: center; }
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 4px;
+    font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .5px;
+  }
+  .badge-open { background: #1b5e20; color: #a5d6a7; }
+  .badge-closed { background: #4e342e; color: #ffcc80; }
+
+  /* File selector */
+  .file-selector { margin-bottom: 2rem; display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+  .file-selector label { font-size: .9rem; color: var(--muted); }
+  .file-selector select {
+    background: var(--surface); color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; padding: .5rem .75rem; font-family: inherit; font-size: .9rem;
+    cursor: pointer;
+  }
+  .file-selector select:focus { border-color: var(--accent); outline: none; }
+
+  /* Sections */
+  section { margin-bottom: 2.5rem; }
+  section h2 {
+    font-size: 1.1rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem;
+  }
+  section h2::before { content: ''; width: 3px; height: 1em; background: var(--accent); border-radius: 2px; }
+
+  /* Equity cards */
+  .equity-list { display: flex; flex-direction: column; gap: .75rem; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 1.2rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
+    transition: border-color .2s;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card-left { display: flex; flex-direction: column; gap: .25rem; }
+  .card-ticker { font-size: 1.2rem; font-weight: 700; color: #fff; }
+  .card-label { font-size: .9rem; color: var(--muted); }
+  .card-right { text-align: right; display: flex; flex-direction: column; gap: .25rem; }
+  .card-price { font-size: 1.5rem; font-weight: 700; }
+  .card-change { font-size: 1rem; font-weight: 600; }
+  .card-ah { font-size: .85rem; color: var(--muted); margin-top: .15rem; }
+  .positive { color: var(--green); }
+  .negative { color: var(--red); }
+  .neutral { color: var(--muted); }
+
+  /* Commodity grid */
+  .commodity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+  @media (max-width: 600px) { .commodity-grid { grid-template-columns: 1fr; } }
+  .commodity-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 1rem 1.2rem; transition: border-color .2s;
+  }
+  .commodity-card:hover { border-color: var(--gold); }
+  .commodity-name { font-size: .9rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: .5rem; }
+  .commodity-price { font-size: 1.3rem; font-weight: 700; color: #fff; }
+  .commodity-unit { font-size: .85rem; font-weight: 400; color: var(--muted); }
+  .commodity-detail { font-size: .9rem; color: var(--muted); margin-top: .3rem; }
+
+  /* Crypto */
+  .crypto-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+  @media (max-width: 600px) { .crypto-grid { grid-template-columns: 1fr; } }
+
+  /* Macro bar */
+  .macro-bar { display: flex; gap: .75rem; flex-wrap: wrap; }
+  .macro-item {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: .8rem 1rem; flex: 1; min-width: 140px;
+  }
+  .macro-item .label { font-size: .85rem; color: var(--muted); text-transform: uppercase; margin-bottom: .3rem; }
+  .macro-item .value { font-size: 1.2rem; font-weight: 700; }
+
+  /* Alerts */
+  .alert-list { display: flex; flex-direction: column; gap: .5rem; }
+  .alert-item {
+    background: #1a1a0a; border: 1px solid #4e4e1e; border-radius: 6px;
+    padding: .7rem 1rem; font-size: .95rem; display: flex; justify-content: space-between;
+  }
+
+  /* News */
+  .news-category { margin-bottom: 1rem; }
+  .news-category h3 { font-size: .95rem; color: var(--accent); margin-bottom: .5rem; }
+  .news-item { font-size: .9rem; color: var(--muted); margin-bottom: .4rem; line-height: 1.5; }
+  .news-item a { color: var(--text); text-decoration: none; }
+  .news-item a:hover { text-decoration: underline; }
+  .news-source { color: var(--muted); font-size: .8rem; }
+
+  /* JSON */
+  .raw-json {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 1rem; font-size: .8rem; color: var(--muted);
+    overflow-x: auto; white-space: pre; max-height: 400px; overflow-y: auto;
+  }
+
+  /* Empty state */
+  .empty { color: var(--muted); font-size: .95rem; font-style: italic; }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 2rem;
+    font-size: .75rem; color: var(--muted); text-align: center;
+  }
+
+  /* Loading */
+  .loading { color: var(--accent); font-size: .9rem; padding: 2rem; text-align: center; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Intelligence Engine — Status</h1>
+  <div class="meta" id="meta"></div>
+</header>
+
+<div class="file-selector">
+  <label for="file-select">Archivo:</label>
+  <select id="file-select"></select>
+</div>
+
+<div id="content">
+  <div class="loading">Conectando a serve.py (localhost:8800)...</div>
+</div>
+
+<section>
+  <h2>JSON crudo</h2>
+  <div class="raw-json" id="raw-json"></div>
+</section>
+
+<footer id="footer">Intelligence Engine v0.1</footer>
+
+<script>
+const API_BASE = location.origin;
+const $ = id => document.getElementById(id);
+
+// ── Helpers ──
+function chgClass(str) {
+  if (!str || typeof str !== 'string') return 'neutral';
+  return str.startsWith('+') ? 'positive' : str.startsWith('-') ? 'negative' : 'neutral';
+}
+function fmtNum(n) { return n != null ? Number(n).toLocaleString('en-US') : '—'; }
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('es-ES', { weekday:'short', year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', timeZoneName:'short' });
+}
+function dayName() { return new Date().toLocaleDateString('es-ES', { weekday:'long' }); }
+
+// Detect file type from filename
+function detectType(filename) {
+  if (filename.startsWith('analysis_')) return 'analysis';
+  if (filename.startsWith('daily_')) return 'daily';
+  if (filename.startsWith('weekly_')) return 'weekly';
+  if (filename.startsWith('monthly_')) return 'monthly';
+  if (filename.startsWith('quarterly_')) return 'quarterly';
+  return 'unknown';
+}
+
+const TYPE_LABELS = { daily:'Diario', weekly:'Semanal', monthly:'Mensual', quarterly:'Trimestral', analysis:'Análisis Capa 2', unknown:'Desconocido' };
+
+// ── Generic card builder ──
+function kvCard(title, rows) {
+  // rows: [{label, value, cls?}]
+  const body = rows.map(r => `
+    <div style="display:flex;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid var(--border);">
+      <span style="color:var(--muted);font-size:.95rem;">${r.label}</span>
+      <span class="${r.cls || ''}" style="font-size:1rem;font-weight:600;">${r.value}</span>
+    </div>`).join('');
+  return `<div class="commodity-card"><div class="commodity-name">${title}</div>${body}</div>`;
+}
+
+// ── Render: Meta header ──
+function renderMeta(data, type) {
+  const box = $('meta');
+  const fetchDate = data.date || '—';
+  const badge = `<span class="badge" style="background:#1a237e;color:#90caf9;">${TYPE_LABELS[type]}</span>`;
+
+  // Market status (daily only)
+  let marketBadge = '';
+  if (type === 'daily') {
+    const prices = Object.values(data.prices || {});
+    const first = prices[0];
+    if (first?.market_open === true) {
+      marketBadge = '<span class="badge badge-open">Mercado abierto</span>';
+    } else if (first?.market_open === false) {
+      marketBadge = '<span class="badge badge-closed">Mercado cerrado</span>';
+      if (first.market_close_utc) marketBadge += `<span>Último cierre: ${fmtDate(first.market_close_utc)}</span>`;
+    }
+    const tickerCount = prices.length;
+    if (tickerCount > 0 && tickerCount < 20) marketBadge += `<span>Filter: ${tickerCount} tickers</span>`;
+  }
+
+  box.innerHTML = `<span>Fetch: ${fetchDate}</span><span>${dayName()}</span>${badge}${marketBadge}`;
+}
+
+// ══════════════════════════════════════
+// DAILY RENDERER
+// ══════════════════════════════════════
+function renderDaily(data) {
+  const sections = [];
+
+  // Alerts
+  const alerts = (data.alerts || []).filter(a => a.ticker);
+  if (alerts.length) {
+    sections.push(`<section><h2>Alertas (${alerts.length})</h2><div class="alert-list">${
+      alerts.map(a => `<div class="alert-item"><span><strong>${a.ticker}</strong> ${a.move || ''}</span><span class="neutral">${a.timeframe || ''}</span></div>`).join('')
+    }</div></section>`);
+  }
+
+  // Equities
+  const prices = Object.values(data.prices || {});
+  if (prices.length) {
+    const cards = prices.map(p => {
+      if (p.error) return `<div class="card"><div class="card-left"><span class="card-ticker">${p.ticker}</span></div><div class="card-right"><span class="neutral">${p.error}</span></div></div>`;
+      const ah = p.post_market ? `<div class="card-ah">After-hours: $${p.post_market.price} <span class="${chgClass(p.post_market.change_pct)}">${p.post_market.change_pct}</span></div>` : '';
+      return `<div class="card"><div class="card-left"><span class="card-ticker">${p.ticker}</span><span class="card-label">${p.currency||'USD'}${p.market_open===false?' · cerrado':''}</span></div><div class="card-right"><span class="card-price">$${p.price}</span>${p.change_1d?`<span class="card-change ${chgClass(p.change_1d)}">${p.change_1d} (1d)</span>`:''}${p.change_1w?`<span class="card-change ${chgClass(p.change_1w)}">${p.change_1w} (1w)</span>`:''}${ah}</div></div>`;
+    }).join('');
+    sections.push(`<section><h2>Equities (${prices.length})</h2><div class="equity-list">${cards}</div></section>`);
+  }
+
+  // Commodities
+  const com = data.commodities || {};
+  if (Object.keys(com).length) {
+    const cards = [];
+    if (com.copper) cards.push(kvCard('Cobre (HG=F)', [
+      {label:'/lb', value:`$${com.copper.copper_usd_lb}`},
+      {label:'/ton', value:`$${fmtNum(com.copper.copper_usd_ton)}`},
+      {label:'1d', value:com.copper.change_1d||'—', cls:chgClass(com.copper.change_1d)},
+    ]));
+    if (com.gold) cards.push(kvCard('Oro (GC=F)', [
+      {label:'Spot', value:`$${fmtNum(com.gold.gold_spot_usd)}`},
+      {label:'1d', value:com.gold.change_1d||'—', cls:chgClass(com.gold.change_1d)},
+    ]));
+    if (com.natgas) cards.push(kvCard('Gas Natural (NG=F)', [
+      {label:'/MMBtu', value:`$${com.natgas.henry_hub_usd_mmbtu}`},
+      {label:'1d', value:com.natgas.change_1d||'—', cls:chgClass(com.natgas.change_1d)},
+    ]));
+    if (com.uranium_proxy) {
+      const u = com.uranium_proxy, ura = u.ura_etf||{}, spr = u.sprott_uranium_trust||{};
+      cards.push(kvCard('Uranio (proxies)', [
+        {label:'URA', value:`$${ura.price||'—'}`},
+        {label:'URA 1d/1w', value:`${ura.change_1d||'—'} / ${ura.change_1w||'—'}`, cls:chgClass(ura.change_1w)},
+        {label:'Sprott', value:`$${spr.price||'—'}`},
+        {label:'Sprott 1d/1w', value:`${spr.change_1d||'—'} / ${spr.change_1w||'—'}`, cls:chgClass(spr.change_1w)},
+      ]));
+    }
+    sections.push(`<section><h2>Commodities</h2><div class="commodity-grid">${cards.join('')}</div></section>`);
+  }
+
+  // Crypto
+  const cr = data.crypto || {};
+  if (cr.btc || cr.hashrate) {
+    const cards = [];
+    if (cr.btc) cards.push(kvCard('Bitcoin', [
+      {label:'Precio', value:`$${fmtNum(cr.btc.btc_usd)}`},
+      {label:'24h', value:cr.btc.change_24h||'—', cls:chgClass(cr.btc.change_24h)},
+    ]));
+    if (cr.hashrate) cards.push(kvCard('BTC Hashrate', [
+      {label:'EH/s', value:cr.hashrate.hashrate_ehs||'—'},
+      {label:'1d', value:cr.hashrate.change_1d||'—', cls:chgClass(cr.hashrate.change_1d)},
+      {label:'1w', value:cr.hashrate.change_1w||'—', cls:chgClass(cr.hashrate.change_1w)},
+    ]));
+    sections.push(`<section><h2>Crypto</h2><div class="crypto-grid">${cards.join('')}</div></section>`);
+  }
+
+  // Macro
+  const fg = data.macro?.fear_greed;
+  if (fg) {
+    const cls = fg.score>60?'positive':fg.score<40?'negative':'neutral';
+    sections.push(`<section><h2>Macro</h2><div class="macro-bar"><div class="macro-item"><div class="label">Fear & Greed</div><div class="value ${cls}">${fg.score} — ${fg.rating}</div></div></div></section>`);
+  }
+
+  // SEC
+  const filings = (data.sec_filings||[]).filter(f=>!f.error && f.form);
+  if (filings.length) {
+    sections.push(`<section><h2>SEC Filings</h2><div class="alert-list">${
+      filings.map(f=>`<div class="alert-item"><span><strong>${f.form}</strong> — ${f.entity}</span><span class="neutral">${f.date||''}</span></div>`).join('')
+    }</div></section>`);
+  }
+
+  // News
+  const news = data.news || {};
+  const cats = Object.entries(news).filter(([_,items])=>items.length && !items[0]?.error);
+  if (cats.length) {
+    const total = cats.reduce((s,[_,i])=>s+i.length,0);
+    const html = cats.map(([key,items])=>{
+      const label = key.replace(/_/g,' ');
+      const lis = items.map(n=>`<div class="news-item"><a href="${n.link}" target="_blank">${n.title}</a> <span class="news-source">${n.source||''} · ${n.pubDate||''}</span></div>`).join('');
+      return `<div class="news-category"><h3>${label}</h3>${lis}</div>`;
+    }).join('');
+    sections.push(`<section><h2>Noticias (${total})</h2>${html}</section>`);
+  }
+
+  return sections.join('');
+}
+
+// ══════════════════════════════════════
+// WEEKLY RENDERER
+// ══════════════════════════════════════
+function renderWeekly(data) {
+  const sections = [];
+
+  // Alerts
+  const alerts = (data.alerts||[]).filter(a=>a.type||a.ticker);
+  if (alerts.length) {
+    sections.push(`<section><h2>Alertas (${alerts.length})</h2><div class="alert-list">${
+      alerts.map(a=>`<div class="alert-item"><span><strong>${a.type||a.ticker||''}</strong> ${a.message||a.detail||JSON.stringify(a)}</span></div>`).join('')
+    }</div></section>`);
+  }
+
+  // BTC Mining
+  const btc = data.btc_mining;
+  if (btc) {
+    const signal = btc.reconversion_signal;
+    const signalCls = signal==='strong'?'positive':signal==='moderate'?'neutral':'negative';
+    sections.push(`<section><h2>BTC Mining & Reconversión</h2><div class="commodity-grid">${
+      kvCard('Hashrate & Difficulty', [
+        {label:'Hashrate', value:`${btc.hashrate_ehs||'—'} EH/s`},
+        {label:'1w', value:btc.hashrate_change_1w||'—', cls:chgClass(btc.hashrate_change_1w)},
+        {label:'1m', value:btc.hashrate_change_1m||'—', cls:chgClass(btc.hashrate_change_1m)},
+        {label:'Última dificultad', value:btc.difficulty_last_adjustment||'—'},
+      ])}${kvCard('Economía Minera', [
+        {label:'BTC Precio', value:`$${fmtNum(btc.btc_price)}`},
+        {label:'BTC/día minados', value:btc.daily_btc_mined||'—'},
+        {label:'Ingreso/EH/día', value:`$${fmtNum(btc.revenue_per_eh_day_usd)}`},
+        {label:'Coste elec/EH/día', value:`$${fmtNum(btc.est_electricity_cost_per_eh_day_usd)}`},
+        {label:'Margen est.', value:btc.est_margin_pct||'—'},
+        {label:'Señal reconversión', value:signal||'—', cls:signalCls},
+      ])}
+    </div></section>`);
+  }
+
+  // Short Interest
+  const si = data.short_interest;
+  if (si && Object.keys(si).length) {
+    const cards = Object.entries(si).map(([ticker, info]) => {
+      if (info.error) return kvCard(ticker, [{label:'Error', value:info.error}]);
+      const rows = Object.entries(info).filter(([k])=>k!=='ticker').map(([k,v])=>({label:k.replace(/_/g,' '), value:String(v)}));
+      return kvCard(ticker, rows);
+    }).join('');
+    sections.push(`<section><h2>Short Interest</h2><div class="commodity-grid">${cards}</div></section>`);
+  }
+
+  // Insider Trades
+  const trades = data.insider_trades || [];
+  const validTrades = trades.filter(t=>!t.error && t.issuer);
+  if (validTrades.length) {
+    const items = validTrades.slice(0,15).map(t=>`
+      <div class="alert-item">
+        <span><strong>${t.issuer||''}</strong> ${t.owner||''} — ${t.transaction_type||''}</span>
+        <span class="neutral">${t.date||''}</span>
+      </div>`).join('');
+    sections.push(`<section><h2>Insider Trades (${validTrades.length})</h2><div class="alert-list">${items}</div></section>`);
+  }
+
+  // ETF Activity
+  const etf = data.etf_activity;
+  if (etf && Object.keys(etf).length) {
+    const cards = Object.entries(etf).map(([ticker, info]) => {
+      if (info.error) return kvCard(ticker, [{label:'Error', value:info.error}]);
+      const rows = Object.entries(info).filter(([k])=>k!=='ticker').map(([k,v])=>({label:k.replace(/_/g,' '), value:typeof v==='number'?fmtNum(v):String(v), cls:k.includes('change')?chgClass(String(v)):''}));
+      return kvCard(ticker, rows);
+    }).join('');
+    sections.push(`<section><h2>ETF Activity</h2><div class="commodity-grid">${cards}</div></section>`);
+  }
+
+  return sections.join('');
+}
+
+// ══════════════════════════════════════
+// MONTHLY RENDERER
+// ══════════════════════════════════════
+function renderMonthly(data) {
+  const sections = [];
+
+  // Alerts
+  const alerts = (data.alerts||[]).filter(a=>a.type||a.ticker);
+  if (alerts.length) {
+    sections.push(`<section><h2>Alertas (${alerts.length})</h2><div class="alert-list">${
+      alerts.map(a=>`<div class="alert-item"><span><strong>${a.type||''}</strong> ${a.message||a.detail||JSON.stringify(a)}</span></div>`).join('')
+    }</div></section>`);
+  }
+
+  // Supercycle score
+  if (data.supercycle) {
+    const sc = data.supercycle;
+    const cls = sc.score>=7?'positive':sc.score>=4?'neutral':'negative';
+    sections.push(`<section><h2>Supercycle Score</h2><div class="macro-bar"><div class="macro-item"><div class="label">Score</div><div class="value ${cls}">${sc.score}/10</div></div><div class="macro-item"><div class="label">Señal</div><div class="value">${sc.signal||'—'}</div></div></div></section>`);
+  }
+
+  // Commodities Deep
+  const cd = data.commodities_deep;
+  if (cd && Object.keys(cd).length) {
+    const cards = Object.entries(cd).map(([name, info]) => {
+      if (info.error) return kvCard(name, [{label:'Error', value:info.error}]);
+      const rows = Object.entries(info).map(([k,v])=>({label:k.replace(/_/g,' '), value:typeof v==='number'?fmtNum(v):String(v), cls:k.includes('change')?chgClass(String(v)):''}));
+      return kvCard(name, rows);
+    }).join('');
+    sections.push(`<section><h2>Commodities Deep (3 meses)</h2><div class="commodity-grid">${cards}</div></section>`);
+  }
+
+  // PJM Queue
+  if (data.pjm_queue) {
+    const pjm = data.pjm_queue;
+    const rows = Object.entries(pjm).map(([k,v])=>({label:k.replace(/_/g,' '), value:String(v)}));
+    sections.push(`<section><h2>PJM Interconnection Queue</h2><div class="commodity-grid">${kvCard('PJM', rows)}</div></section>`);
+  }
+
+  // Macro (FRED)
+  const macro = data.macro;
+  if (macro && Object.keys(macro).length) {
+    const items = Object.entries(macro).map(([k,v])=>`<div class="macro-item"><div class="label">${k.replace(/_/g,' ')}</div><div class="value">${v!=null?v:'—'}</div></div>`).join('');
+    sections.push(`<section><h2>Macro (FRED)</h2><div class="macro-bar">${items}</div></section>`);
+  }
+
+  // DC News
+  const dcn = data.dc_news;
+  if (dcn && Object.keys(dcn).length) {
+    const cats = Object.entries(dcn).filter(([_,items])=>Array.isArray(items)&&items.length);
+    if (cats.length) {
+      const html = cats.map(([key,items])=>{
+        const label = key.replace(/_/g,' ');
+        const lis = items.map(n=>`<div class="news-item"><a href="${n.link||'#'}" target="_blank">${n.title||''}</a> <span class="news-source">${n.source||''}</span></div>`).join('');
+        return `<div class="news-category"><h3>${label}</h3>${lis}</div>`;
+      }).join('');
+      sections.push(`<section><h2>Data Center News</h2>${html}</section>`);
+    }
+  }
+
+  return sections.join('');
+}
+
+// ══════════════════════════════════════
+// QUARTERLY RENDERER
+// ══════════════════════════════════════
+function renderQuarterly(data) {
+  const sections = [];
+
+  // Quarter
+  if (data.quarter) sections.push(`<section><h2>Quarter: ${data.quarter}</h2></section>`);
+
+  // SA LP 13F
+  const f13 = data.sa_lp_13f;
+  if (f13) {
+    if (f13.error) {
+      sections.push(`<section><h2>SA LP 13F</h2><div class="empty">${f13.error}</div></section>`);
+    } else {
+      const holdings = f13.holdings || [];
+      if (holdings.length) {
+        const items = holdings.slice(0,20).map(h=>`
+          <div class="alert-item">
+            <span><strong>${h.issuer||h.name||''}</strong> ${h.shares?fmtNum(h.shares)+' shares':''}</span>
+            <span class="neutral">$${fmtNum(h.value||h.market_value)} ${h.option_type||''}</span>
+          </div>`).join('');
+        sections.push(`<section><h2>SA LP 13F (${holdings.length} posiciones)</h2><div class="alert-list">${items}</div></section>`);
+      }
+    }
+  }
+
+  // CORZ 13D
+  const d13 = data.corz_13d;
+  if (d13 && !d13.error) {
+    const rows = Object.entries(d13).filter(([k])=>k!=='filings').map(([k,v])=>({label:k.replace(/_/g,' '), value:String(v)}));
+    sections.push(`<section><h2>CORZ 13D</h2><div class="commodity-grid">${kvCard('13D/A', rows)}</div></section>`);
+  }
+
+  // Hyperscaler Fundamentals
+  const hyp = data.hyperscaler_fundamentals;
+  if (hyp && Object.keys(hyp).length) {
+    const cards = Object.entries(hyp).map(([ticker, info]) => {
+      if (info.error) return kvCard(ticker, [{label:'Error', value:info.error}]);
+      const rows = Object.entries(info).filter(([k])=>k!=='ticker').map(([k,v])=>({label:k.replace(/_/g,' '), value:typeof v==='number'?fmtNum(v):String(v!=null?v:'—')}));
+      return kvCard(ticker, rows);
+    }).join('');
+    sections.push(`<section><h2>Hyperscaler Fundamentals</h2><div class="commodity-grid">${cards}</div></section>`);
+  }
+
+  // Holdings Fundamentals
+  const hf = data.holdings_fundamentals;
+  if (hf && Object.keys(hf).length) {
+    const cards = Object.entries(hf).map(([ticker, info]) => {
+      if (info.error) return kvCard(ticker, [{label:'Error', value:info.error}]);
+      const rows = Object.entries(info).filter(([k])=>k!=='ticker').map(([k,v])=>({label:k.replace(/_/g,' '), value:typeof v==='number'?fmtNum(v):String(v!=null?v:'—')}));
+      return kvCard(ticker, rows);
+    }).join('');
+    sections.push(`<section><h2>Holdings Core Fundamentals</h2><div class="commodity-grid">${cards}</div></section>`);
+  }
+
+  // Portfolio Performance
+  const perf = data.portfolio_performance;
+  if (perf && Object.keys(perf).length) {
+    const cards = Object.entries(perf).map(([ticker, info]) => {
+      if (info.error) return kvCard(ticker, [{label:'Error', value:info.error}]);
+      const rows = Object.entries(info).filter(([k])=>k!=='ticker').map(([k,v])=>({label:k.replace(/_/g,' '), value:String(v||'—'), cls:k.includes('change')?chgClass(String(v)):''}));
+      return kvCard(ticker, rows);
+    }).join('');
+    sections.push(`<section><h2>Portfolio Performance (3m)</h2><div class="commodity-grid">${cards}</div></section>`);
+  }
+
+  return sections.join('');
+}
+
+// ══════════════════════════════════════
+// ANALYSIS RENDERER (plain text / JSON)
+// ══════════════════════════════════════
+function renderAnalysis(data) {
+  // Analysis files are varied — just show key fields nicely
+  const sections = [];
+  if (data._meta) {
+    const m = data._meta;
+    sections.push(`<section><h2>Análisis</h2><div class="macro-bar">
+      <div class="macro-item"><div class="label">Motor</div><div class="value">${m.engine||'—'}</div></div>
+      <div class="macro-item"><div class="label">Modelo</div><div class="value">${m.model||'—'}</div></div>
+      <div class="macro-item"><div class="label">Coste</div><div class="value">${m.cost||'—'}</div></div>
+    </div></section>`);
+  }
+  // Show one_liner if present
+  if (data.one_liner) {
+    sections.push(`<section><h2>One-liner</h2><div class="note-box" style="border-left-color:var(--green);font-size:1rem;color:var(--text);">${data.one_liner}</div></section>`);
+  }
+  // Show analysis text
+  if (data.analysis) {
+    const text = typeof data.analysis === 'string' ? data.analysis : JSON.stringify(data.analysis, null, 2);
+    sections.push(`<section><h2>Análisis completo</h2><div class="note-box" style="white-space:pre-wrap;max-height:600px;overflow-y:auto;">${text}</div></section>`);
+  }
+  return sections.join('');
+}
+
+// ══════════════════════════════════════
+// MAIN RENDER DISPATCH
+// ══════════════════════════════════════
+let currentFile = '';
+function render(data, filename) {
+  currentFile = filename;
+  const type = detectType(filename);
+  renderMeta(data, type);
+
+  let html = '';
+  switch(type) {
+    case 'daily': html = renderDaily(data); break;
+    case 'weekly': html = renderWeekly(data); break;
+    case 'monthly': html = renderMonthly(data); break;
+    case 'quarterly': html = renderQuarterly(data); break;
+    case 'analysis': html = renderAnalysis(data); break;
+    default: html = '';
+  }
+
+  // Sources badge bar (from _meta)
+  if (data._meta && data._meta.sources) {
+    const m = data._meta;
+    const badges = m.sources.map(s => `<span class="badge" style="background:#1b2a1b;color:#a5d6a7;margin:.2rem .3rem;">${s}</span>`).join('');
+    const modeLabel = m.mode === 'filter' ? `Filter (${m.tickers_requested} tickers)` : `Full (${m.tickers_requested} tickers)`;
+    html += `<section><h2>Fuentes (${m.sources.length})</h2>
+      <div style="margin-bottom:.5rem;font-size:.9rem;color:var(--muted);">${m.fetcher} · modo: ${modeLabel}</div>
+      <div style="display:flex;flex-wrap:wrap;">${badges}</div>
+    </section>`;
+  }
+
+  $('content').innerHTML = html || '<div class="empty">Sin datos renderizables para este tipo de archivo.</div>';
+  $('raw-json').textContent = JSON.stringify(data, null, 2);
+  $('footer').textContent = `Intelligence Engine v0.1 · ${data.date||'—'} · ${TYPE_LABELS[type]} · ${data.fetched_at||''}`;
+}
+
+// ── File listing & loading ──
+async function loadFileList() {
+  try {
+    const res = await fetch(`${API_BASE}/api/files`);
+    const files = await res.json();
+    const sel = $('file-select');
+
+    // Group by type, most recent first
+    const groups = { daily:[], weekly:[], monthly:[], quarterly:[], analysis:[] };
+    files.sort().reverse().forEach(f => {
+      const t = detectType(f);
+      (groups[t] || (groups.other = groups.other||[])).push(f);
+    });
+
+    const order = ['daily','weekly','monthly','quarterly','analysis'];
+    order.forEach(type => {
+      const items = groups[type] || [];
+      if (!items.length) return;
+      const group = document.createElement('optgroup');
+      group.label = TYPE_LABELS[type];
+      items.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f;
+        opt.textContent = f.replace('.json','');
+        group.appendChild(opt);
+      });
+      sel.appendChild(group);
+    });
+
+    sel.addEventListener('change', () => loadFile(sel.value));
+
+    // Default: most recent daily
+    const defaultFile = (groups.daily[0]) || files[files.length-1];
+    if (defaultFile) {
+      sel.value = defaultFile;
+      loadFile(defaultFile);
+    } else {
+      $('content').innerHTML = '<div class="empty">No hay archivos JSON en data/. Ejecuta fetch_daily.py primero.</div>';
+    }
+  } catch (e) {
+    $('content').innerHTML = '<div class="empty">No se pudo conectar a serve.py.<br>Ejecuta: <code>python serve.py</code> en intelligence/</div>';
+  }
+}
+
+async function loadFile(filename) {
+  try {
+    const res = await fetch(`${API_BASE}/fetcher/data/${filename}`);
+    const data = await res.json();
+    render(data, filename);
+  } catch (e) {
+    $('content').innerHTML = `<div class="empty">Error cargando ${filename}: ${e.message}</div>`;
+  }
+}
+
+loadFileList();
+</script>
+
+</body>
+</html>
